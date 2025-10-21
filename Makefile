@@ -26,7 +26,8 @@ EXTENSION_FILES = \
 EXTRA_FILES = \
 	README.md \
 	LICENSE \
-	CHANGELOG.md
+	CHANGELOG.md \
+	CONTRIBUTING.md
 
 # Default target
 all: build

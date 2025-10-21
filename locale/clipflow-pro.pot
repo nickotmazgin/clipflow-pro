@@ -1,0 +1,271 @@
+# ClipFlow Pro - Translation Template
+# Copyright (C) 2025 Nick Otmazgin
+# This file is distributed under the same license as the ClipFlow Pro package.
+# Nick Otmazgin <contact-via-github-issues>, 2025.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: ClipFlow Pro 1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/nickotmazgin/clipflow-pro/issues\n"
+"POT-Creation-Date: 2025-01-21 10:00+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# UI Elements
+msgid "Search clipboard..."
+msgstr ""
+
+msgid "Clear All"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "‹ Previous"
+msgstr ""
+
+msgid "Next ›"
+msgstr ""
+
+msgid "No clipboard entries"
+msgstr ""
+
+msgid "Just now"
+msgstr ""
+
+msgid "Copied to clipboard"
+msgstr ""
+
+# Settings Pages
+msgid "General"
+msgstr ""
+
+msgid "Shortcuts"
+msgstr ""
+
+msgid "Behavior"
+msgstr ""
+
+msgid "Appearance"
+msgstr ""
+
+msgid "Privacy"
+msgstr ""
+
+msgid "About"
+msgstr ""
+
+# Settings Options
+msgid "Maximum Entries"
+msgstr ""
+
+msgid "Maximum number of clipboard entries to keep in history"
+msgstr ""
+
+msgid "Maximum Entry Length"
+msgstr ""
+
+msgid "Maximum length of individual clipboard entries (characters)"
+msgstr ""
+
+msgid "Entries Per Page"
+msgstr ""
+
+msgid "Number of clipboard entries to show per page"
+msgstr ""
+
+msgid "Auto-copy on Selection"
+msgstr ""
+
+msgid "Automatically copy selected text to clipboard"
+msgstr ""
+
+msgid "Show Entry Numbers"
+msgstr ""
+
+msgid "Display numbers next to clipboard entries"
+msgstr ""
+
+msgid "Show Entry Preview"
+msgstr ""
+
+msgid "Show preview of clipboard entry content in menu"
+msgstr ""
+
+msgid "Ignore Password Fields"
+msgstr ""
+
+msgid "Don't save clipboard content from password fields"
+msgstr ""
+
+msgid "Clear on Logout"
+msgstr ""
+
+msgid "Clear clipboard history when logging out"
+msgstr ""
+
+# Keyboard Shortcuts
+msgid "Show Clipboard Menu"
+msgstr ""
+
+msgid "Open the clipboard history menu"
+msgstr ""
+
+msgid "Enhanced Copy"
+msgstr ""
+
+msgid "Enhanced copy operation"
+msgstr ""
+
+msgid "Enhanced Paste"
+msgstr ""
+
+msgid "Enhanced paste operation"
+msgstr ""
+
+msgid "New accelerator…"
+msgstr ""
+
+msgid "Set Shortcut"
+msgstr ""
+
+msgid "Press the new shortcut keys or Escape to cancel"
+msgstr ""
+
+# Context Menu
+msgid "ClipFlow Pro"
+msgstr ""
+
+msgid "Copy Full Path"
+msgstr ""
+
+msgid "Copy File Name"
+msgstr ""
+
+msgid "Copy Directory Path"
+msgstr ""
+
+msgid "Open Terminal Here"
+msgstr ""
+
+# About Page
+msgid "Advanced clipboard manager for GNOME Shell"
+msgstr ""
+
+msgid "Version"
+msgstr ""
+
+msgid "Developer"
+msgstr ""
+
+msgid "Source Code"
+msgstr ""
+
+msgid "Open GitHub Repository"
+msgstr ""
+
+msgid "PayPal Donation"
+msgstr ""
+
+msgid "Support development with a donation"
+msgstr ""
+
+msgid "Donate via PayPal"
+msgstr ""
+
+msgid "License"
+msgstr ""
+
+msgid "This extension is licensed under GPL-3.0-or-later"
+msgstr ""
+
+msgid "Free and open source software"
+msgstr ""
+
+# Settings Groups
+msgid "Storage Settings"
+msgstr ""
+
+msgid "Configure clipboard history storage limits"
+msgstr ""
+
+msgid "Display Settings"
+msgstr ""
+
+msgid "Configure how clipboard entries are displayed"
+msgstr ""
+
+msgid "Keyboard Shortcuts"
+msgstr ""
+
+msgid "Customize keyboard shortcuts for clipboard operations"
+msgstr ""
+
+msgid "Auto-copy Settings"
+msgstr ""
+
+msgid "Configure automatic copying behavior"
+msgstr ""
+
+msgid "Context Menu Integration"
+msgstr ""
+
+msgid "Enable right-click menu integration"
+msgstr ""
+
+msgid "Enable Context Menu"
+msgstr ""
+
+msgid "Add clipboard options to right-click context menu"
+msgstr ""
+
+msgid "File Manager Integration"
+msgstr ""
+
+msgid "Add file operations (copy path, open terminal) to context menu"
+msgstr ""
+
+msgid "Panel Settings"
+msgstr ""
+
+msgid "Configure panel icon appearance and position"
+msgstr ""
+
+msgid "Panel Position"
+msgstr ""
+
+msgid "Position of clipboard icon in the top panel"
+msgstr ""
+
+msgid "Left"
+msgstr ""
+
+msgid "Center"
+msgstr ""
+
+msgid "Right"
+msgstr ""
+
+msgid "Entry Display"
+msgstr ""
+
+msgid "Configure how clipboard entries are displayed in the menu"
+msgstr ""
+
+msgid "Security Settings"
+msgstr ""
+
+msgid "Configure privacy and security options"
+msgstr ""
+
+msgid "Support & Donations"
+msgstr ""
+
+msgid "Support the development of ClipFlow Pro"
+msgstr ""

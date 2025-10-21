@@ -1,7 +1,7 @@
 # ClipFlow Pro - Translation Template
 # Copyright (C) 2025 Nick Otmazgin
 # This file is distributed under the same license as the ClipFlow Pro package.
-# Nick Otmazgin <contact-via-github-issues>, 2025.
+# Nick Otmazgin <nickotmazgin.dev@gmail.com>, 2025.
 #
 #, fuzzy
 msgid ""

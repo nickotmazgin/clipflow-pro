@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.clipflow-pro" path="/org/gnome/shell/extensions/clipflow-pro/">
+    
+    <!-- General Settings -->
+    <key name="max-entries" type="i">
+      <default>50</default>
+      <summary>Maximum clipboard entries</summary>
+      <description>Maximum number of clipboard entries to keep in history</description>
+    </key>
+    
+    <key name="max-entry-length" type="i">
+      <default>1000</default>
+      <summary>Maximum entry character length</summary>
+      <description>Maximum length of individual clipboard entries</description>
+    </key>
+    
+    <!-- Auto-copy Settings -->
+    <key name="enable-auto-copy" type="b">
+      <default>false</default>
+      <summary>Enable auto-copy on selection</summary>
+      <description>Automatically copy selected text to clipboard</description>
+    </key>
+    
+    <!-- Keyboard Shortcuts -->
+    <key name="copy-shortcut" type="as">
+      <default>['&lt;Super&gt;c']</default>
+      <summary>Copy shortcut</summary>
+      <description>Keyboard shortcut for copying</description>
+    </key>
+    
+    <key name="paste-shortcut" type="as">
+      <default>['&lt;Super&gt;v']</default>
+      <summary>Paste shortcut</summary>
+      <description>Keyboard shortcut for pasting</description>
+    </key>
+    
+    <key name="show-menu-shortcut" type="as">
+      <default>['&lt;Super&gt;&lt;Shift&gt;v']</default>
+      <summary>Show clipboard menu shortcut</summary>
+      <description>Keyboard shortcut to show clipboard history menu</description>
+    </key>
+    
+    <!-- UI Settings -->
+    <key name="show-numbers" type="b">
+      <default>true</default>
+      <summary>Show entry numbers</summary>
+      <description>Display numbers next to clipboard entries</description>
+    </key>
+    
+    <key name="entries-per-page" type="i">
+      <default>10</default>
+      <summary>Entries per page</summary>
+      <description>Number of entries to show per page in the menu</description>
+    </key>
+    
+    <!-- Right-click Menu Integration -->
+    <key name="enable-context-menu" type="b">
+      <default>true</default>
+      <summary>Enable right-click context menu</summary>
+      <description>Add clipboard options to right-click context menu</description>
+    </key>
+    
+    <key name="enable-file-integration" type="b">
+      <default>true</default>
+      <summary>Enable file manager integration</summary>
+      <description>Add file operations (copy path, open terminal) to context menu</description>
+    </key>
+    
+    <!-- Privacy and Security -->
+    <key name="ignore-passwords" type="b">
+      <default>true</default>
+      <summary>Ignore password fields</summary>
+      <description>Don't save clipboard content from password fields</description>
+    </key>
+    
+    <key name="clear-on-logout" type="b">
+      <default>false</default>
+      <summary>Clear clipboard on logout</summary>
+      <description>Clear clipboard history when logging out</description>
+    </key>
+    
+    <!-- Appearance -->
+    <key name="panel-position" type="s">
+      <choices>
+        <choice value="left"/>
+        <choice value="center"/>
+        <choice value="right"/>
+      </choices>
+      <default>'right'</default>
+      <summary>Panel icon position</summary>
+      <description>Position of clipboard icon in the top panel</description>
+    </key>
+    
+    <key name="show-preview" type="b">
+      <default>true</default>
+      <summary>Show entry preview</summary>
+      <description>Show preview of clipboard entry content in menu</description>
+    </key>
+    
+  </schema>
+</schemalist>

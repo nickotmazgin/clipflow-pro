@@ -1,0 +1,350 @@
+/* ClipFlow Pro - Stylesheet */
+/* Advanced Clipboard Manager for GNOME Shell */
+/* Created by Nick Otmazgin */
+
+/* Panel Icon */
+.clipflow-panel-icon {
+    icon-size: 16px;
+}
+
+/* Search Entry */
+.clipflow-search-entry {
+    width: 300px;
+    margin: 6px 12px;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+}
+
+.clipflow-search-entry:focus {
+    border: 2px solid #3584e4;
+    box-shadow: 0 0 4px rgba(53, 132, 228, 0.3);
+}
+
+/* Control Buttons */
+.clipflow-button-box {
+    spacing: 8px;
+    margin: 4px 12px;
+}
+
+.clipflow-control-button {
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.clipflow-control-button:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.clipflow-control-button:active {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+/* Entry Items */
+.clipflow-entry-item {
+    min-height: 60px;
+    padding: 8px 12px;
+    margin: 2px 0;
+    border-radius: 6px;
+    transition: all 0.2s ease;
+}
+
+.clipflow-entry-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+    transform: translateY(-1px);
+}
+
+.clipflow-entry-item:active {
+    background: rgba(255, 255, 255, 0.15);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+    transform: translateY(0px);
+}
+
+.clipflow-entry-box {
+    spacing: 12px;
+    padding: 4px;
+}
+
+/* Entry Left Side (Numbers and Indicators) */
+.clipflow-entry-left {
+    spacing: 6px;
+    min-width: 40px;
+}
+
+.clipflow-entry-number {
+    font-size: 11px;
+    font-weight: 600;
+    color: #3584e4;
+    min-width: 20px;
+    text-align: center;
+}
+
+.clipflow-entry-indicator {
+    icon-size: 14px;
+    color: #f9c23c;
+}
+
+/* Entry Content */
+.clipflow-entry-content {
+    spacing: 4px;
+}
+
+.clipflow-entry-text {
+    font-size: 12px;
+    font-weight: 400;
+    color: #ffffff;
+    max-width: 280px;
+    line-height: 1.3;
+}
+
+.clipflow-entry-time {
+    font-size: 10px;
+    font-weight: 300;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Action Buttons */
+.clipflow-entry-actions {
+    spacing: 4px;
+}
+
+.clipflow-action-button {
+    padding: 4px;
+    border-radius: 3px;
+    min-width: 24px;
+    min-height: 24px;
+    border: none;
+    background: transparent;
+    transition: all 0.2s ease;
+}
+
+.clipflow-action-button:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: scale(1.1);
+}
+
+.clipflow-action-button:active {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.0);
+}
+
+.clipflow-action-active {
+    color: #3584e4;
+}
+
+.clipflow-action-inactive {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.clipflow-action-delete {
+    color: #e01b24;
+}
+
+.clipflow-action-delete:hover {
+    color: #ff4757;
+    background: rgba(224, 27, 36, 0.2);
+}
+
+/* Navigation */
+.clipflow-nav-box {
+    spacing: 12px;
+    margin: 8px 12px;
+    padding: 6px;
+}
+
+.clipflow-nav-button {
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    transition: all 0.2s ease;
+}
+
+.clipflow-nav-button:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.clipflow-nav-button:insensitive {
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.clipflow-page-label {
+    font-size: 11px;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8);
+    text-align: center;
+}
+
+/* Separator Styling */
+.popup-separator-menu-item .popup-separator {
+    margin: 6px 0;
+    background: rgba(255, 255, 255, 0.1);
+    height: 1px;
+}
+
+/* Menu Base Styling */
+.popup-menu {
+    max-width: 400px;
+    min-width: 320px;
+}
+
+.popup-menu-content {
+    padding: 8px 0;
+    border-radius: 8px;
+    background: rgba(0, 0, 0, 0.9);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+/* Context Menu Integration Styles */
+.clipflow-context-menu {
+    padding: 4px 0;
+}
+
+.clipflow-context-item {
+    padding: 6px 12px;
+    font-size: 11px;
+    border-radius: 4px;
+    margin: 2px 6px;
+    transition: all 0.2s ease;
+}
+
+.clipflow-context-item:hover {
+    background: rgba(53, 132, 228, 0.2);
+    color: #3584e4;
+}
+
+/* Pinned and Starred Entry Highlights */
+.clipflow-entry-item.pinned {
+    border-left: 3px solid #f9c23c;
+    background: rgba(249, 194, 60, 0.05);
+}
+
+.clipflow-entry-item.starred {
+    border-right: 3px solid #3584e4;
+    background: rgba(53, 132, 228, 0.05);
+}
+
+.clipflow-entry-item.pinned.starred {
+    border-left: 3px solid #f9c23c;
+    border-right: 3px solid #3584e4;
+    background: linear-gradient(90deg, 
+        rgba(249, 194, 60, 0.05) 0%, 
+        rgba(53, 132, 228, 0.05) 100%);
+}
+
+/* Empty State */
+.clipflow-empty-state {
+    padding: 24px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 12px;
+    font-style: italic;
+}
+
+/* Loading State */
+.clipflow-loading {
+    padding: 16px;
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 11px;
+}
+
+/* Accessibility Improvements */
+.clipflow-entry-item:focus {
+    outline: 2px solid #3584e4;
+    outline-offset: -2px;
+}
+
+.clipflow-action-button:focus {
+    outline: 2px solid #3584e4;
+    outline-offset: 1px;
+    border-radius: 4px;
+}
+
+/* Responsive Design */
+@media (max-width: 400px) {
+    .clipflow-entry-text {
+        max-width: 200px;
+    }
+    
+    .popup-menu {
+        min-width: 280px;
+    }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+    .clipflow-entry-item {
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    
+    .clipflow-entry-text {
+        font-weight: 500;
+    }
+    
+    .clipflow-action-inactive {
+        color: rgba(255, 255, 255, 0.8);
+    }
+}
+
+/* Reduced Motion Support */
+@media (prefers-reduced-motion: reduce) {
+    .clipflow-entry-item,
+    .clipflow-control-button,
+    .clipflow-nav-button,
+    .clipflow-action-button {
+        transition: none;
+    }
+    
+    .clipflow-entry-item:hover {
+        transform: none;
+    }
+    
+    .clipflow-action-button:hover {
+        transform: none;
+    }
+}
+
+/* Dark Theme Optimizations */
+.popup-menu-content {
+    background: rgba(46, 52, 64, 0.95);
+    border: 1px solid rgba(76, 86, 106, 0.3);
+}
+
+.clipflow-search-entry {
+    background: rgba(59, 66, 82, 0.8);
+    border: 1px solid rgba(76, 86, 106, 0.5);
+    color: #d8dee9;
+}
+
+.clipflow-search-entry:focus {
+    border: 2px solid #5e81ac;
+    box-shadow: 0 0 4px rgba(94, 129, 172, 0.3);
+}
+
+/* Performance Optimizations */
+.clipflow-entry-item {
+    will-change: transform, background;
+}
+
+.clipflow-action-button {
+    will-change: transform, background;
+}

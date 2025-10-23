@@ -1,18 +1,19 @@
 // ClipFlow Pro - Context Menu Integration
 // Created by Nick Otmazgin
 
-import {gettext as _} from 'resource:///org/gnome/shell/extensions/extension.js';
-import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
-import St from 'gi://St';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import Clutter from 'gi://Clutter';
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
+const _ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
+const PopupMenu = imports.ui.popupMenu;
+const {St, Gio, GLib, Clutter} = imports.gi;
 
-export class ContextMenuManager {
-    constructor(extension, manager) {
-        this._extension = extension;
-        this._settings = extension.getSettings();
+// ClipboardEntry will be passed as parameter to avoid circular imports
+
+var ContextMenuManager = class ContextMenuManager {
+    constructor(settings, manager, ClipboardEntryClass) {
+        this._settings = settings;
         this._manager = manager;
+        this._ClipboardEntry = ClipboardEntryClass;
         this._nautilus = null;
         this._fileManager = null;
         
@@ -105,7 +106,7 @@ export class ContextMenuManager {
         clipboard.set_text(St.ClipboardType.CLIPBOARD, filePath);
         
         // Add to clipboard history
-        this._manager._addEntry(new this._manager.ClipboardEntry(filePath, 'file-path'));
+        this._manager._addEntry(new this._ClipboardEntry(filePath, 'file-path'));
     }
 
     copyFileName(filePath) {
@@ -114,7 +115,7 @@ export class ContextMenuManager {
         clipboard.set_text(St.ClipboardType.CLIPBOARD, fileName);
         
         // Add to clipboard history
-        this._manager._addEntry(new this._manager.ClipboardEntry(fileName, 'file-name'));
+        this._manager._addEntry(new this._ClipboardEntry(fileName, 'file-name'));
     }
 
     copyDirectoryPath(filePath) {
@@ -123,13 +124,25 @@ export class ContextMenuManager {
         clipboard.set_text(St.ClipboardType.CLIPBOARD, dirPath);
         
         // Add to clipboard history
-        this._manager._addEntry(new this._manager.ClipboardEntry(dirPath, 'directory-path'));
+        this._manager._addEntry(new this._ClipboardEntry(dirPath, 'directory-path'));
     }
 
     openTerminalHere(filePath) {
         try {
+            // Validate file path
+            if (!filePath || !GLib.file_test(filePath, GLib.FileTest.EXISTS)) {
+                log(`ClipFlow Pro: Invalid file path: ${filePath}`);
+                return false;
+            }
+
             const dirPath = GLib.file_test(filePath, GLib.FileTest.IS_DIR) ? 
                 filePath : GLib.path_get_dirname(filePath);
+
+            // Validate directory path
+            if (!GLib.file_test(dirPath, GLib.FileTest.IS_DIR)) {
+                log(`ClipFlow Pro: Invalid directory path: ${dirPath}`);
+                return false;
+            }
 
             // Try different terminal emulators
             const terminals = [
@@ -147,7 +160,9 @@ export class ContextMenuManager {
                     const terminalPath = GLib.find_program_in_path(terminal);
                     
                     if (terminalPath) {
-                        const argv = [terminalPath, ...args, dirPath];
+                        // Escape the directory path to prevent command injection
+                        const escapedDirPath = GLib.shell_quote(dirPath);
+                        const argv = [terminalPath, ...args, escapedDirPath];
                         GLib.spawn_async(null, argv, null, GLib.SpawnFlags.SEARCH_PATH, null);
                         return true;
                     }
@@ -156,9 +171,10 @@ export class ContextMenuManager {
                 }
             }
             
-            // Fallback to xterm
+            // Fallback to xterm with proper escaping
             try {
-                const argv = ['xterm', '-e', `cd "${dirPath}" && $SHELL`];
+                const escapedDirPath = GLib.shell_quote(dirPath);
+                const argv = ['xterm', '-e', `cd ${escapedDirPath} && $SHELL`];
                 GLib.spawn_async(null, argv, null, GLib.SpawnFlags.SEARCH_PATH, null);
                 return true;
             } catch (e) {
@@ -174,6 +190,12 @@ export class ContextMenuManager {
 
     openInFileManager(filePath) {
         try {
+            // Validate file path
+            if (!filePath || !GLib.file_test(filePath, GLib.FileTest.EXISTS)) {
+                log(`ClipFlow Pro: Invalid file path: ${filePath}`);
+                return false;
+            }
+
             if (!this._fileManager) {
                 return false;
             }
@@ -197,6 +219,13 @@ export class ContextMenuManager {
                     break;
                 default:
                     return false;
+            }
+
+            // Validate that the file manager executable exists
+            const fileManagerPath = GLib.find_program_in_path(argv[0]);
+            if (!fileManagerPath) {
+                log(`ClipFlow Pro: File manager not found: ${argv[0]}`);
+                return false;
             }
 
             GLib.spawn_async(null, argv, null, GLib.SpawnFlags.SEARCH_PATH, null);
@@ -329,4 +358,4 @@ export class ContextMenuManager {
 
         this._removeContextMenu();
     }
-}
+};

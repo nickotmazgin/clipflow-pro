@@ -461,6 +461,14 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         });
         linksBox.append(githubButton);
 
+        // README link
+        const readmeButton = new Gtk.Button({ label: 'Read Documentation (README.md)' });
+        readmeButton.set_halign(Gtk.Align.START);
+        readmeButton.connect('clicked', () => {
+            Gio.AppInfo.launch_default_for_uri('https://github.com/nickotmazgin/clipflow-pro/blob/main/README.md', null);
+        });
+        linksBox.append(readmeButton);
+
         // PayPal link
         const paypalButton = new Gtk.Button({ label: 'Donate via PayPal' });
         paypalButton.set_halign(Gtk.Align.START);

@@ -1,8 +1,0 @@
-{
-  "name": "ClipFlow Pro Clean",
-  "description": "Clean test version of ClipFlow Pro",
-  "uuid": "clipflow-pro-clean@nickotmazgin.github.io",
-  "shell-version": ["42", "43", "44", "45"],
-  "version": 1,
-  "url": "https://github.com/nickotmazgin/clipflow-pro"
-}

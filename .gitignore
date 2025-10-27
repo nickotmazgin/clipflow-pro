@@ -60,3 +60,12 @@ venv/
 
 # User-specific history files
 *.history
+
+# Development archives and internal docs
+docs/archive/
+FINAL_RECOMMENDATIONS.md
+GITHUB_SETUP.md
+GITHUB_SETUP_COMPLETE.md
+
+# System scripts (not extension-related)
+tools/system_security_hardening.sh

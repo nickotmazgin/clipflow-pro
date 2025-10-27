@@ -38,3 +38,25 @@ yarn-error.log*
 
 # Distribution files (keep source, ignore builds)
 *.zip
+*.tar.gz
+
+# AI/Cursor specific
+.aider*
+.cursor/
+
+# Development temp files
+*.cache
+*.pid
+
+# Python (if using development tools)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.pytest_cache/
+
+# User-specific history files
+*.history

@@ -36,6 +36,14 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 - GLib development tools
 - Make
 
+### Create a package for extensions.gnome.org
+```bash
+make dist   # Creates dist/clipflow-pro@nickotmazgin.github.io.zip
+# Or pack with the official tool from build/
+make pack
+```
+
+Note: GNOME Shell extensions are not distributed as Flatpaks. Distribute via extensions.gnome.org or distro package repos.
 ### Ubuntu/Debian
 ```bash
 # Install dependencies
@@ -95,6 +103,10 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 ### Restart GNOME Shell
 - **Wayland**: Log out and back in
 - **X11**: `Alt + F2`, type `r`, press Enter
+
+### Configuration Files
+- Clipboard history is stored at `~/.config/clipflow-pro/history.json`.
+- Remove that file (or the entire directory) if you want to reset ClipFlow Pro's history.
 
 ### Verify Installation
 ```bash
@@ -219,7 +231,6 @@ If you encounter issues:
 After installation:
 1. Open preferences to configure shortcuts
 2. Set up auto-copy preferences
-3. Enable file manager integration
-4. Customize appearance settings
+3. Customize appearance settings
 
 Enjoy using ClipFlow Pro!

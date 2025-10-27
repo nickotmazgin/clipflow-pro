@@ -14,25 +14,18 @@
       <summary>Maximum entry character length</summary>
       <description>Maximum length of individual clipboard entries</description>
     </key>
-    
-    <!-- Auto-copy Settings -->
-    <key name="enable-auto-copy" type="b">
-      <default>false</default>
-      <summary>Enable auto-copy on selection</summary>
-      <description>Automatically copy selected text to clipboard</description>
-    </key>
-    
+
     <!-- Keyboard Shortcuts -->
-    <key name="copy-shortcut" type="as">
+    <key name="enhanced-copy-shortcut" type="as">
       <default>['&lt;Super&gt;c']</default>
-      <summary>Copy shortcut</summary>
-      <description>Keyboard shortcut for copying</description>
+      <summary>Enhanced copy shortcut</summary>
+      <description>Keyboard shortcut for enhanced copying</description>
     </key>
     
-    <key name="paste-shortcut" type="as">
+    <key name="enhanced-paste-shortcut" type="as">
       <default>['&lt;Super&gt;v']</default>
-      <summary>Paste shortcut</summary>
-      <description>Keyboard shortcut for pasting</description>
+      <summary>Enhanced paste shortcut</summary>
+      <description>Keyboard shortcut for enhanced pasting</description>
     </key>
     
     <key name="show-menu-shortcut" type="as">
@@ -54,17 +47,10 @@
       <description>Number of entries to show per page in the menu</description>
     </key>
     
-    <!-- Right-click Menu Integration -->
-    <key name="enable-context-menu" type="b">
-      <default>true</default>
-      <summary>Enable right-click context menu</summary>
-      <description>Add clipboard options to right-click context menu</description>
-    </key>
-    
-    <key name="enable-file-integration" type="b">
-      <default>true</default>
-      <summary>Enable file manager integration</summary>
-      <description>Add file operations (copy path, open terminal) to context menu</description>
+    <key name="context-menu-items" type="i">
+      <default>5</default>
+      <summary>Recent items in context menu</summary>
+      <description>Number of recent clipboard entries to show in the right-click context menu.</description>
     </key>
     
     <!-- Privacy and Security -->
@@ -77,7 +63,26 @@
     <key name="clear-on-logout" type="b">
       <default>false</default>
       <summary>Clear clipboard on logout</summary>
-      <description>Clear clipboard history when logging out</description>
+      <description>Clear clipboard history and remove ~/.config/clipflow-pro/history.json on logout</description>
+    </key>
+    
+    <key name="auto-clear-sensitive" type="b">
+      <default>false</default>
+      <summary>Auto-clear sensitive data</summary>
+      <description>Automatically remove password-like entries after 5 minutes</description>
+    </key>
+
+    <key name="show-copy-notifications" type="b">
+      <default>true</default>
+      <summary>Show copy notifications</summary>
+      <description>Display a GNOME notification when ClipFlow Pro copies an entry</description>
+    </key>
+
+    <!-- Diagnostics -->
+    <key name="enable-debug-logs" type="b">
+      <default>false</default>
+      <summary>Enable debug logging</summary>
+      <description>Write verbose ClipFlow Pro diagnostics to the GNOME Shell log to help troubleshoot clipboard activity</description>
     </key>
     
     <!-- Appearance -->
@@ -96,6 +101,19 @@
       <default>true</default>
       <summary>Show entry preview</summary>
       <description>Show preview of clipboard entry content in menu</description>
+    </key>
+    
+    <key name="show-timestamps" type="b">
+      <default>true</default>
+      <summary>Show entry timestamps</summary>
+      <description>Display when each clipboard entry was copied</description>
+    </key>
+    
+    <!-- Preferences Navigation -->
+    <key name="target-prefs-tab" type="s">
+      <default>'general'</default>
+      <summary>Target preferences tab</summary>
+      <description>Internal key used to focus a specific tab when the preferences window opens.</description>
     </key>
     
   </schema>

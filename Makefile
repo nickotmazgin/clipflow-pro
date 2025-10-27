@@ -20,8 +20,8 @@ EXTENSION_FILES = \
 	prefs.js \
 	metadata.json \
 	stylesheet.css \
-	contextMenu.js \
-	schemas/org.gnome.shell.extensions.clipflow-pro.gschema.xml
+	schemas/org.gnome.shell.extensions.clipflow-pro.gschema.xml \
+	icons/clipflow-pro-symbolic.svg
 
 EXTRA_FILES = \
 	README.md \
@@ -42,7 +42,8 @@ clean:
 build:
 	@echo "Building $(EXTENSION_NAME)..."
 	
-	# Create build directory
+	# Create fresh build directory
+	rm -rf $(BUILD_DIR)
 	mkdir -p $(BUILD_DIR)
 	
 	# Copy extension files
@@ -50,7 +51,11 @@ build:
 	cp prefs.js $(BUILD_DIR)/
 	cp metadata.json $(BUILD_DIR)/
 	cp stylesheet.css $(BUILD_DIR)/
-	cp contextMenu.js $(BUILD_DIR)/
+	
+	# Copy icons
+	if [ -d "icons" ]; then \
+		cp -r icons $(BUILD_DIR)/; \
+	fi
 	
 	# Compile schemas if they exist
 	if [ -d "$(SCHEMAS_DIR)" ]; then \
@@ -71,10 +76,16 @@ install: build
 	@echo "Installing $(EXTENSION_NAME)..."
 	
 	# Create installation directory
+	rm -rf $(INSTALL_PATH)
 	mkdir -p $(INSTALL_PATH)
 	
 	# Copy all files
 	cp -r $(BUILD_DIR)/* $(INSTALL_PATH)/
+	
+	# Compile schemas
+	if [ -d "$(INSTALL_PATH)/schemas" ]; then \
+		glib-compile-schemas $(INSTALL_PATH)/schemas/; \
+	fi
 	
 	@echo "Extension installed to $(INSTALL_PATH)"
 	@echo "Restart GNOME Shell (Alt+F2, type 'r', press Enter) and enable the extension"
@@ -100,6 +111,13 @@ dist: build
 		$(SCHEMAS_DIR) $(LOCALE_DIR) 2>/dev/null || true
 	
 	@echo "Distribution packages created in $(DIST_DIR)/"
+
+# Pack using GNOME Extensions tool
+pack: build
+	@echo "Packing with gnome-extensions..."
+	mkdir -p $(DIST_DIR)
+	gnome-extensions pack --force --out-dir $(DIST_DIR) $(BUILD_DIR)
+	@echo "Packed zip(s) in $(DIST_DIR)/"
 
 # Development mode - install and watch for changes
 dev: install

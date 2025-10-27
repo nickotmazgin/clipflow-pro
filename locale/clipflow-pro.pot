@@ -3,12 +3,11 @@
 # This file is distributed under the same license as the ClipFlow Pro package.
 # Nick Otmazgin <nickotmazgin.dev@gmail.com>, 2025.
 #
-#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: ClipFlow Pro 1.0\n"
+"Project-Id-Version: ClipFlow Pro 1.1.0\n"
 "Report-Msgid-Bugs-To: https://github.com/nickotmazgin/clipflow-pro/issues\n"
-"POT-Creation-Date: 2025-01-21 10:00+0000\n"
+"POT-Creation-Date: 2025-10-24 13:57+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,255 +16,148 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-# UI Elements
-msgid "Search clipboard..."
+#: extension.js:352
+msgid "Extension enabled successfully! 🎉"
 msgstr ""
 
-msgid "Clear All"
+#: extension.js:355
+msgid "Failed to enable extension. Check logs for details."
 msgstr ""
 
-msgid "Settings"
+#: extension.js:365
+msgid "Extension disabled"
 msgstr ""
 
-msgid "‹ Previous"
+#: prefs.js:393
+msgid ""
+"Tip: Click a shortcut above to record a new combination. Use Clear to remove "
+"it."
 msgstr ""
 
-msgid "Next ›"
+#: prefs.js:737 prefs.js:790
+msgid "Not set"
 msgstr ""
 
-msgid "No clipboard entries"
+#: extension.js:586
+msgid "Prev"
 msgstr ""
 
-msgid "Just now"
+#: extension.js:593
+msgid "Next"
 msgstr ""
 
-msgid "Copied to clipboard"
+#: extension.js:601
+msgid "Page %d of %d"
 msgstr ""
 
-# Settings Pages
-msgid "General"
+#: extension.js:331
+msgid "Show Notifications"
 msgstr ""
 
-msgid "Shortcuts"
+#: prefs.js:741 prefs.js:796 prefs.js:798
+msgid "Click to set a new shortcut"
 msgstr ""
 
-msgid "Behavior"
+#: prefs.js:744 prefs.js:907
+msgid "Clear"
 msgstr ""
 
-msgid "Appearance"
+#: prefs.js:748
+msgid "Remove the custom shortcut."
 msgstr ""
 
-msgid "Privacy"
+#: prefs.js:788
+msgid "Click to change this shortcut"
 msgstr ""
 
-msgid "About"
+#: prefs.js:794
+#, javascript-format
+msgid "Suggested default: %s"
 msgstr ""
 
-# Settings Options
-msgid "Maximum Entries"
-msgstr ""
-
-msgid "Maximum number of clipboard entries to keep in history"
-msgstr ""
-
-msgid "Maximum Entry Length"
-msgstr ""
-
-msgid "Maximum length of individual clipboard entries (characters)"
-msgstr ""
-
-msgid "Entries Per Page"
-msgstr ""
-
-msgid "Number of clipboard entries to show per page"
-msgstr ""
-
-msgid "Auto-copy on Selection"
-msgstr ""
-
-msgid "Automatically copy selected text to clipboard"
-msgstr ""
-
-msgid "Show Entry Numbers"
-msgstr ""
-
-msgid "Display numbers next to clipboard entries"
-msgstr ""
-
-msgid "Show Entry Preview"
-msgstr ""
-
-msgid "Show preview of clipboard entry content in menu"
-msgstr ""
-
-msgid "Ignore Password Fields"
-msgstr ""
-
-msgid "Don't save clipboard content from password fields"
-msgstr ""
-
-msgid "Clear on Logout"
-msgstr ""
-
-msgid "Clear clipboard history when logging out"
-msgstr ""
-
-# Keyboard Shortcuts
-msgid "Show Clipboard Menu"
-msgstr ""
-
-msgid "Open the clipboard history menu"
-msgstr ""
-
-msgid "Enhanced Copy"
-msgstr ""
-
-msgid "Enhanced copy operation"
-msgstr ""
-
-msgid "Enhanced Paste"
-msgstr ""
-
-msgid "Enhanced paste operation"
-msgstr ""
-
-msgid "New accelerator…"
-msgstr ""
-
+#: prefs.js:818
 msgid "Set Shortcut"
 msgstr ""
 
-msgid "Press the new shortcut keys or Escape to cancel"
+#: prefs.js:822 prefs.js:906
+msgid "Cancel"
 msgstr ""
 
-# Context Menu
+#: prefs.js:834
+msgid "Press the new keyboard shortcut now…"
+msgstr ""
+
+#: prefs.js:842
+msgid ""
+"Include Ctrl, Alt, or Super with your key. Press Esc to cancel or Backspace "
+"to clear."
+msgstr ""
+
+#: prefs.js:901
+msgid "Clear All History"
+msgstr ""
+
+#: prefs.js:918
+msgid ""
+"Are you sure you want to clear all clipboard history? This action cannot be "
+"undone."
+msgstr ""
+
+#: contextMenu.js:304
 msgid "ClipFlow Pro"
 msgstr ""
 
+#: contextMenu.js:308
 msgid "Copy Full Path"
 msgstr ""
 
+#: contextMenu.js:315
 msgid "Copy File Name"
 msgstr ""
 
+#: contextMenu.js:322
 msgid "Copy Directory Path"
 msgstr ""
 
+#: contextMenu.js:331
 msgid "Open Terminal Here"
 msgstr ""
 
-# About Page
-msgid "Advanced clipboard manager for GNOME Shell"
+#: extension.js:1779
+msgid "History cleared"
 msgstr ""
 
-msgid "Version"
+#: extension.js:1767
+msgid "Text copied to clipboard"
 msgstr ""
 
-msgid "Developer"
+#: extension.js:1771
+msgid "Failed to copy text"
 msgstr ""
 
-msgid "Source Code"
+#: extension.js:1809
+msgid "Settings not available"
 msgstr ""
 
-msgid "Open GitHub Repository"
+#: prefs.js:210
+msgid "Diagnostics"
 msgstr ""
 
-msgid "PayPal Donation"
+#: prefs.js:203
+msgid "Notifications"
 msgstr ""
 
-msgid "Support development with a donation"
+#: prefs.js:214
+msgid "Display a GNOME notification when ClipFlow Pro copies an entry"
 msgstr ""
 
-msgid "Donate via PayPal"
+#: prefs.js:221
+msgid "Enable Debug Logging"
 msgstr ""
 
-msgid "License"
+#: prefs.js:222
+msgid "Write extra information to GNOME Shell logs to help troubleshoot problems"
 msgstr ""
-
-msgid "This extension is licensed under GPL-3.0-or-later"
-msgstr ""
-
-msgid "Free and open source software"
-msgstr ""
-
-# Settings Groups
-msgid "Storage Settings"
-msgstr ""
-
-msgid "Configure clipboard history storage limits"
-msgstr ""
-
-msgid "Display Settings"
-msgstr ""
-
-msgid "Configure how clipboard entries are displayed"
-msgstr ""
-
-msgid "Keyboard Shortcuts"
-msgstr ""
-
-msgid "Customize keyboard shortcuts for clipboard operations"
-msgstr ""
-
-msgid "Auto-copy Settings"
-msgstr ""
-
-msgid "Configure automatic copying behavior"
-msgstr ""
-
-msgid "Context Menu Integration"
-msgstr ""
-
-msgid "Enable right-click menu integration"
-msgstr ""
-
-msgid "Enable Context Menu"
-msgstr ""
-
-msgid "Add clipboard options to right-click context menu"
-msgstr ""
-
-msgid "File Manager Integration"
-msgstr ""
-
-msgid "Add file operations (copy path, open terminal) to context menu"
-msgstr ""
-
-msgid "Panel Settings"
-msgstr ""
-
-msgid "Configure panel icon appearance and position"
-msgstr ""
-
-msgid "Panel Position"
-msgstr ""
-
-msgid "Position of clipboard icon in the top panel"
-msgstr ""
-
-msgid "Left"
-msgstr ""
-
-msgid "Center"
-msgstr ""
-
-msgid "Right"
-msgstr ""
-
-msgid "Entry Display"
-msgstr ""
-
-msgid "Configure how clipboard entries are displayed in the menu"
-msgstr ""
-
-msgid "Security Settings"
-msgstr ""
-
-msgid "Configure privacy and security options"
-msgstr ""
-
-msgid "Support & Donations"
-msgstr ""
-
-msgid "Support the development of ClipFlow Pro"
+#: prefs.js:211
+msgid "Show Notifications"
 msgstr ""

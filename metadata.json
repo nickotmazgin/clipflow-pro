@@ -1,30 +1,11 @@
 {
-  "uuid": "clipflow-pro@nickotmazgin.github.io",
   "name": "ClipFlow Pro",
-  "description": "Advanced clipboard manager with intelligent organization, shortcuts, right-click integration, and comprehensive clipboard history management. Features numbered entries, search, pin/star functionality, auto-copy on select, and file manager integration.",
-  "version": 1.0,
-  "shell-version": [
-    "40",
-    "41",
-    "42",
-    "43",
-    "44",
-    "45",
-    "46",
-    "47"
-  ],
+  "description": "A modern, powerful clipboard manager for GNOME Shell with intelligent organization, beautiful UI, and comprehensive history management.",
+  "uuid": "clipflow-pro@nickotmazgin.github.io",
+  "shell-version": ["42", "43", "44", "45", "46", "47"],
+  "version": 1,
+  "version-name": "1.1.0",
   "url": "https://github.com/nickotmazgin/clipflow-pro",
   "settings-schema": "org.gnome.shell.extensions.clipflow-pro",
-  "gettext-domain": "clipflow-pro",
-  "donations": {
-    "paypal": "https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW"
-  },
-  "developer": "Nick Otmazgin",
-  "license": "GPL-3.0-or-later",
-  "compatibility": {
-    "wayland": true,
-    "xorg": true,
-    "gnome": true,
-    "zorin": true
-  }
+  "gettext-domain": "clipflow-pro"
 }

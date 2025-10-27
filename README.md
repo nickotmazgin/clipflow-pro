@@ -1,272 +1,249 @@
 # ClipFlow Pro
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-[![GNOME Shell](https://img.shields.io/badge/GNOME%20Shell-40%2B-orange.svg)](https://www.gnome.org/)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)
+**Advanced Clipboard Manager for GNOME Shell**
 
-**ClipFlow Pro** is an advanced clipboard manager extension for GNOME Shell that provides intelligent organization, powerful search capabilities, and seamless integration with your desktop workflow.
+ClipFlow Pro is a powerful and intelligent clipboard manager that provides comprehensive clipboard history management with advanced features like intelligent organization, search capabilities, pin/star functionality, and auto-copy on selection.
 
-![ClipFlow Pro Banner](assets/banner.png)
+## Features
 
-## ✨ Features
-
-### 🎯 Core Functionality
-- **Smart Clipboard History** - Keep track of up to 1000 clipboard entries with intelligent duplicate detection
-- **Advanced Search** - Quickly find any clipboard entry with real-time search functionality
-- **Organized Display** - Numbered entries with pagination for easy navigation
-- **Persistent Storage** - Clipboard history survives system restarts
-
-### 🔧 Smart Organization
-- **Pin Important Items** - Pin frequently used clipboard entries for quick access
-- **Star Favorites** - Star important content to highlight it in your history
-- **Auto-categorization** - Automatic content type detection (text, files, URLs, etc.)
-- **Custom Entry Limits** - Configure maximum entries and character length per entry
-
-### ⚡ Productivity Features
-- **Auto-copy on Selection** - Optionally copy selected text automatically
-- **One-click Actions** - Click any entry to instantly copy it to clipboard
-- **Keyboard Shortcuts** - Fully customizable shortcuts for all operations
-- **Quick Access Panel** - Always-available panel icon for instant access
-
-### 🗂️ File Manager Integration
-- **Copy File Paths** - Right-click integration to copy full paths, filenames, or directory paths
-- **Open Terminal Here** - Quick terminal access from any file location
-- **File Information** - Display file size, type, and other metadata
-- **Multi-format Support** - Works with all major Linux file managers
-
-### 🎨 Customization & Appearance
-- **Flexible UI** - Choose panel position (left, center, right)
-- **Preview Options** - Toggle entry previews and numbering
-- **Responsive Design** - Adapts to different screen sizes
-- **Accessibility** - Full keyboard navigation and screen reader support
+### 🚀 Core Features
+- **Advanced Clipboard History**: Keep track of all your clipboard entries with intelligent categorization
+- **Smart Search & Filtering**: Find clipboard entries quickly with powerful search and category filtering
+- **Pin & Star System**: Mark important entries for quick access
+- **Auto-copy on Selection**: Automatically copy selected text to clipboard history
+- **Keyboard Shortcuts**: Full keyboard support for power users
 
 ### 🔒 Privacy & Security
-- **Password Protection** - Automatically ignores password field content
-- **Secure Storage** - Local-only storage with no cloud synchronization
-- **Clear on Logout** - Optional automatic history clearing
-- **Content Filtering** - Smart content detection to avoid sensitive data
+- **Password Detection**: Automatically detect and optionally ignore password-like content
+- **Sensitive Data Protection**: Clear sensitive data with one click
+- **Auto-clear Sensitive Data**: Automatically remove sensitive entries after 5 minutes
+- **Secure Data Handling**: Proper cleanup of sensitive information
 
-## 🚀 Installation
+### 🎨 User Experience
+- **Modern UI**: Beautiful, responsive interface that adapts to your GNOME theme
+- **Intelligent Categorization**: Automatically categorize entries (URLs, emails, code, files, etc.)
+- **Pagination Support**: Handle large clipboard histories efficiently
+- **Right-click Integration**: Context menu integration for file operations
 
-### From GNOME Extensions Website
-1. Visit [extensions.gnome.org](https://extensions.gnome.org) (coming soon)
+### ⚙️ Customization
+- **Comprehensive Settings**: Extensive configuration options
+- **Theme Integration**: Automatically adapts to dark/light themes
+- **Customizable Shortcuts**: Configure keyboard shortcuts to your preference
+- **Panel Position**: Choose where to place the clipboard icon
+
+## Installation
+
+### Method 1: Manual Installation
+
+1. **Download the extension**:
+   ```bash
+   git clone https://github.com/nickotmazgin/clipflow-pro.git
+   cd clipflow-pro
+   ```
+
+2. **Build the extension**:
+   ```bash
+   ./build.sh
+   ```
+
+3. **Install the extension**:
+   ```bash
+   mkdir -p ~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io
+   cp -r build/* ~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io/
+   ```
+
+4. **Enable the extension**:
+   ```bash
+   gnome-extensions enable clipflow-pro@nickotmazgin.github.io
+   ```
+
+5. **Restart GNOME Shell** (Alt+F2, type `r`, press Enter)
+
+### Method 2: GNOME Extensions Website
+
+1. Visit [extensions.gnome.org](https://extensions.gnome.org)
 2. Search for "ClipFlow Pro"
-3. Click "Install" and toggle ON
+3. Click "Install" and follow the instructions
 
-### Manual Installation
-1. Download the latest release from [GitHub Releases](https://github.com/nickotmazgin/clipflow-pro/releases)
-2. Extract the archive to `~/.local/share/gnome-shell/extensions/`
-3. Restart GNOME Shell: `Alt + F2`, type `r`, press Enter
-4. Enable the extension: `gnome-extensions enable clipflow-pro@nickotmazgin.github.io`
+## Usage
 
-### From Source
-```bash
-git clone https://github.com/nickotmazgin/clipflow-pro.git
-cd clipflow-pro
-make install
-```
+### Basic Usage
 
-## 🎮 Usage
+1. **Access the clipboard menu**: Click the clipboard icon in the top panel or use the keyboard shortcut `Super+Shift+V`
+2. **Search entries**: Type in the search box to find specific clipboard entries
+3. **Copy an entry**: Click on any entry to copy it to your clipboard
+4. **Pin important entries**: Click the pin icon to keep important entries at the top
+5. **Star favorites**: Click the star icon to mark favorite entries
 
-### Basic Operations
-- **Open Menu**: `Super + Shift + V` (customizable)
-- **Search**: Start typing in the search box when menu is open
-- **Copy Entry**: Click any clipboard entry to copy it
-- **Navigate**: Use arrow keys or pagination buttons
+### Keyboard Shortcuts
 
-### Managing Entries
-- **Pin Entry**: Click the pin icon next to any entry
-- **Star Entry**: Click the star icon to mark as favorite  
-- **Delete Entry**: Click the delete (×) icon to remove
-- **Clear All**: Use the "Clear All" button to empty history
+- `Super+Shift+V`: Show/hide clipboard menu
+- `Super+C`: Enhanced copy (copy selected text to clipboard history)
+- `Super+V`: Enhanced paste (paste with formatting cleanup)
 
-### File Operations
-- **Copy Paths**: Right-click files → ClipFlow Pro → Copy options
-- **Open Terminal**: Right-click files → ClipFlow Pro → Open Terminal Here
-- **File Info**: View file size and metadata in context menu
+## Configuration
 
-## ⚙️ Configuration
+### Settings Panel
 
-Access settings through:
-- **Extension Preferences**: Click "Settings" in ClipFlow Pro menu
-- **GNOME Extensions**: Open Extensions app → ClipFlow Pro → Settings
-- **Command Line**: `gnome-extensions prefs clipflow-pro@nickotmazgin.github.io`
-
-### Settings Categories
+Access the settings by clicking the "Settings" button in the clipboard menu or through GNOME Extensions.
 
 #### General Settings
-- Maximum clipboard entries (10-1000)
-- Maximum entry character length (100-10000)  
-- Entries displayed per page (5-50)
+- **Maximum Entries**: Set how many clipboard entries to keep (10-1000)
+- **Maximum Entry Length**: Limit individual entry length (100-10000 characters)
+- **Entries Per Page**: Number of entries shown per page (5-50)
+- **Show Entry Numbers**: Display numbers next to entries
+- **Show Entry Preview**: Show content preview in menu
+- **Show Entry Timestamps**: Display when entries were copied
 
-#### Keyboard Shortcuts
-- Show clipboard menu (default: `Super + Shift + V`)
-- Enhanced copy operation (default: `Super + C`)
-- Enhanced paste operation (default: `Super + V`)
-
-#### Behavior Options
-- Auto-copy on text selection (toggle)
-- Right-click context menu integration (toggle)
-- File manager integration (toggle)
-
-#### Appearance
-- Panel icon position (left/center/right)
-- Show entry numbers (toggle)
-- Show entry previews (toggle)
+#### Behavior Settings
+- **Enable Auto-copy on Selection**: Automatically copy selected text
+- **Enhanced Selection Notifications**: Show notifications when text is auto-copied
+- **Panel Icon Position**: Choose where to place the clipboard icon
 
 #### Privacy & Security
-- Ignore password fields (recommended: ON)
-- Clear clipboard on logout (default: OFF)
+- **Ignore Passwords**: Don't save password-like content
+- **Clear on Logout**: Clear history when logging out
+- **Auto-clear Sensitive Data**: Automatically remove sensitive entries after 5 minutes
+- **Persistent History Storage**: History is kept locally at `~/.config/clipflow-pro/history.json`
 
-## 🖥️ Compatibility
+#### Keyboard Shortcuts
+- **Show Clipboard Menu**: Open the clipboard history menu
+- **Enhanced Copy**: Copy selected text to clipboard history
+- **Enhanced Paste**: Paste with formatting cleanup
 
-### Supported GNOME Shell Versions
-- GNOME Shell 40+
-- GNOME Shell 41+
-- GNOME Shell 42+
-- GNOME Shell 43+
-- GNOME Shell 44+
-- GNOME Shell 45+
-- GNOME Shell 46+
-- GNOME Shell 47+
+## Troubleshooting
 
-### Supported Distributions
-- **Ubuntu** 20.04+ (with GNOME Shell 40+)
-- **Fedora** 34+
-- **Zorin OS** 16+
-- **Pop!_OS** 21.04+
-- **openSUSE** Tumbleweed
-- **Arch Linux** (with GNOME)
-- **Debian** 11+ (with GNOME Shell backports)
+### Extension Not Showing in Panel
 
-### Display Protocols
-- ✅ **Wayland** (full support)
-- ✅ **X11/Xorg** (full support)
+1. Check if the extension is enabled:
+   ```bash
+   gnome-extensions list --enabled | grep clipflow-pro
+   ```
 
-### File Managers
-- **Nautilus** (GNOME Files) - Full integration
-- **Nemo** (Cinnamon) - Full integration
-- **Thunar** (XFCE) - Full integration  
-- **Dolphin** (KDE) - Basic integration
-- **PCManFM** (LXDE/LXQt) - Basic integration
+2. If not enabled, enable it:
+   ```bash
+   gnome-extensions enable clipflow-pro@nickotmazgin.github.io
+   ```
 
-## 🐛 Troubleshooting
+3. Restart GNOME Shell (Alt+F2, type `r`, press Enter)
 
-### Common Issues
+### Settings Not Working
 
-#### Extension Not Loading
-```bash
-# Check if extension is enabled
-gnome-extensions list | grep clipflow-pro
+1. Check if schemas are compiled:
+   ```bash
+   glib-compile-schemas ~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io/schemas/
+   ```
 
-# Check for errors
-journalctl -f | grep clipflow-pro
+2. Restart GNOME Shell
 
-# Restart GNOME Shell
-Alt + F2 → type 'r' → Enter
-```
+### Keyboard Shortcuts Not Working
 
-#### Keyboard Shortcuts Not Working
-1. Open Settings → Check for conflicting shortcuts
-2. Reset shortcuts in ClipFlow Pro preferences
-3. Ensure extension has proper permissions
+1. Check if shortcuts are properly set in GNOME Settings > Keyboard > Shortcuts
+2. Make sure no other extensions are conflicting
+3. Try resetting the shortcuts in the extension settings
 
-#### Context Menu Not Appearing
-1. Enable "Context Menu Integration" in settings
-2. Restart file manager application
-3. Check file manager compatibility list above
+### Performance Issues
 
-#### History Not Persisting
-- Check write permissions for `~/.config/clipflow-pro/`
-- Ensure sufficient disk space
-- Review privacy settings (clear on logout)
+1. Reduce the maximum entries limit in settings
+2. Reduce the maximum entry length
+3. Enable auto-clear sensitive data to reduce memory usage
 
-## 🤝 Contributing
+## Development
 
-We welcome contributions! Here's how you can help:
+### Building from Source
 
-### Development Setup
-```bash
-git clone https://github.com/nickotmazgin/clipflow-pro.git
-cd clipflow-pro
-npm install  # If using development tools
-make dev     # Start development mode
-```
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/nickotmazgin/clipflow-pro.git
+   cd clipflow-pro
+   ```
 
-### Reporting Issues
-1. Check [existing issues](https://github.com/nickotmazgin/clipflow-pro/issues)
-2. Use the issue template for bug reports
-3. Include system information and logs
-4. Provide steps to reproduce
+2. Make changes to the source files
 
-### Feature Requests
-- Open a [feature request](https://github.com/nickotmazgin/clipflow-pro/issues/new?template=feature_request.md)
-- Explain the use case and expected behavior
-- Check if it aligns with project goals
+3. Build the extension:
+   ```bash
+   ./build.sh
+   ```
 
-### Translation
-Help translate ClipFlow Pro into your language:
-1. Check available translations in `locale/`
-2. Copy `locale/clipflow-pro.pot` to `locale/[lang]/LC_MESSAGES/clipflow-pro.po`
-3. Translate strings and submit a pull request
+4. Install and test:
+   ```bash
+   cp -r build/* ~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io/
+   gnome-extensions enable clipflow-pro@nickotmazgin.github.io
+   ```
 
-## 📋 Changelog
-
-### Version 1.0.0 (Initial Release)
-- ✨ Complete clipboard history management
-- ✨ Advanced search and filtering
-- ✨ Pin/star organization system  
-- ✨ File manager integration
-- ✨ Customizable keyboard shortcuts
-- ✨ Comprehensive privacy controls
-- ✨ Multi-distribution support
-- ✨ Wayland and X11 compatibility
-
-## 💝 Support the Project
-
-If ClipFlow Pro has improved your productivity, consider supporting its development:
-
-[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg?style=for-the-badge&logo=paypal)](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)
-
-Your donations help:
-- 🔧 Maintain compatibility with new GNOME versions
-- 🌟 Add new features based on user feedback  
-- 🐛 Fix bugs and improve stability
-- 📚 Create better documentation and tutorials
-- 🌍 Support more languages and distributions
-
-## 📄 License
-
-ClipFlow Pro is licensed under the [GNU General Public License v3.0 or later](LICENSE).
+### File Structure
 
 ```
-ClipFlow Pro - Advanced Clipboard Manager for GNOME Shell
-Copyright (C) 2025 Nick Otmazgin
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
+clipflow-pro/
+├── extension.js          # Main extension file
+├── prefs.js             # Preferences/settings UI
+├── contextMenu.js       # Context menu integration
+├── stylesheet.css       # Styling
+├── metadata.json        # Extension metadata
+├── schemas/             # GSettings schemas
+│   └── org.gnome.shell.extensions.clipflow-pro.gschema.xml
+├── locale/              # Translation files
+│   └── clipflow-pro.pot
+├── build.sh             # Build script
+└── README.md            # This file
 ```
 
-## 👨‍💻 Author
+## Contributing
 
-**Nick Otmazgin**
-- GitHub: [@nickotmazgin](https://github.com/nickotmazgin)
-- Email: Contact via GitHub issues
-- Donate: [PayPal](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Test thoroughly
+5. Submit a pull request
 
-## 🙏 Acknowledgments
+## Project Structure
 
-- GNOME Shell development team for the excellent extension API
-- The open-source community for feedback and contributions
-- All users who support the project through donations and feedback
+- `docs/` – Internal notes, audits, and archived extension experiments.
+- `icons/` – Custom symbolic icons bundled with the extension.
+- `tools/` – Optional helper scripts for development and AI workflows.
+
+## License
+
+This project is licensed under the GPL-3.0-or-later License - see the [LICENSE](LICENSE) file for details.
+
+## Support
+
+- **GitHub Issues**: [Report bugs or request features](https://github.com/nickotmazgin/clipflow-pro/issues)
+- **GitHub Discussions**: [Ask questions or discuss ideas](https://github.com/nickotmazgin/clipflow-pro/discussions)
+
+## Donations
+
+If you find ClipFlow Pro useful, please consider supporting its development:
+
+[![PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)
+
+## Changelog
+
+### Version 1.1.0
+- Persistent clipboard history saved to `~/.config/clipflow-pro/history.json`
+- Search-aware pagination with configurable page size
+- Auto-clearing timers for sensitive entries
+- Custom ClipFlow Pro panel icon and reorganised project docs/tools
+- Asynchronous conflict detection and refined context menu integration
+
+### Version 1.0.0
+- Initial release
+- Advanced clipboard history management
+- Intelligent search and filtering
+- Pin and star system
+- Auto-copy on selection
+- File manager integration
+- Comprehensive settings panel
+- Security and privacy features
+- Keyboard shortcuts support
+- Theme integration
+
+## Acknowledgments
+
+- GNOME Shell team for the excellent extension system
+- GNOME community for inspiration and feedback
+- All contributors and testers
 
 ---
 
-**⭐ If you find ClipFlow Pro useful, please star this repository to show your support!**
+**Made with ❤️ for the GNOME community**

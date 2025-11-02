@@ -24,6 +24,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.1] - 2025-10-31
+
+### Improved
+- Auto-focus the search field when the menu opens for faster access
+- Settings validation with safe bounds for numeric options
+- Content-type styling now uses CSS classes for reliable theming
+- Friendlier empty-state messages (with guidance) 
+
+### Performance
+- Cached filtered results to speed up search and refresh on large histories
+
+### Fixed
+- Keyboard navigation (Enter/Space) now respects promote-on-copy behavior
+
+---
+
 ## [1.0.0] - 2025-01-21
 
 ### ✨ Added - Initial Release

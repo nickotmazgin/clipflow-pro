@@ -50,6 +50,12 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         this._notebook.set_margin_end(6);
         this._notebook.set_hexpand(true);
         this._notebook.set_vexpand(true);
+
+        if (!this._settings) {
+            this._renderMissingSchemaMessage();
+            return;
+        }
+
         this.append(this._notebook);
 
         // Add tabs
@@ -69,11 +75,11 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         generalBox.set_margin_top(12);
         
         // Header
-        const header = this._createSectionHeader('General Settings');
+        const header = this._createSectionHeader(_('General Settings'));
         generalBox.append(header);
 
         // History Management
-        const historyFrame = this._createFrame('History Management');
+        const historyFrame = this._createFrame(_('History Management'));
         const historyBox = new Gtk.Box({ 
             orientation: Gtk.Orientation.VERTICAL,
             spacing: 10
@@ -82,8 +88,8 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
         // Max entries
         const maxEntriesBox = this._createSpinRow(
-            'Maximum Entries',
-            'Maximum number of clipboard entries to keep in history',
+            _('Maximum Entries'),
+            _('Maximum number of clipboard entries to keep in history'),
             'max-entries',
             10, 1000, 50
         );
@@ -91,24 +97,33 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
         // Max entry length
         const maxLengthBox = this._createSpinRow(
-            'Maximum Entry Length',
-            'Maximum characters per clipboard entry',
+            _('Maximum Entry Length'),
+            _('Maximum characters per clipboard entry'),
             'max-entry-length',
             100, 10000, 1000
         );
         historyBox.append(maxLengthBox);
 
+        // Minimum entry length
+        const minLengthBox = this._createSpinRow(
+            _('Minimum Entry Length'),
+            _('Ignore entries shorter than this length'),
+            'min-entry-length',
+            0, 100, 1
+        );
+        historyBox.append(minLengthBox);
+
         // Entries per page
         const entriesPerPageBox = this._createSpinRow(
-            'Entries Per Page',
-            'Number of entries to show per page in the menu',
+            _('Entries Per Page'),
+            _('Number of entries to show per page in the menu'),
             'entries-per-page',
             5, 50, 10
         );
         historyBox.append(entriesPerPageBox);
 
         // Clear history button
-        const clearButton = new Gtk.Button({ label: 'Clear All History' });
+        const clearButton = new Gtk.Button({ label: _('Clear All History') });
         clearButton.set_halign(Gtk.Align.START);
         clearButton.add_css_class('destructive-action');
         clearButton.connect('clicked', () => this._clearHistory());
@@ -117,7 +132,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         generalBox.append(historyFrame);
 
         // Privacy & Security
-        const privacyFrame = this._createFrame('Privacy & Security');
+        const privacyFrame = this._createFrame(_('Privacy & Security'));
         const privacyBox = new Gtk.Box({ 
             orientation: Gtk.Orientation.VERTICAL,
             spacing: 10
@@ -126,27 +141,25 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
         // Ignore passwords
         const ignorePasswordsBox = this._createSwitchRow(
-            'Ignore Passwords',
-            'Don\'t save clipboard content that looks like passwords',
-            'ignore-passwords',
-            'Uses a simple heuristic to detect password-like strings (e.g., contains the word \'password\') and prevents them from being saved to history.'
+            _('Ignore Passwords'),
+            _("Don't save clipboard content that looks like passwords. Uses a simple heuristic to detect password-like strings (e.g., contains the word 'password') and prevents them from being saved to history."),
+            'ignore-passwords'
         );
         privacyBox.append(ignorePasswordsBox);
 
         // Clear on logout
         const clearOnLogoutBox = this._createSwitchRow(
-            'Clear on Logout',
-            'Clear clipboard history when logging out',
+            _('Clear on Logout'),
+            _('Clear clipboard history when logging out'),
             'clear-on-logout'
         );
         privacyBox.append(clearOnLogoutBox);
 
         // Auto-clear sensitive data
         const autoClearSensitiveBox = this._createSwitchRow(
-            'Auto-clear Sensitive Data',
-            'Automatically remove password-like entries after 5 minutes',
-            'auto-clear-sensitive',
-            'Any entry detected as sensitive will be automatically deleted from the history 5 minutes after it was copied.'
+            _('Auto-clear Sensitive Data'),
+            _('Automatically remove password-like entries after 5 minutes. Any entry detected as sensitive will be automatically deleted from the history 5 minutes after it was copied.'),
+            'auto-clear-sensitive'
         );
         privacyBox.append(autoClearSensitiveBox);
 
@@ -167,10 +180,15 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         );
         diagnosticsBox.append(debugLoggingRow);
 
+        const selfCheckButton = new Gtk.Button({ label: _('Run self-check and log environment info') });
+        selfCheckButton.set_halign(Gtk.Align.START);
+        selfCheckButton.connect('clicked', () => this._runSelfCheck());
+        diagnosticsBox.append(selfCheckButton);
+
         generalBox.append(diagnosticsFrame);
 
         // Add to notebook
-        this._notebook.append_page(generalBox, new Gtk.Label({ label: 'General' }));
+        this._notebook.append_page(generalBox, new Gtk.Label({ label: _('General') }));
         this._setTabIndex('general', this._notebook.get_n_pages() - 1);
     }
 
@@ -182,7 +200,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         behaviorBox.set_margin_top(12);
         
         // Header
-        const header = this._createSectionHeader('Behavior Settings');
+        const header = this._createSectionHeader(_('Behavior Settings'));
         behaviorBox.append(header);
 
         // Notifications
@@ -200,10 +218,25 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         );
         notifyBox.append(notificationSwitch);
 
+        const showCopiedPreview = this._createSwitchRow(
+            _('Show Copied Preview'),
+            _('Include a short preview of copied text in notifications'),
+            'show-copied-preview'
+        );
+        notifyBox.append(showCopiedPreview);
+
+        const previewLen = this._createSpinRow(
+            _('Copied Preview Length'),
+            _('Characters to show in copy notification preview'),
+            'copied-preview-length',
+            10, 200, 40
+        );
+        notifyBox.append(previewLen);
+
         behaviorBox.append(notifyFrame);
 
         // Panel Position
-        const panelFrame = this._createFrame('Panel Position');
+        const panelFrame = this._createFrame(_('Panel Position'));
         const panelBox = new Gtk.Box({ 
             orientation: Gtk.Orientation.VERTICAL,
             spacing: 10
@@ -211,21 +244,57 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         panelFrame.set_child(panelBox);
 
         const panelPositionBox = this._createComboRow(
-            'Panel Icon Position',
-            'Position of clipboard icon in the top panel',
+            _('Panel Icon Position'),
+            _('Position of clipboard icon in the top panel'),
             'panel-position',
             [
-                ['left', 'Left'],
-                ['center', 'Center'],
-                ['right', 'Right']
+                ['left', _('Left')],
+                ['center', _('Center')],
+                ['right', _('Right')]
             ]
         );
         panelBox.append(panelPositionBox);
 
         behaviorBox.append(panelFrame);
 
+        // Clipboard Behavior
+        const clipFrame = this._createFrame(_('Clipboard Behavior'));
+        const clipBox = new Gtk.Box({ 
+            orientation: Gtk.Orientation.VERTICAL,
+            spacing: 10
+        });
+        clipFrame.set_child(clipBox);
+
+        const capturePrimaryBox = this._createSwitchRow(
+            _('Capture PRIMARY Selection'),
+            _('Also capture selections from the PRIMARY buffer'),
+            'capture-primary'
+        );
+        clipBox.append(capturePrimaryBox);
+
+        const dedupeModeBox = this._createComboRow(
+            _('Duplicate Handling'),
+            _('Choose how to handle duplicate entries'),
+            'dedupe-mode',
+            [
+                ['ignore', _('Ignore duplicates')],
+                ['promote', _('Move duplicate to top')]
+            ]
+        );
+        clipBox.append(dedupeModeBox);
+
+        const pauseDurationBox = this._createSpinRow(
+            _('Pause Duration (minutes)'),
+            _('Default duration for Pause Monitoring action'),
+            'pause-duration-minutes',
+            1, 120, 5
+        );
+        clipBox.append(pauseDurationBox);
+
+        behaviorBox.append(clipFrame);
+
         // Add to notebook
-        this._notebook.append_page(behaviorBox, new Gtk.Label({ label: 'Behavior' }));
+        this._notebook.append_page(behaviorBox, new Gtk.Label({ label: _('Behavior') }));
         this._setTabIndex('behavior', this._notebook.get_n_pages() - 1);
     }
 
@@ -237,11 +306,11 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         appearanceBox.set_margin_top(12);
         
         // Header
-        const header = this._createSectionHeader('Appearance Settings');
+        const header = this._createSectionHeader(_('Appearance Settings'));
         appearanceBox.append(header);
 
         // Display Options
-        const displayFrame = this._createFrame('Display Options');
+        const displayFrame = this._createFrame(_('Display Options'));
         const displayBox = new Gtk.Box({ 
             orientation: Gtk.Orientation.VERTICAL,
             spacing: 10
@@ -250,24 +319,24 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
         // Show numbers
         const showNumbersBox = this._createSwitchRow(
-            'Show Entry Numbers',
-            'Display numbers next to clipboard entries',
+            _('Show Entry Numbers'),
+            _('Display numbers next to clipboard entries'),
             'show-numbers'
         );
         displayBox.append(showNumbersBox);
 
         // Show preview
         const showPreviewBox = this._createSwitchRow(
-            'Show Entry Preview',
-            'Show preview of clipboard entry content in menu',
+            _('Show Entry Preview'),
+            _('Show preview of clipboard entry content in menu'),
             'show-preview'
         );
         displayBox.append(showPreviewBox);
 
         // Show timestamps
         const showTimestampsBox = this._createSwitchRow(
-            'Show Entry Timestamps',
-            'Display when each clipboard entry was copied',
+            _('Show Entry Timestamps'),
+            _('Display when each clipboard entry was copied'),
             'show-timestamps'
         );
         displayBox.append(showTimestampsBox);
@@ -275,7 +344,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         appearanceBox.append(displayFrame);
 
         // Menu Styling
-        const styleFrame = this._createFrame('Menu Styling');
+        const styleFrame = this._createFrame(_('Menu Styling'));
         const styleBox = new Gtk.Box({ 
             orientation: Gtk.Orientation.VERTICAL,
             spacing: 10
@@ -284,7 +353,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
         // Theme info
         const themeInfo = new Gtk.Label({
-            label: 'ClipFlow Pro automatically adapts to your GNOME theme.\nThe menu will match your system\'s dark/light mode preference.',
+            label: _('ClipFlow Pro automatically adapts to your GNOME theme.\nThe menu will match your system\'s dark/light mode preference.'),
             wrap: true,
             wrap_mode: Pango.WrapMode.WORD
         });
@@ -293,8 +362,42 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
         appearanceBox.append(styleFrame);
 
+        // App Exclusions
+        const exclFrame = this._createFrame(_('App Exclusions'));
+        const exclBox = new Gtk.Box({ 
+            orientation: Gtk.Orientation.VERTICAL,
+            spacing: 10
+        });
+        exclFrame.set_child(exclBox);
+
+        const exclRow = this._createTextRow(
+            _('Ignore Apps (comma-separated)'),
+            _('App names or IDs to ignore when capturing (e.g., Passwords, org.keepassxc.keepassxc)'),
+            'ignore-apps'
+        );
+        exclBox.append(exclRow);
+        appearanceBox.append(exclFrame);
+
+        // Panel Icon
+        const iconFrame = this._createFrame(_('Panel Icon'));
+        const iconBox = new Gtk.Box({ 
+            orientation: Gtk.Orientation.VERTICAL,
+            spacing: 10
+        });
+        iconFrame.set_child(iconBox);
+
+        const iconSizeOverride = this._createSpinRow(
+            _('Icon Size Override (px)'),
+            _('0 = auto-size based on panel height and scale'),
+            'icon-size-override',
+            0, 64, 0
+        );
+        iconBox.append(iconSizeOverride);
+
+        appearanceBox.append(iconFrame);
+
         // Add to notebook
-        this._notebook.append_page(appearanceBox, new Gtk.Label({ label: 'Appearance' }));
+        this._notebook.append_page(appearanceBox, new Gtk.Label({ label: _('Appearance') }));
         this._setTabIndex('appearance', this._notebook.get_n_pages() - 1);
     }
 
@@ -306,11 +409,11 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         shortcutsBox.set_margin_top(12);
         
         // Header
-        const header = this._createSectionHeader('Keyboard Shortcuts');
+        const header = this._createSectionHeader(_('Keyboard Shortcuts'));
         shortcutsBox.append(header);
 
         // Shortcuts Frame
-        const shortcutsFrame = this._createFrame('Keyboard Shortcuts');
+        const shortcutsFrame = this._createFrame(_('Keyboard Shortcuts'));
         const shortcutsListBox = new Gtk.Box({ 
             orientation: Gtk.Orientation.VERTICAL,
             spacing: 10
@@ -319,8 +422,8 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
         // Show menu shortcut
         const showMenuBox = this._createShortcutRow(
-            'Show Clipboard Menu',
-            'Open the clipboard history menu',
+            _('Show Clipboard Menu'),
+            _('Open the clipboard history menu'),
             'show-menu-shortcut',
             '<Super><Shift>v'
         );
@@ -328,8 +431,8 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
         // Enhanced copy shortcut
         const copyShortcutBox = this._createShortcutRow(
-            'Enhanced Copy',
-            'Copy selected text to clipboard history',
+            _('Enhanced Copy'),
+            _('Copy selected text to clipboard history'),
             'enhanced-copy-shortcut',
             '<Super>c'
         );
@@ -337,8 +440,8 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
         // Enhanced paste shortcut
         const pasteShortcutBox = this._createShortcutRow(
-            'Enhanced Paste',
-            'Paste with formatting cleanup',
+            _('Enhanced Paste'),
+            _('Paste with formatting cleanup'),
             'enhanced-paste-shortcut',
             '<Super>v'
         );
@@ -362,7 +465,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         shortcutsBox.append(infoBox);
 
         // Add to notebook
-        this._notebook.append_page(shortcutsBox, new Gtk.Label({ label: 'Shortcuts' }));
+        this._notebook.append_page(shortcutsBox, new Gtk.Label({ label: _('Shortcuts') }));
         this._setTabIndex('shortcuts', this._notebook.get_n_pages() - 1);
     }
 
@@ -374,11 +477,11 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         aboutBox.set_margin_top(12);
         
         // Header
-        const header = this._createSectionHeader('About ClipFlow Pro');
+        const header = this._createSectionHeader(_('About ClipFlow Pro'));
         aboutBox.append(header);
 
         // App info
-        const appInfoFrame = this._createFrame('Application Information');
+        const appInfoFrame = this._createFrame(_('Application Information'));
         const appInfoBox = new Gtk.Box({ 
             orientation: Gtk.Orientation.VERTICAL,
             spacing: 15
@@ -387,7 +490,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
         // Description
         const description = new Gtk.Label({
-            label: 'ClipFlow Pro is a powerful and intelligent clipboard manager for GNOME Shell that provides comprehensive clipboard history management with advanced features like intelligent organization, search capabilities, pin/star functionality, and privacy protection.',
+            label: _('ClipFlow Pro is a powerful and intelligent clipboard manager for GNOME Shell that provides comprehensive clipboard history management with advanced features like intelligent organization, search capabilities, pin/star functionality, and privacy protection.'),
             wrap: true,
             wrap_mode: Pango.WrapMode.WORD
         });
@@ -399,7 +502,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
             orientation: Gtk.Orientation.HORIZONTAL,
             spacing: 10
         });
-        const versionLabel = new Gtk.Label({ label: 'Version:' });
+        const versionLabel = new Gtk.Label({ label: _('Version:') });
         const versionValue = new Gtk.Label({
             label: Me.metadata['version-name'] || String(Me.metadata.version ?? ''),
         });
@@ -412,7 +515,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
             orientation: Gtk.Orientation.HORIZONTAL,
             spacing: 10
         });
-        const developerLabel = new Gtk.Label({ label: 'Developer:' });
+        const developerLabel = new Gtk.Label({ label: _('Developer:') });
         const developerValue = new Gtk.Label({ label: 'Nick Otmazgin' });
         developerBox.append(developerLabel);
         developerBox.append(developerValue);
@@ -423,7 +526,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
             orientation: Gtk.Orientation.HORIZONTAL,
             spacing: 10
         });
-        const licenseLabel = new Gtk.Label({ label: 'License:' });
+        const licenseLabel = new Gtk.Label({ label: _('License:') });
         const licenseValue = new Gtk.Label({ 
             label: '<a href="https://github.com/nickotmazgin/clipflow-pro/blob/main/LICENSE">GPL-3.0-or-later</a>',
             use_markup: true
@@ -437,7 +540,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
             orientation: Gtk.Orientation.HORIZONTAL,
             spacing: 10
         });
-        const copyrightLabel = new Gtk.Label({ label: 'Copyright:' });
+        const copyrightLabel = new Gtk.Label({ label: _('Copyright:') });
         const copyrightValue = new Gtk.Label({ label: '© 2025 Nick Otmazgin' });
         copyrightBox.append(copyrightLabel);
         copyrightBox.append(copyrightValue);
@@ -446,7 +549,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         aboutBox.append(appInfoFrame);
 
         // Links
-        const linksFrame = this._createFrame('Links');
+        const linksFrame = this._createFrame(_('Links'));
         const linksBox = new Gtk.Box({ 
             orientation: Gtk.Orientation.VERTICAL,
             spacing: 10
@@ -454,7 +557,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         linksFrame.set_child(linksBox);
 
         // GitHub link
-        const githubButton = new Gtk.Button({ label: 'GitHub Repository' });
+        const githubButton = new Gtk.Button({ label: _('GitHub Repository') });
         githubButton.set_halign(Gtk.Align.START);
         githubButton.connect('clicked', () => {
             Gio.AppInfo.launch_default_for_uri('https://github.com/nickotmazgin/clipflow-pro', null);
@@ -462,7 +565,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         linksBox.append(githubButton);
 
         // README link
-        const readmeButton = new Gtk.Button({ label: 'Read Documentation (README.md)' });
+        const readmeButton = new Gtk.Button({ label: _('Read Documentation (README.md)') });
         readmeButton.set_halign(Gtk.Align.START);
         readmeButton.connect('clicked', () => {
             Gio.AppInfo.launch_default_for_uri('https://github.com/nickotmazgin/clipflow-pro/blob/main/README.md', null);
@@ -470,7 +573,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         linksBox.append(readmeButton);
 
         // PayPal link
-        const paypalButton = new Gtk.Button({ label: 'Donate via PayPal' });
+        const paypalButton = new Gtk.Button({ label: _('Donate via PayPal') });
         paypalButton.set_halign(Gtk.Align.START);
         paypalButton.connect('clicked', () => {
             Gio.AppInfo.launch_default_for_uri('https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW', null);
@@ -480,7 +583,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         aboutBox.append(linksFrame);
 
         // Features
-        const featuresFrame = this._createFrame('Features');
+        const featuresFrame = this._createFrame(_('Features'));
         const featuresBox = new Gtk.Box({ 
             orientation: Gtk.Orientation.VERTICAL,
             spacing: 5
@@ -488,16 +591,16 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         featuresFrame.set_child(featuresBox);
 
         const features = [
-            '• Advanced clipboard history management',
-            '• Intelligent search and filtering with debouncing',
-            '• Pin and star system for important entries',
-            '• Smart content type detection (URLs, emails, code)',
-            '• Password detection and filtering',
-            '• Secure local-only storage with privacy protection',
-            '• Keyboard shortcuts support',
-            '• Search-aware pagination',
-            '• GNOME theme integration',
-            '• Auto-clear sensitive data option'
+            _('• Advanced clipboard history management'),
+            _('• Intelligent search and filtering with debouncing'),
+            _('• Pin and star system for important entries'),
+            _('• Smart content type detection (URLs, emails, code)'),
+            _('• Password detection and filtering'),
+            _('• Secure local-only storage with privacy protection'),
+            _('• Keyboard shortcuts support'),
+            _('• Search-aware pagination'),
+            _('• GNOME theme integration'),
+            _('• Auto-clear sensitive data option')
         ];
 
         features.forEach(feature => {
@@ -509,8 +612,35 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         aboutBox.append(featuresFrame);
 
         // Add to notebook
-        this._notebook.append_page(aboutBox, new Gtk.Label({ label: 'About' }));
+        this._notebook.append_page(aboutBox, new Gtk.Label({ label: _('About') }));
         this._setTabIndex('about', this._notebook.get_n_pages() - 1);
+    }
+
+    _renderMissingSchemaMessage() {
+        const messageBox = new Gtk.Box({
+            orientation: Gtk.Orientation.VERTICAL,
+            hexpand: true,
+            vexpand: true,
+            spacing: 12
+        });
+        const titleText = _('ClipFlow Pro');
+        const title = new Gtk.Label({ use_markup: true });
+        title.set_markup(`<b>${GLib.markup_escape_text(titleText, -1)}</b>`);
+        title.set_halign(Gtk.Align.START);
+        title.set_xalign(0);
+
+        const body = new Gtk.Label({
+            label: _('Settings schema not found. Run the build script and reinstall the extension.'),
+            wrap: true,
+            wrap_mode: Pango.WrapMode.WORD,
+            xalign: 0
+        });
+        body.set_halign(Gtk.Align.START);
+        body.add_css_class('dim-label');
+
+        messageBox.append(title);
+        messageBox.append(body);
+        this.append(messageBox);
     }
 
     _setTabIndex(name, index) {
@@ -704,16 +834,92 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         labelBox.append(titleLabel);
         labelBox.append(descLabel);
 
-        const comboBox = Gtk.DropDown.new_from_strings(options.map(opt => opt[1]));
+        const labels = options.map(opt => opt[1]);
+        const valueToIndex = new Map(options.map(([value], index) => [value, index]));
+        const indexToValue = options.map(opt => opt[0]);
+
+        const comboBox = Gtk.DropDown.new_from_strings(labels);
         comboBox.set_halign(Gtk.Align.END);
         comboBox.set_hexpand(false);
         comboBox.set_valign(Gtk.Align.CENTER);
         comboBox.set_size_request(220, -1);
 
-        this._settings.bind(settingKey, comboBox, 'selected', Gio.SettingsBindFlags.DEFAULT);
+        const applySelectionFromSettings = () => {
+            const currentValue = this._settings.get_string(settingKey);
+            const targetIndex = valueToIndex.has(currentValue) ? valueToIndex.get(currentValue) : 0;
+            if (comboBox.get_selected() !== targetIndex) {
+                comboBox.set_selected(targetIndex);
+            }
+        };
+
+        applySelectionFromSettings();
+
+        const signalId = this._settings.connect(`changed::${settingKey}`, () => {
+            applySelectionFromSettings();
+        });
+        this._settingsSignals.push(signalId);
+
+        comboBox.connect('notify::selected', () => {
+            const selectedIndex = comboBox.get_selected();
+            if (selectedIndex < 0 || selectedIndex >= indexToValue.length)
+                return;
+
+            const selectedValue = indexToValue[selectedIndex];
+            if (this._settings.get_string(settingKey) !== selectedValue) {
+                this._settings.set_string(settingKey, selectedValue);
+            }
+        });
 
         box.append(labelBox);
         box.append(comboBox);
+
+        return box;
+    }
+
+    _createTextRow(title, description, settingKey) {
+        const box = new Gtk.Box({
+            orientation: Gtk.Orientation.HORIZONTAL,
+            spacing: 10,
+        });
+        box.set_hexpand(true);
+        box.set_halign(Gtk.Align.FILL);
+        box.set_margin_top(6);
+        box.set_margin_bottom(6);
+
+        const labelBox = new Gtk.Box({
+            orientation: Gtk.Orientation.VERTICAL,
+            spacing: 2,
+        });
+        labelBox.set_hexpand(true);
+        labelBox.set_valign(Gtk.Align.CENTER);
+        labelBox.set_margin_end(12);
+
+        const titleLabel = new Gtk.Label({ use_markup: true });
+        titleLabel.set_markup(`<b>${GLib.markup_escape_text(title, -1)}</b>`);
+        titleLabel.set_halign(Gtk.Align.START);
+        titleLabel.set_xalign(0);
+
+        const descLabel = new Gtk.Label({ label: description });
+        descLabel.set_halign(Gtk.Align.START);
+        descLabel.set_wrap(true);
+        descLabel.set_wrap_mode(Pango.WrapMode.WORD);
+        descLabel.add_css_class('dim-label');
+        descLabel.set_xalign(0);
+
+        labelBox.append(titleLabel);
+        labelBox.append(descLabel);
+
+        const entry = new Gtk.Entry();
+        entry.set_hexpand(false);
+        entry.set_valign(Gtk.Align.CENTER);
+        entry.set_width_chars(36);
+        entry.set_text(this._settings.get_string(settingKey));
+        entry.connect('changed', () => {
+            this._settings.set_string(settingKey, entry.get_text());
+        });
+
+        box.append(labelBox);
+        box.append(entry);
 
         return box;
     }
@@ -970,6 +1176,44 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         });
 
         dialog.present();
+    }
+
+    _runSelfCheck() {
+        try {
+            const shellVersion = Me.metadata['shell-version'] || [];
+            const envWayland = GLib.getenv('XDG_SESSION_TYPE') || '';
+            const platform = envWayland.toLowerCase();
+            const now = GLib.DateTime.new_now_local().format('%Y-%m-%d %H:%M:%S');
+            log(`[ClipFlow Pro] Self-check @ ${now}`);
+            log(`[ClipFlow Pro] GNOME Shell versions supported: ${JSON.stringify(shellVersion)}`);
+            log(`[ClipFlow Pro] Session type: ${platform}`);
+            const settings = this._settings;
+            log(`[ClipFlow Pro] Settings snapshot: capture-primary=${settings.get_boolean('capture-primary')}, dedupe-mode=${settings.get_string('dedupe-mode')}, min-entry-length=${settings.get_int('min-entry-length')}, max-entry-length=${settings.get_int('max-entry-length')}, entries-per-page=${settings.get_int('entries-per-page')}, icon-size-override=${settings.get_int('icon-size-override')}`);
+            log('[ClipFlow Pro] Self-check completed. Open GNOME Shell logs to view details.');
+            // Provide immediate UI feedback
+            const dlg = new Gtk.MessageDialog({
+                transient_for: this.get_root(),
+                modal: true,
+                buttons: Gtk.ButtonsType.OK,
+                message_type: Gtk.MessageType.INFO,
+                text: _('Self-check completed'),
+                secondary_text: _('Details written to system logs. Look for "ClipFlow Pro" in GNOME Shell logs.'),
+            });
+            dlg.connect('response', () => dlg.destroy());
+            dlg.present();
+        } catch (e) {
+            log(`[ClipFlow Pro] Self-check failed: ${e.message}`);
+            const dlg = new Gtk.MessageDialog({
+                transient_for: this.get_root(),
+                modal: true,
+                buttons: Gtk.ButtonsType.OK,
+                message_type: Gtk.MessageType.ERROR,
+                text: _('Self-check failed'),
+                secondary_text: String(e?.message ?? e),
+            });
+            dlg.connect('response', () => dlg.destroy());
+            dlg.present();
+        }
     }
 });
 

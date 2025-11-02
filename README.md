@@ -177,13 +177,14 @@ Access the settings by clicking the "Settings" button in the clipboard menu or t
 clipflow-pro/
 ├── extension.js          # Main extension file
 ├── prefs.js             # Preferences/settings UI
-├── contextMenu.js       # Context menu integration
 ├── stylesheet.css       # Styling
 ├── metadata.json        # Extension metadata
 ├── schemas/             # GSettings schemas
 │   └── org.gnome.shell.extensions.clipflow-pro.gschema.xml
 ├── locale/              # Translation files
 │   └── clipflow-pro.pot
+├── icons/               # Extension icons
+│   └── clipflow-pro-symbolic.svg
 ├── build.sh             # Build script
 └── README.md            # This file
 ```
@@ -218,6 +219,14 @@ If you find ClipFlow Pro useful, please consider supporting its development:
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)
 
 ## Changelog
+
+### Version 1.1.1
+- Auto-focus search field when menu opens for faster access
+- Settings validation with automatic bounds checking
+- Content type styling now uses CSS classes for visual distinction
+- Improved empty state messaging with helpful guidance
+- Performance optimization with cached filtered results
+- Fixed keyboard navigation to respect promote-on-copy setting
 
 ### Version 1.1.0
 - Persistent clipboard history saved to `~/.config/clipflow-pro/history.json`

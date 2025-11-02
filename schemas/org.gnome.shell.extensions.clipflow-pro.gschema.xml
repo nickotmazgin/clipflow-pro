@@ -5,14 +5,23 @@
     <!-- General Settings -->
     <key name="max-entries" type="i">
       <default>50</default>
+      <range min="10" max="1000"/>
       <summary>Maximum clipboard entries</summary>
       <description>Maximum number of clipboard entries to keep in history</description>
     </key>
     
     <key name="max-entry-length" type="i">
       <default>1000</default>
+      <range min="100" max="10000"/>
       <summary>Maximum entry character length</summary>
       <description>Maximum length of individual clipboard entries</description>
+    </key>
+
+    <key name="min-entry-length" type="i">
+      <default>1</default>
+      <range min="0" max="100"/>
+      <summary>Minimum entry character length</summary>
+      <description>Ignore entries shorter than this many characters</description>
     </key>
 
     <!-- Keyboard Shortcuts -->
@@ -23,7 +32,7 @@
     </key>
     
     <key name="enhanced-paste-shortcut" type="as">
-      <default>['&lt;Super&gt;v']</default>
+      <default>[]</default>
       <summary>Enhanced paste shortcut</summary>
       <description>Keyboard shortcut for enhanced pasting</description>
     </key>
@@ -43,12 +52,14 @@
     
     <key name="entries-per-page" type="i">
       <default>10</default>
+      <range min="5" max="50"/>
       <summary>Entries per page</summary>
       <description>Number of entries to show per page in the menu</description>
     </key>
     
     <key name="context-menu-items" type="i">
       <default>5</default>
+      <range min="1" max="20"/>
       <summary>Recent items in context menu</summary>
       <description>Number of recent clipboard entries to show in the right-click context menu.</description>
     </key>
@@ -78,6 +89,36 @@
       <description>Display a GNOME notification when ClipFlow Pro copies an entry</description>
     </key>
 
+    <key name="show-copied-preview" type="b">
+      <default>true</default>
+      <summary>Show entry preview in copy toast</summary>
+      <description>Include the first characters of the copied entry in notifications</description>
+    </key>
+
+    <key name="copied-preview-length" type="i">
+      <default>40</default>
+      <range min="5" max="200"/>
+      <summary>Copy toast preview length</summary>
+      <description>Number of characters to show in the copy notification preview</description>
+    </key>
+
+    <!-- Clipboard Behavior -->
+    <key name="capture-primary" type="b">
+      <default>true</default>
+      <summary>Capture PRIMARY selection</summary>
+      <description>Also capture selections from the PRIMARY buffer into history</description>
+    </key>
+
+    <key name="dedupe-mode" type="s">
+      <choices>
+        <choice value="ignore"/>
+        <choice value="promote"/>
+      </choices>
+      <default>'ignore'</default>
+      <summary>Duplicate handling mode</summary>
+      <description>Either ignore duplicate entries or move the latest duplicate to the top</description>
+    </key>
+
     <!-- Diagnostics -->
     <key name="enable-debug-logs" type="b">
       <default>false</default>
@@ -96,6 +137,13 @@
       <summary>Panel icon position</summary>
       <description>Position of clipboard icon in the top panel</description>
     </key>
+
+    <key name="icon-size-override" type="i">
+      <default>0</default>
+      <range min="0" max="64"/>
+      <summary>Panel icon size override</summary>
+      <description>Override icon size in pixels (0 = auto)</description>
+    </key>
     
     <key name="show-preview" type="b">
       <default>true</default>
@@ -107,6 +155,26 @@
       <default>true</default>
       <summary>Show entry timestamps</summary>
       <description>Display when each clipboard entry was copied</description>
+    </key>
+
+    <key name="ignore-apps" type="s">
+      <default>''</default>
+      <summary>Apps to ignore (comma-separated)</summary>
+      <description>Comma-separated list of app names or IDs to ignore when capturing</description>
+    </key>
+
+    <key name="promote-on-copy" type="b">
+      <default>false</default>
+      <summary>Promote on copy</summary>
+      <description>When clicking an entry to copy, move it to the top and refresh its timestamp</description>
+    </key>
+
+    <!-- Pause Monitoring -->
+    <key name="pause-duration-minutes" type="i">
+      <default>5</default>
+      <range min="1" max="120"/>
+      <summary>Pause duration (minutes)</summary>
+      <description>Default number of minutes to pause clipboard monitoring</description>
     </key>
     
     <!-- Preferences Navigation -->

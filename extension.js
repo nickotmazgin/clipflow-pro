@@ -66,13 +66,15 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._isMonitoring = false;
         this._clipboard = null;
         this._clipboardOwnerChangeId = 0;
+        this._selection = null;
+        this._selectionOwnerChangedId = 0;
         this._clipboardCheckTimeout = 0;
         this._clipboardTimeout = null; // Retained for cleanup during transitions
         this._clipboardPollId = 0;
         this._clipboardPollIntervalMs = 750;
         this._clipboardRetryTimeoutId = 0;
         this._clipboardRetryAttempts = 0;
-        this._maxClipboardRetryAttempts = 6;
+        this._clipboardRetryNotified = false;
         this._lastClipboardText = '';
         this._lastPrimaryText = '';
         this._monitoringResumeTimeoutId = 0;
@@ -80,6 +82,20 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._searchDebounceTimeout = 0;
         this._filteredHistoryCache = null;
         this._filterCacheValid = false;
+        this._textMimeTypes = [
+            'text/plain',
+            'text/plain;charset=utf-8',
+            'text/plain;charset=UTF-8',
+            'UTF8_STRING',
+            'STRING',
+            'TEXT',
+            'COMPOUND_TEXT',
+            'text/uri-list',
+            'x-special/gnome-copied-files',
+            'text/html',
+            'text/html;charset=utf-8',
+            'text/html;charset=UTF-8'
+        ];
         
         // Validate and sanitize settings on startup
         this._validateSettings();
@@ -135,6 +151,19 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._buildMenu();
         this._startClipboardMonitoring();
         this._registerKeybindings();
+        
+        // Connect menu open/close signals to refresh history when menu opens
+        if (this.menu && typeof this.menu.connect === 'function') {
+            if (this._menuOpenChangedId) {
+                this.menu.disconnect(this._menuOpenChangedId);
+            }
+            this._menuOpenChangedId = this.menu.connect('open-state-changed', (menu, open) => {
+                if (open && this._historyContainer) {
+                    this._debugLog('Menu opened - refreshing history display');
+                    this._refreshHistory();
+                }
+            });
+        }
         
         this._buttonPressId = this.connect('button-press-event', this._onButtonPressEvent.bind(this));
         this._popupMenuId = this.connect('popup-menu', this._onPopupMenu.bind(this));
@@ -313,6 +342,78 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return '';
         }
         return fallback;
+    }
+
+    _decodeClipboardBytes(bytes, mimetype) {
+        if (!bytes) {
+            return '';
+        }
+
+        let rawValue = null;
+        try {
+            if (ByteArray && typeof ByteArray.fromGBytes === 'function') {
+                rawValue = ByteArray.fromGBytes(bytes);
+            } else if (bytes && typeof bytes.toArray === 'function') {
+                rawValue = bytes.toArray();
+            } else if (typeof bytes === 'string') {
+                rawValue = bytes;
+            }
+        } catch (error) {
+            this._debugLog(`Failed to convert clipboard bytes: ${error.message}`);
+        }
+
+        let text = this._normalizeClipboardText(rawValue);
+        if (!text) {
+            return '';
+        }
+
+        const mime = String(mimetype || '').toLowerCase();
+        const baseMime = mime.split(';')[0];
+
+        if (baseMime === 'x-special/gnome-copied-files' || baseMime === 'text/uri-list') {
+            // Convert newline-separated URIs/paths into a user-friendly list
+            // Handle Nautilus/Files format: "copy\nfile:///path1\nfile:///path2" or "cut\nfile:///path"
+            const lines = text.split(/\r?\n/).map(line => line.trim()).filter(Boolean);
+            const payload = lines
+                .filter(line => line !== 'copy' && line !== 'cut') // Skip Nautilus header
+                .map(line => {
+                    if (line.startsWith('file://')) {
+                        try {
+                            // Decode URI and remove file:// prefix for clean display
+                            return decodeURI(line.replace(/^file:\/\//, ''));
+                        } catch (_e) {
+                            // Fallback: just strip the prefix if URI decode fails
+                            return line.replace(/^file:\/\//, '');
+                        }
+                    }
+                    return line;
+                });
+            text = payload.join('\n');
+            this._debugLog(`Parsed ${baseMime}: ${payload.length} file(s)`);
+        } else if (baseMime === 'text/html') {
+            text = this._stripClipboardHtml(text);
+        }
+
+        return text;
+    }
+
+    _stripClipboardHtml(html) {
+        if (!html) {
+            return '';
+        }
+
+        let text = String(html);
+        text = text.replace(/<style[\s\S]*?<\/style>/gi, '')
+            .replace(/<script[\s\S]*?<\/script>/gi, '')
+            .replace(/<br\s*\/?>/gi, '\n')
+            .replace(/<\/(p|div|li|tr|h[1-6])>/gi, '\n')
+            .replace(/<td>/gi, '\t')
+            .replace(/<[^>]+>/g, '');
+
+        // Collapse excessive whitespace but keep intentional newlines
+        text = text.replace(/\r/g, '');
+        text = text.replace(/\n{3,}/g, '\n\n');
+        return text.trim();
     }
 
     _hideActor(target) {
@@ -522,6 +623,46 @@ class ClipFlowIndicator extends PanelMenu.Button {
         }
     }
 
+    // Safe settings access with fallback defaults
+    _safeGetInt(key, defaultValue) {
+        try {
+            if (!this._settings) {
+                this._debugLog(`⚠️ Settings object missing for key: ${key}, using default: ${defaultValue}`);
+                return defaultValue;
+            }
+            return this._settings.get_int(key);
+        } catch (error) {
+            this._debugLog(`⚠️ Error reading setting ${key}: ${error.message}, using default: ${defaultValue}`);
+            return defaultValue;
+        }
+    }
+
+    _safeGetBoolean(key, defaultValue) {
+        try {
+            if (!this._settings) {
+                this._debugLog(`⚠️ Settings object missing for key: ${key}, using default: ${defaultValue}`);
+                return defaultValue;
+            }
+            return this._settings.get_boolean(key);
+        } catch (error) {
+            this._debugLog(`⚠️ Error reading setting ${key}: ${error.message}, using default: ${defaultValue}`);
+            return defaultValue;
+        }
+    }
+
+    _safeGetString(key, defaultValue) {
+        try {
+            if (!this._settings) {
+                this._debugLog(`⚠️ Settings object missing for key: ${key}, using default: ${defaultValue}`);
+                return defaultValue;
+            }
+            return this._settings.get_string(key) || defaultValue;
+        } catch (error) {
+            this._debugLog(`⚠️ Error reading setting ${key}: ${error.message}, using default: ${defaultValue}`);
+            return defaultValue;
+        }
+    }
+
     _buildMenu() {
         // Clear existing menu
         this.menu.removeAll();
@@ -599,6 +740,10 @@ class ClipFlowIndicator extends PanelMenu.Button {
             vertical: true,
             x_expand: true
         });
+        this._debugLog('History container constructed');
+        if (typeof this._historyContainer.add_style_class_name === 'function') {
+            this._historyContainer.add_style_class_name('clipflow-history-list');
+        }
         if (typeof this._historyContainer.set_spacing === 'function') {
             this._historyContainer.set_spacing(4);
         } else if (typeof this._historyContainer.get_layout_manager === 'function') {
@@ -623,8 +768,14 @@ class ClipFlowIndicator extends PanelMenu.Button {
         const actionRow = this._createActionButtons();
         container.add_child(actionRow);
 
-        // Load initial history
-        this._refreshHistory();
+        // Load initial history - ensure container exists first
+        this._debugLog(`Building menu complete - history container exists: ${!!this._historyContainer}, history count: ${this._clipboardHistory.length}`);
+        if (this._historyContainer) {
+            this._refreshHistory();
+            this._debugLog(`Initial history refresh called after menu build`);
+        } else {
+            this._debugLog(`⚠️ WARNING: History container missing after menu build!`);
+        }
     }
 
     _buildContextMenu() {
@@ -931,13 +1082,6 @@ class ClipFlowIndicator extends PanelMenu.Button {
             vertical: false,
             x_expand: true
         });
-        if (typeof buttonContainer.set_spacing === 'function') {
-            buttonContainer.set_spacing(12);
-        } else if (typeof buttonContainer.get_layout_manager === 'function') {
-            const layout = buttonContainer.get_layout_manager();
-            if (layout && 'spacing' in layout)
-                layout.spacing = 12;
-        }
         buttonContainer.add_style_class_name('clipflow-action-container');
         
         // Clear button
@@ -946,10 +1090,30 @@ class ClipFlowIndicator extends PanelMenu.Button {
             style_class: 'clipflow-button',
             x_expand: true
         });
+        clearButton.add_style_class_name('clipflow-button-danger');
+        clearButton.set_accessible_name(_('Clear all clipboard history'));
         clearButton.connect('clicked', () => {
             this._clearAllHistory();
         });
         buttonContainer.add_child(clearButton);
+
+        const spacer = new St.Widget({
+            reactive: false,
+            can_focus: false
+        });
+        if (typeof spacer.set_x_expand === 'function') {
+            spacer.set_x_expand(false);
+        }
+        if (typeof spacer.set_y_expand === 'function') {
+            spacer.set_y_expand(false);
+        }
+        if (typeof spacer.set_width === 'function') {
+            spacer.set_width(16);
+        } else if (typeof spacer.set_style === 'function') {
+            spacer.set_style('min-width: 16px;');
+        }
+        spacer.add_style_class_name('clipflow-action-spacer');
+        buttonContainer.add_child(spacer);
         
         // Settings button
         const settingsButton = new St.Button({
@@ -957,11 +1121,13 @@ class ClipFlowIndicator extends PanelMenu.Button {
             style_class: 'clipflow-button',
             x_expand: true
         });
+        settingsButton.add_style_class_name('clipflow-button-secondary');
+        settingsButton.set_accessible_name(_('Open ClipFlow Pro settings'));
         settingsButton.connect('clicked', () => {
             this._openSettings();
         });
         buttonContainer.add_child(settingsButton);
-        buttonContainer.set_margin_top(6);
+        buttonContainer.set_margin_top(8);
         return buttonContainer;
     }
 
@@ -1000,6 +1166,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             label: _('Prev'),
             style_class: buttonStyle
         });
+        this._paginationPrevButton.set_accessible_name(_('Previous page'));
         this._paginationPrevButton.connect('clicked', () => {
             this._changePage(-1);
         });
@@ -1008,6 +1175,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             label: _('Next'),
             style_class: buttonStyle
         });
+        this._paginationNextButton.set_accessible_name(_('Next page'));
         this._paginationNextButton.connect('clicked', () => {
             this._changePage(1);
         });
@@ -1077,15 +1245,24 @@ class ClipFlowIndicator extends PanelMenu.Button {
     _ensureStorageDir() {
         try {
             if (!GLib.file_test(this._storageDir, GLib.FileTest.IS_DIR)) {
-                GLib.mkdir_with_parents(this._storageDir, 0o700);
+                const result = GLib.mkdir_with_parents(this._storageDir, 0o700);
+                if (typeof result === 'number' && result !== 0) {
+                    throw new Error(`Failed to create storage directory: ${this._storageDir}`);
+                }
             }
             // Ensure directory permissions are secure (user-only access)
-            const file = Gio.File.new_for_path(this._storageDir);
-            if (file.query_exists(null)) {
-                file.set_attribute_uint32('unix::mode', 0o700, Gio.FileQueryInfoFlags.NONE, null);
+            try {
+                const file = Gio.File.new_for_path(this._storageDir);
+                if (file.query_exists(null)) {
+                    file.set_attribute_uint32('unix::mode', 0o700, Gio.FileQueryInfoFlags.NONE, null);
+                }
+            } catch (permError) {
+                // Log but don't fail - directory exists even if permissions couldn't be set
+                this._debugLog(`Failed to set directory permissions: ${permError.message}`);
             }
         } catch (error) {
             log(`ClipFlow Pro: Failed to ensure storage directory: ${error}`);
+            throw error; // Re-throw so caller knows directory creation failed
         }
     }
 
@@ -1109,8 +1286,27 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 return;
             }
 
-            const parsed = JSON.parse(raw);
+            let parsed;
+            try {
+                parsed = JSON.parse(raw);
+            } catch (jsonError) {
+                log(`ClipFlow Pro: Failed to parse history JSON (file may be corrupted): ${jsonError.message}`);
+                // Backup the corrupted file before resetting
+                try {
+                    const backupFile = Gio.File.new_for_path(this._historyFile + '.corrupted.' + Date.now());
+                    if (file.query_exists(null)) {
+                        file.copy(backupFile, Gio.FileCopyFlags.NONE, null, null);
+                        this._debugLog(`Corrupted history backed up to: ${backupFile.get_path()}`);
+                    }
+                } catch (backupError) {
+                    this._debugLog(`Failed to backup corrupted history: ${backupError.message}`);
+                }
+                this._clipboardHistory = [];
+                return;
+            }
+
             if (!Array.isArray(parsed)) {
+                log(`ClipFlow Pro: History file does not contain an array, resetting history`);
                 this._clipboardHistory = [];
                 return;
             }
@@ -1163,7 +1359,12 @@ class ClipFlowIndicator extends PanelMenu.Button {
             this._trimHistory(true);
             this._currentPage = 0;
             this._updateAutoClearTimers();
-            this._debugLog(`Loaded ${this._clipboardHistory.length} history entries from disk`);
+            this._filterCacheValid = false;
+            this._filteredHistoryCache = null;
+            this._debugLog(`✅ Loaded ${this._clipboardHistory.length} history entries from disk`);
+            if (this._clipboardHistory.length > 0) {
+                this._debugLog(`First entry preview: "${this._truncateText(this._clipboardHistory[0].text, 50)}..."`);
+            }
         } catch (error) {
             log(`ClipFlow Pro: Failed to load history: ${error}`);
             this._clipboardHistory = [];
@@ -1201,7 +1402,12 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
     _writeHistoryToDisk() {
         try {
-            this._ensureStorageDir();
+            try {
+                this._ensureStorageDir();
+            } catch (dirError) {
+                log(`ClipFlow Pro: Cannot save history - storage directory unavailable: ${dirError.message}`);
+                return; // Cannot save without storage directory
+            }
             const serialised = this._clipboardHistory.map(item => ({
                 id: item.id,
                 text: item.text,
@@ -1213,12 +1419,20 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
             const payload = JSON.stringify(serialised);
             const payloadBytes = ByteArray.fromString(payload);
-            GLib.file_set_contents(this._historyFile, payloadBytes);
+            const success = GLib.file_set_contents(this._historyFile, payloadBytes);
+            if (!success) {
+                throw new Error('Failed to write history file');
+            }
             
             // Set secure file permissions (user read/write only, mode 0600)
-            const file = Gio.File.new_for_path(this._historyFile);
-            if (file.query_exists(null)) {
-                file.set_attribute_uint32('unix::mode', 0o600, Gio.FileQueryInfoFlags.NONE, null);
+            try {
+                const file = Gio.File.new_for_path(this._historyFile);
+                if (file.query_exists(null)) {
+                    file.set_attribute_uint32('unix::mode', 0o600, Gio.FileQueryInfoFlags.NONE, null);
+                }
+            } catch (permError) {
+                // Log but don't fail - file was written successfully
+                this._debugLog(`Failed to set file permissions (history still saved): ${permError.message}`);
             }
         } catch (error) {
             log(`ClipFlow Pro: Failed to save history: ${error}`);
@@ -1364,20 +1578,33 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
         this._clearClipboardRetry();
         this._isMonitoring = true;
+        this._lastClipboardText = null;
+        this._lastPrimaryText = null;
         this._debugLog('Starting clipboard monitoring.');
 
+        // Wire up clipboard signals and selection monitor first
         this._connectClipboardSignals();
+        this._connectSelectionMonitor();
         this._startClipboardPolling();
         this._syncContextMenuToggles();
         this._updateIconState();
         
+        // Warm-poll: grab whatever is currently in the clipboard after connections are established
+        // This ensures the menu isn't blank on the very first copy after enable/login
+        GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+            this._debugLog('Warm-start check triggered');
+            this._checkClipboard('warm-start');
+            return GLib.SOURCE_REMOVE;
+        });
+        
         // Perform an initial check, as the owner might not change if text is already present
         GLib.timeout_add(GLib.PRIORITY_DEFAULT, 500, () => {
+            this._debugLog('Startup check triggered (500ms delay)');
             this._checkClipboard('startup');
             return GLib.SOURCE_REMOVE;
         });
         
-        this._debugLog('Clipboard monitoring started successfully');
+        this._debugLog('Clipboard monitoring started successfully - monitoring=' + this._isMonitoring + ', clipboard=' + (this._clipboard ? 'present' : 'null'));
     }
 
     _obtainClipboardInterface() {
@@ -1417,16 +1644,14 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return;
         }
 
-        if (this._maxClipboardRetryAttempts > 0 && this._clipboardRetryAttempts >= this._maxClipboardRetryAttempts) {
-            this._debugLog(`Clipboard monitoring retry limit reached after ${this._clipboardRetryAttempts} attempts`);
-            Main.notify('ClipFlow Pro', _('Unable to start clipboard monitoring. Try reloading the extension.'));
-            return;
+        this._clipboardRetryAttempts += 1;
+        if (this._clipboardRetryAttempts >= 5 && !this._clipboardRetryNotified) {
+            this._clipboardRetryNotified = true;
+            Main.notify('ClipFlow Pro', _('Waiting for clipboard service… Some desktop environments delay availability after login.'));
         }
 
-        this._clipboardRetryAttempts += 1;
-
         const baseDelayMs = Math.max(500, this._clipboardPollIntervalMs);
-        const retryDelayMs = Math.min(10000, baseDelayMs * Math.pow(2, Math.max(0, this._clipboardRetryAttempts - 1)));
+        const retryDelayMs = Math.min(12000, baseDelayMs * Math.pow(2, Math.max(0, this._clipboardRetryAttempts - 1)));
         this._debugLog(`Scheduling clipboard monitoring retry #${this._clipboardRetryAttempts} in ${retryDelayMs}ms (reason: ${reason})`);
         this._clipboardRetryTimeoutId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, retryDelayMs, () => {
             this._clipboardRetryTimeoutId = 0;
@@ -1448,6 +1673,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             this._clipboardRetryTimeoutId = 0;
         }
         this._clipboardRetryAttempts = 0;
+        this._clipboardRetryNotified = false;
     }
 
     _connectClipboardSignals() {
@@ -1482,6 +1708,75 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._debugLog('Falling back to poll-only clipboard monitoring (no clipboard signals available).');
     }
 
+    _connectSelectionMonitor() {
+        try {
+            if (Meta && typeof Meta.is_wayland_compositor === 'function' && Meta.is_wayland_compositor()) {
+                this._debugLog('Skipping Meta.Selection monitor on Wayland (signals/polling already active).');
+                return;
+            }
+
+            const display = global.display;
+            if (!display || typeof display.get_selection !== 'function') {
+                return;
+            }
+
+            if (!Meta || !Meta.SelectionType) {
+                return;
+            }
+
+            const typeEnums = Meta.SelectionType;
+            const clipboardEnum = typeEnums.CLIPBOARD ?? typeEnums.SELECTION_CLIPBOARD;
+            const primaryEnum = typeEnums.PRIMARY ?? typeEnums.SELECTION_PRIMARY;
+            if (clipboardEnum === undefined) {
+                return;
+            }
+
+            const selection = display.get_selection();
+            if (!selection || typeof selection.connect !== 'function') {
+                return;
+            }
+
+            if (this._selection && this._selectionOwnerChangedId) {
+                this._disconnectSelectionMonitor();
+            }
+
+            this._selection = selection;
+            this._selectionOwnerChangedId = selection.connect('owner-changed', (_sel, selectionType) => {
+                if (!this._isMonitoring) {
+                    return;
+                }
+
+                try {
+                    const isClipboardChange = selectionType === clipboardEnum;
+                    const isPrimaryChange = primaryEnum !== undefined && selectionType === primaryEnum;
+                    this._debugLog(`SELECTION owner-changed: ${String(selectionType)} (CLIPBOARD=${isClipboardChange}, PRIMARY=${isPrimaryChange})`);
+                    if (isClipboardChange || (isPrimaryChange && this._settings.get_boolean('capture-primary'))) {
+                        this._debugLog(`Meta selection owner changed (${isClipboardChange ? 'CLIPBOARD' : 'PRIMARY'})`);
+                        this._checkClipboard('selection');
+                    }
+                } catch (error) {
+                    this._debugLog(`Selection change handling failed: ${error.message}`);
+                }
+            });
+        } catch (error) {
+            this._debugLog(`Failed to connect selection monitor: ${error.message}`);
+        }
+    }
+
+    _disconnectSelectionMonitor() {
+        if (this._selection && this._selectionOwnerChangedId) {
+            try {
+                if (typeof this._selection.disconnect === 'function') {
+                    this._selection.disconnect(this._selectionOwnerChangedId);
+                }
+            } catch (error) {
+                this._debugLog(`Failed to disconnect selection monitor: ${error.message}`);
+            }
+        }
+        this._selectionOwnerChangedId = 0;
+        this._selection = null;
+    }
+
     _stopClipboardMonitoring() {
         this._clearClipboardRetry();
 
@@ -1494,6 +1789,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._stopClipboardPolling();
 
         this._disconnectClipboardSignals();
+        this._disconnectSelectionMonitor();
 
         if (this._clipboardCheckTimeout > 0) {
             GLib.source_remove(this._clipboardCheckTimeout);
@@ -1548,6 +1844,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _onClipboardOwnerChanged() {
+        this._debugLog('CLIPBOARD signal fired: owner-changed');
         if (this._clipboardCheckTimeout > 0) {
             GLib.source_remove(this._clipboardCheckTimeout);
         }
@@ -1561,57 +1858,166 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _checkClipboard(source = 'owner-change') {
-        if (!this._isMonitoring || !this._clipboard) {
-            this._debugLog(`Clipboard check skipped - monitoring: ${this._isMonitoring}, clipboard: ${this._clipboard ? 'present' : 'null'}`);
+        this._debugLog(`_checkClipboard called: source=${source}, monitoring=${this._isMonitoring}, clipboard=${this._clipboard ? 'present' : 'null'}`);
+        
+        if (!this._isMonitoring) {
+            this._debugLog('Clipboard check skipped - monitoring disabled');
+            return;
+        }
+
+        if (!this._clipboard) {
+            this._debugLog('Clipboard object missing during check; scheduling retry');
+            this._scheduleClipboardRetry('clipboard-null');
             return;
         }
 
         try {
-            if (typeof this._clipboard.get_text !== 'function') {
-                this._debugLog('Clipboard.get_text is not a function');
+            if (typeof this._clipboard.get_text !== 'function' ||
+                typeof this._clipboard.get_content !== 'function') {
+                this._debugLog('Clipboard interface missing required functions (get_text: ' + typeof this._clipboard.get_text + ', get_content: ' + typeof this._clipboard.get_content + ')');
+                this._scheduleClipboardRetry('missing-getters');
                 return;
             }
-            
-            this._clipboard.get_text(St.ClipboardType.CLIPBOARD, (clip, text) => {
-                this._debugLog(`Clipboard callback fired with text length: ${text ? text.length : 'null'}`);
-                if (text) {
-                    this._handleClipboardText(text, source);
-                } else {
-                    this._debugLog('Clipboard callback received null/undefined text');
-                }
-            });
+
+            this._debugLog(`Checking CLIPBOARD selection (source: ${source})`);
+            this._consumeClipboardSelection(St.ClipboardType.CLIPBOARD, 'clipboard');
+
             if (this._settings.get_boolean('capture-primary')) {
-                this._clipboard.get_text(St.ClipboardType.PRIMARY, (clip, text) => {
-                    this._debugLog(`PRIMARY callback fired with text length: ${text ? text.length : 'null'}`);
-                    if (text) {
-                        this._handleClipboardText(text, source);
-                    }
-                });
+                this._debugLog(`Checking PRIMARY selection (source: ${source})`);
+                this._consumeClipboardSelection(St.ClipboardType.PRIMARY, 'primary');
+            } else {
+                this._debugLog('PRIMARY selection capture is disabled');
             }
         } catch (e) {
             this._debugLog(`Error checking clipboard: ${e.message}`);
             log(`ClipFlow Pro: Error checking clipboard: ${e.message}`);
+            if (e.stack) {
+                this._debugLog(`Stack trace: ${e.stack}`);
+            }
+            this._scheduleClipboardRetry('clipboard-check-error');
+        }
+    }
+
+    _consumeClipboardSelection(clipboardType, sourceLabel) {
+        if (!this._clipboard) {
+            this._debugLog(`${sourceLabel}: Clipboard object missing in _consumeClipboardSelection`);
+            return;
+        }
+
+        if (!this._isMonitoring) {
+            this._debugLog(`${sourceLabel}: Monitoring not active, skipping clipboard check`);
+            return;
+        }
+
+        const handleResult = text => {
+            if (text && typeof text === 'string' && text.trim().length > 0) {
+                this._debugLog(`${sourceLabel}: handleResult called with text (${text.length} chars)`);
+                this._handleClipboardText(text, sourceLabel);
+            } else {
+                this._debugLog(`${sourceLabel}: handleResult called with empty/null text`);
+            }
+        };
+
+        try {
+            this._debugLog(`${sourceLabel}: Calling get_text for clipboard type ${clipboardType}`);
+            this._clipboard.get_text(clipboardType, (_clip, text) => {
+                this._debugLog(`${sourceLabel.toUpperCase()} callback fired - text type: ${typeof text}, length: ${text ? text.length : 'null'}, value: ${text ? this._truncateText(String(text), 50) : 'null'}`);
+                
+                if (text && typeof text === 'string' && text.trim().length > 0) {
+                    this._debugLog(`${sourceLabel}: get_text returned valid text, processing immediately`);
+                    handleResult(text);
+                    return;
+                }
+
+                this._debugLog(`${sourceLabel}: get_text returned empty/null result, attempting mimetype fallback`);
+                this._fallbackFetchClipboardText(clipboardType, sourceLabel, handleResult);
+            });
+        } catch (error) {
+            this._debugLog(`get_text failed for ${sourceLabel}: ${error.message}`);
+            log(`ClipFlow Pro: get_text error for ${sourceLabel}: ${error.message}`);
+            this._fallbackFetchClipboardText(clipboardType, sourceLabel, handleResult);
+        }
+    }
+
+    _fallbackFetchClipboardText(clipboardType, sourceLabel, callback, index = 0) {
+        if (!this._clipboard) {
+            return;
+        }
+
+        if (!Array.isArray(this._textMimeTypes) || index >= this._textMimeTypes.length) {
+            this._debugLog(`No textual mimetype matched for ${sourceLabel} clipboard`);
+            return;
+        }
+
+        const mimetype = this._textMimeTypes[index];
+        try {
+            this._clipboard.get_content(clipboardType, mimetype, (_clip, bytes) => {
+                try {
+                    let decoded = '';
+                    const byteSize = bytes && typeof bytes.get_size === 'function' ? bytes.get_size() : 0;
+                    this._debugLog(`get_content hit: ${mimetype}, length=${byteSize}`);
+                    if (bytes && byteSize > 0) {
+                        decoded = this._decodeClipboardBytes(bytes, mimetype);
+                    }
+                    if (decoded) {
+                        this._debugLog(`Fetched ${sourceLabel} text using mimetype ${mimetype} (${decoded.length} chars)`);
+                        callback(decoded);
+                        return;
+                    }
+                } catch (conversionError) {
+                    this._debugLog(`Failed to convert clipboard bytes (${mimetype}): ${conversionError.message}`);
+                }
+
+                this._fallbackFetchClipboardText(clipboardType, sourceLabel, callback, index + 1);
+            });
+        } catch (error) {
+            this._debugLog(`Error requesting clipboard content (${mimetype}): ${error.message}`);
+            this._fallbackFetchClipboardText(clipboardType, sourceLabel, callback, index + 1);
         }
     }
 
     _handleClipboardText(rawText, source = 'owner-change') {
+        this._debugLog(`_handleClipboardText called: source=${source}, rawText type=${typeof rawText}, length=${rawText ? String(rawText).length : 'null'}`);
+        
         const text = this._normalizeClipboardText(rawText);
-        if (!text) {
-            this._debugLog('Received empty clipboard text');
+        if (!text || typeof text !== 'string') {
+            this._debugLog(`Received empty/invalid clipboard text after normalization (type: ${typeof text})`);
             return;
         }
 
         const trimmedText = text.trim();
-        if (!trimmedText) {
+        if (!trimmedText || trimmedText.length === 0) {
             this._debugLog('Clipboard text is empty after trimming');
             return;
         }
 
-        this._debugLog(`Received clipboard text (${trimmedText.length} chars) via ${source}`);
-        // The _processClipboardText method already handles duplicate checks.
-        // Relying on it simplifies the logic and avoids race conditions between
-        // the signal-based and polling-based clipboard listeners.
-        this._processClipboardText(trimmedText, 'clipboard');
+        this._debugLog(`Normalized text: "${this._truncateText(trimmedText, 100)}" (${trimmedText.length} chars)`);
+
+        // Quick duplicate check: skip if same as last captured text (prevents rapid duplicate captures)
+        // BUT: Only do this check AFTER we've confirmed the text passed all filters in _processClipboardText
+        // This prevents blocking valid entries that were filtered out previously
+        const lastText = (source === 'clipboard') ? this._lastClipboardText : this._lastPrimaryText;
+        if (lastText === trimmedText) {
+            this._debugLog(`Skipping duplicate ${source} capture (same as last captured: "${this._truncateText(trimmedText, 30)}...")`);
+            return;
+        }
+
+        this._debugLog(`Processing clipboard text (${trimmedText.length} chars) via ${source} - will update last cache after successful add`);
+        
+        // Process first, update cache only if successfully added
+        // We'll update the cache in _addToHistory after confirmation
+        const previousHistoryLength = this._clipboardHistory.length;
+        this._processClipboardText(trimmedText, source);
+        
+        // Only update cache if a new entry was actually added
+        if (this._clipboardHistory.length > previousHistoryLength) {
+            if (source === 'clipboard') {
+                this._lastClipboardText = trimmedText;
+            } else if (source === 'primary') {
+                this._lastPrimaryText = trimmedText;
+            }
+            this._debugLog(`Updated ${source} cache after successful add (history now ${this._clipboardHistory.length} entries)`);
+        }
     }
 
     _processClipboardText(text, source = 'clipboard') {
@@ -1628,7 +2034,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
         const charLength = this._characterLength(cleanedText);
         const isSensitive = this._isSensitiveContent(cleanedText);
-        if (isSensitive && this._settings.get_boolean('ignore-passwords')) {
+        if (isSensitive && this._safeGetBoolean('ignore-passwords', false)) {
             this._debugLog('Process clipboard: ignoring sensitive content');
             return;
         }
@@ -1638,7 +2044,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             const tracker = Shell.WindowTracker.get_default();
             const app = tracker && tracker.focus_app ? tracker.focus_app : null;
             const appName = app ? (app.get_name?.() || app.get_id?.() || '') : '';
-            const ignoreRaw = this._settings.get_string('ignore-apps') || '';
+            const ignoreRaw = this._safeGetString('ignore-apps', '');
             if (ignoreRaw && appName) {
                 const list = ignoreRaw.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
                 const current = appName.toLowerCase();
@@ -1651,14 +2057,30 @@ class ClipFlowIndicator extends PanelMenu.Button {
             // best-effort
         }
 
-        // Minimum length
-        const minLen = Math.max(0, this._settings.get_int('min-entry-length'));
+        // Minimum length - use safe access with default of 0 (accept all entries)
+        const minLen = Math.max(0, Math.min(100, this._safeGetInt('min-entry-length', 0)));
         if (charLength < minLen) {
-            this._debugLog('Process clipboard: below minimum entry length');
+            this._debugLog(`Process clipboard: below minimum entry length (${charLength} < ${minLen})`);
             return;
         }
 
-        // Duplicate handling
+        // Duplicate handling - early exit optimization
+        // Check most recent entry first (common case)
+        if (this._clipboardHistory.length > 0 && this._clipboardHistory[0].text === cleanedText) {
+            const mode = this._settings.get_string('dedupe-mode');
+            if (mode === 'promote') {
+                const item = this._clipboardHistory[0];
+                item.timestamp = GLib.DateTime.new_now_local();
+                item.timestampUnix = item.timestamp.to_unix();
+                this._queueHistorySave();
+                this._refreshHistory();
+            } else {
+                this._debugLog(`Process clipboard: ignoring duplicate text (${this._truncateText(cleanedText, 20)}...)`);
+            }
+            return;
+        }
+
+        // Check remaining history if not the most recent
         const duplicateIndex = this._findDuplicateIndex(cleanedText);
         if (duplicateIndex !== -1) {
             const mode = this._settings.get_string('dedupe-mode');
@@ -1675,7 +2097,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return;
         }
 
-        this._debugLog(`Process clipboard: adding to history - "${this._truncateText(cleanedText, 50)}..."`);
+        this._debugLog(`Process clipboard: PASSED ALL FILTERS - adding to history - "${this._truncateText(cleanedText, 50)}..." (length: ${charLength}, sensitive: ${isSensitive}, source: ${source})`);
         this._addToHistory(cleanedText, { source, sensitive: isSensitive });
     }
     
@@ -1878,7 +2300,17 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _findDuplicateIndex(text) {
-        return this._clipboardHistory.findIndex(item => item.text === text);
+        // Skip first entry since we already checked it
+        if (this._clipboardHistory.length <= 1) {
+            return -1;
+        }
+        // Check remaining entries starting from index 1
+        for (let i = 1; i < this._clipboardHistory.length; i++) {
+            if (this._clipboardHistory[i].text === text) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     _detectContentType(text) {
@@ -1954,8 +2386,11 @@ class ClipFlowIndicator extends PanelMenu.Button {
         // Invalidate filter cache when new item is added
         this._filterCacheValid = false;
         this._filteredHistoryCache = null;
-        this._debugLog(`Added history item (length now ${this._clipboardHistory.length})`);
+        this._debugLog(`✅ SUCCESS: Added history item #${this._clipboardHistory.length} - "${this._truncateText(text, 50)}..."`);
+        this._debugLog(`History collection now has ${this._clipboardHistory.length} total entries.`);
+        this._debugLog(`Calling _refreshHistory() to update UI...`);
         this._refreshHistory();
+        this._debugLog(`_refreshHistory() completed. Container has ${this._historyContainer && this._historyContainer.get_children ? this._historyContainer.get_children().length : 'unknown'} children.`);
     }
     
     _trimHistory(skipSave = false) {
@@ -1988,6 +2423,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
     _refreshHistory() {
         if (!this._historyContainer) {
+            this._debugLog('⚠️ History container missing during refresh - cannot display entries');
             return;
         }
 
@@ -1996,6 +2432,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         const filteredHistory = this._getFilteredHistory();
         const sortedHistory = this._sortHistory(filteredHistory);
         const totalEntries = sortedHistory.length;
+        this._debugLog(`🔄 Refreshing history view: totalEntries=${totalEntries}, filtered=${filteredHistory.length}, stored=${this._clipboardHistory.length}, currentPage=${this._currentPage}`);
         const pageSize = Math.max(1, this._entriesPerPage);
         const totalPages = totalEntries === 0 ? 0 : Math.ceil(totalEntries / pageSize);
         if (totalPages > 0 && this._currentPage > totalPages - 1) {
@@ -2179,7 +2616,10 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 layout.spacing = 2;
         }
 
-        if (this._settings.get_boolean('show-preview')) {
+        const showPreview = this._settings.get_boolean('show-preview');
+        const showTimestamps = this._settings.get_boolean('show-timestamps');
+
+        if (showPreview) {
             const textLabel = new St.Label({
                 text: item.preview,
                 style_class: 'clipflow-history-text',
@@ -2189,7 +2629,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             contentBox.add_child(textLabel);
         }
 
-        if (this._settings.get_boolean('show-timestamps')) {
+        if (showTimestamps) {
             const characterCount = typeof item.length === 'number' ? item.length : item.text.length;
             const dateLabel = item.timestamp.format('%m/%d %H:%M');
             
@@ -2198,6 +2638,16 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 style_class: 'clipflow-history-meta'
             });
             contentBox.add_child(metaLabel);
+        }
+
+        if (!showPreview && !showTimestamps) {
+            const fallbackLabel = new St.Label({
+                text: item.preview,
+                style_class: 'clipflow-history-text',
+                x_expand: true
+            });
+            fallbackLabel.clutter_text.set_line_wrap(true);
+            contentBox.add_child(fallbackLabel);
         }
 
         const actionBox = new St.BoxLayout({
@@ -2507,6 +2957,12 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._unregisterKeybindings();
         this._clearAllAutoClearTimers();
         this._cancelHistorySaveTimeout();
+        
+        // Clean up monitoring resume timeout
+        if (this._monitoringResumeTimeoutId) {
+            GLib.source_remove(this._monitoringResumeTimeoutId);
+            this._monitoringResumeTimeoutId = 0;
+        }
         
         // Clean up search debounce
         if (this._searchDebounceTimeout) {

@@ -5,22 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.1.0] - 2025-10-25
+## [1.1.2] - 2025-11-04
 
-### Added
-- Persistent clipboard history stored at `~/.config/clipflow-pro/history.json` with auto-save and optional logout wipe.
-- Sensitive-entry auto-clear timers and improved duplicate filtering.
-- Search-aware pagination controls in the main menu.
-- Custom symbolic panel icon packaged via `icons/clipflow-pro-symbolic.svg`.
-- Context menu integration toggles and asynchronous conflict detection.
-
-### Changed
-- Reorganised documentation under `docs/` and helper scripts under `tools/` to keep the project root tidy.
-- Updated README/INSTALL guides to reflect new data paths and workflow.
+### Improved
+- Broadened clipboard MIME handling to cover HTML payloads, `text/uri-list`, and `x-special/gnome-copied-files` for reliable Wayland captures.
+- Added warm-start polling and Wayland-safe selection monitoring guards so history begins populating immediately after enable.
+- Introduced richer debug logging (signal firing, MIME matches, parsed file counts) to simplify troubleshooting.
+- Bundled the `LICENSE` file in build artifacts and shipped the `verify_clipflow.sh` helper for quick environment checks.
 
 ### Fixed
-- History list not rendering when menu sections were reactive containers.
-- Highlight overflow that selected every entry in the popup.
+- Hardened Nautilus/Files list parsing with safer URI decoding and clearer fallbacks.
+- Prevented duplicate-filter caching from hiding the first captured entry on restart.
 
 ---
 
@@ -37,6 +32,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Keyboard navigation (Enter/Space) now respects promote-on-copy behavior
+
+---
+
+## [1.1.0] - 2025-10-25
+
+### Added
+- Persistent clipboard history stored at `~/.config/clipflow-pro/history.json` with auto-save and optional logout wipe.
+- Sensitive-entry auto-clear timers and improved duplicate filtering.
+- Search-aware pagination controls in the main menu.
+- Custom symbolic panel icon packaged via `icons/clipflow-pro-symbolic.svg`.
+- Context menu integration toggles and asynchronous conflict detection.
+
+### Changed
+- Reorganised documentation under `docs/` and helper scripts under `tools/` to keep the project root tidy.
+- Updated README/INSTALL guides to reflect new data paths and workflow.
+
+### Fixed
+- History list not rendering when menu sections were reactive containers.
+- Highlight overflow that selected every entry in the popup.
 
 ---
 
@@ -131,13 +145,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ---
 
 ## Future Planned Features
-
-### Version 1.1.0 (Planned)
-- [ ] Image clipboard support with thumbnails
-- [ ] Rich text formatting preservation
-- [ ] Cloud backup/sync options (optional)
-- [ ] Multiple clipboard profiles
-- [ ] Advanced content filters and rules
 
 ### Version 1.2.0 (Planned)
 - [ ] Plugin system for custom content processors

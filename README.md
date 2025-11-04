@@ -113,6 +113,19 @@ Access the settings by clicking the "Settings" button in the clipboard menu or t
 
 ## Troubleshooting
 
+### Quick Verification
+
+Run the built-in verification script to check your setup:
+```bash
+./verify_clipflow.sh
+```
+
+This will:
+- Verify extension installation
+- Check schema compilation
+- Reset problematic settings (min-entry-length, ignore-passwords)
+- Provide testing commands for Wayland clipboard
+
 ### Extension Not Showing in Panel
 
 1. Check if the extension is enabled:
@@ -126,6 +139,26 @@ Access the settings by clicking the "Settings" button in the clipboard menu or t
    ```
 
 3. Restart GNOME Shell (Alt+F2, type `r`, press Enter)
+
+### Empty History List on Wayland
+
+If clipboard history stays empty on Wayland:
+
+1. **Enable debug logging** in extension settings
+2. **Run verification script**: `./verify_clipflow.sh`
+3. **Test with wl-clipboard**:
+   ```bash
+   printf 'hello clipflow' | wl-copy
+   ```
+4. **Watch logs**:
+   ```bash
+   journalctl -f /usr/bin/gnome-shell | grep -i "ClipFlow Pro"
+   ```
+5. **Toggle extension** (Wayland-safe):
+   ```bash
+   gnome-extensions disable clipflow-pro@nickotmazgin.github.io
+   gnome-extensions enable clipflow-pro@nickotmazgin.github.io
+   ```
 
 ### Settings Not Working
 
@@ -219,6 +252,12 @@ If you find ClipFlow Pro useful, please consider supporting its development:
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)
 
 ## Changelog
+
+### Version 1.1.2
+- Broadened clipboard MIME handling (HTML snippets, Nautilus file lists, URI targets) with smarter decoding on Wayland.
+- Added Wayland-safe monitoring guards and warm-start polling so history populates reliably after enable.
+- Introduced `verify_clipflow.sh` for one-command environment checks and refreshed troubleshooting guidance.
+- Build artifacts now bundle the project `LICENSE` automatically for extensions.gnome.org submissions.
 
 ### Version 1.1.1
 - Auto-focus search field when menu opens for faster access

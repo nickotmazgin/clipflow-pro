@@ -53,5 +53,12 @@ else
     echo "Note: locale directory not found; continuing without translations."
 fi
 
+echo "→ Copying LICENSE file..."
+if [[ -f "LICENSE" ]]; then
+    cp "LICENSE" "${BUILD_DIR}/"
+else
+    echo "Warning: LICENSE file not found." >&2
+fi
+
 echo "Build completed successfully."
 echo "Artifacts available in '${BUILD_DIR}/'."

@@ -72,7 +72,32 @@
 }
 
 .clipflow-action-container {
-    padding-top: 4px;
+    padding-top: 8px;
+}
+
+.clipflow-action-container .clipflow-button {
+    min-width: 0;
+}
+
+.clipflow-action-spacer {
+    min-width: 16px;
+}
+
+.clipflow-button-danger {
+    background-color: rgba(224, 82, 82, 0.28);
+    border-color: rgba(224, 82, 82, 0.65);
+}
+
+.clipflow-button-danger:hover {
+    background-color: rgba(224, 82, 82, 0.4);
+}
+
+.clipflow-button-secondary {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.clipflow-button-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.16);
 }
 
 .clipflow-pagination {
@@ -101,7 +126,6 @@
     padding: 4px 0;
     margin: 6px 0;
     border-radius: 8px;
-    background-color: rgba(255, 255, 255, 0.02);
 }
 
 .clipflow-history-scroll StScrollBar {
@@ -129,8 +153,8 @@
     margin: 4px 0;
     border-radius: 8px;
     border: 1px solid rgba(255, 255, 255, 0.16);
-    background-color: rgba(255, 255, 255, 0.08);
-    color: #f9f9fb;
+    background-color: rgba(0, 0, 0, 0.06);
+    color: inherit;
 }
 
 .clipflow-history-item.clipflow-type-url {
@@ -161,7 +185,7 @@
 .clipflow-history-text {
     font-size: 12px;
     line-height: 1.35;
-    color: #ffffff;
+    color: inherit;
 }
 
 .clipflow-history-item.clipflow-type-code .clipflow-history-text,
@@ -171,13 +195,15 @@
 
 .clipflow-history-meta {
     font-size: 10px;
-    color: rgba(255, 255, 255, 0.7);
+    color: inherit;
+    opacity: 0.7;
 }
 
 .clipflow-history-number {
     font-size: 11px;
     font-weight: 600;
-    color: rgba(255, 255, 255, 0.8);
+    color: inherit;
+    opacity: 0.85;
     min-width: 28px;
     text-align: center;
     margin-right: 6px;

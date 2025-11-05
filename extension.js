@@ -424,8 +424,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
         };
 
         let text = String(html);
-        text = sanitize(text, /<style[\s\S]*?<\/style>/gi);
-        text = sanitize(text, /<script[\s\S]*?<\/script>/gi);
+        text = sanitize(text, /<\s*style\b[^>]*>[\s\S]*?<\s*\/\s*style\s*>/gi);
+        text = sanitize(text, /<\s*script\b[^>]*>[\s\S]*?<\s*\/\s*script\s*>/gi);
         text = sanitize(text, /<br\s*\/?>/gi, '\n');
         text = sanitize(text, /<\/(p|div|li|tr|h[1-6])>/gi, '\n');
         text = sanitize(text, /<td>/gi, '\t');

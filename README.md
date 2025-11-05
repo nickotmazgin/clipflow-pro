@@ -253,6 +253,10 @@ If you find ClipFlow Pro useful, please consider supporting its development:
 
 ## Changelog
 
+### Version 1.2.0
+- Hardened clipboard HTML sanitization so embedded script/style tags are stripped reliably before copying back to the user.
+- Added automated CodeQL scanning for every push/PR (and weekly), keeping the JavaScript codebase checked for vulnerabilities.
+- Enabled GitHub security features (secret scanning with push protection, vulnerability alerts) to guard the project supply chain.
 ### Version 1.1.2
 - Reworked the main history view with Wayland-safe `St` rows, inline pin/star badges, and improved hover/focus states.
 - Added an optional “Use Legacy Menu Rows” preference so older GNOME Shell builds can fall back to the previous popup layout.

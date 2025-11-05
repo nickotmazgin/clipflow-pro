@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.0] - 2025-11-05
+
+### Added
+- Automated CodeQL scanning workflow that runs on every push/PR to `main` and on a weekly schedule, surfacing JavaScript security issues early.
+- Repository security guardrails: GitHub secret scanning with push protection, vulnerability alerts, and automated fixes.
+
+### Improved
+- Hardened clipboard HTML sanitization to remove script/style tags even when they contain trailing whitespace or attributes, preventing partial injections in copied text.
+
+### Fixed
+- Resolved CodeQL-reported sanitization warnings to keep the codebase clean for future scans.
+
+---
+
 ## [1.1.2] - 2025-11-04
 
 ### Added

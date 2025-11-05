@@ -413,17 +413,28 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return '';
         }
 
+        const sanitize = (input, regex, replacement = '') => {
+            let previous = input;
+            let current = input;
+            do {
+                previous = current;
+                current = current.replace(regex, replacement);
+            } while (current !== previous);
+            return current;
+        };
+
         let text = String(html);
-        text = text.replace(/<style[\s\S]*?<\/style>/gi, '')
-            .replace(/<script[\s\S]*?<\/script>/gi, '')
-            .replace(/<br\s*\/?>/gi, '\n')
-            .replace(/<\/(p|div|li|tr|h[1-6])>/gi, '\n')
-            .replace(/<td>/gi, '\t')
-            .replace(/<[^>]+>/g, '');
+        text = sanitize(text, /<style[\s\S]*?<\/style>/gi);
+        text = sanitize(text, /<script[\s\S]*?<\/script>/gi);
+        text = sanitize(text, /<br\s*\/?>/gi, '\n');
+        text = sanitize(text, /<\/(p|div|li|tr|h[1-6])>/gi, '\n');
+        text = sanitize(text, /<td>/gi, '\t');
+        text = sanitize(text, /<[^>]+>/g);
 
         // Collapse excessive whitespace but keep intentional newlines
-        text = text.replace(/\r/g, '');
-        text = text.replace(/\n{3,}/g, '\n\n');
+        text = sanitize(text, /\r/g);
+        text = sanitize(text, /\n{3,}/g, '\n\n');
+        text = text.replace(/[<>]/g, '');
         return text.trim();
     }
 

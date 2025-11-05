@@ -69,3 +69,27 @@ GITHUB_SETUP_COMPLETE.md
 
 # System scripts (not extension-related)
 tools/system_security_hardening.sh
+
+# Security: Never commit secrets or credentials
+*.env
+*.env.*
+.env*
+*.pem
+*.key
+*.gpg
+*.p12
+*.pfx
+*_rsa
+*_dsa
+*_ecdsa
+*id_ed25519*
+id_rsa*
+id_dsa*
+id_ecdsa*
+credentials*
+secrets*
+.npmrc
+.pypirc
+*.crt
+*.cer
+*.der

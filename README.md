@@ -251,6 +251,8 @@ If you find ClipFlow Pro useful, please consider supporting its development:
 
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)
 
+You can also add the link manually in GNOME Extensions → ⟪ClipFlow Pro⟫ preferences → **About** → “Sponsor ClipFlow Pro”.
+
 ## Changelog
 
 ### Version 1.2.0

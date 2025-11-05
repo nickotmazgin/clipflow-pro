@@ -7,15 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.1.2] - 2025-11-04
 
+### Added
+- Compatibility toggle in preferences (`Use Legacy Menu Rows`) so users can switch between the new Wayland-safe list rendering and the classic popup layout if their Shell version prefers it.
+
 ### Improved
-- Broadened clipboard MIME handling to cover HTML payloads, `text/uri-list`, and `x-special/gnome-copied-files` for reliable Wayland captures.
-- Added warm-start polling and Wayland-safe selection monitoring guards so history begins populating immediately after enable.
-- Introduced richer debug logging (signal firing, MIME matches, parsed file counts) to simplify troubleshooting.
-- Bundled the `LICENSE` file in build artifacts and shipped the `verify_clipflow.sh` helper for quick environment checks.
+- Rebuilt history rows with plain `St` actors, hover/focus styling, and inline badges to eliminate Wayland layout glitches and keep keyboard navigation responsive.
+- Guarded menu assembly, added idle-driven rebuild fallbacks, and hardened copy notification settings to ensure the main menu always populates even when optional widgets misbehave.
+- Throttled copy success notifications and GNOME Shell log output so rapid clipboard activity no longer spams toasts or the journal.
+- Added context-aware badges, timestamp formatting, and schema-backed defaults for legacy shells.
 
 ### Fixed
-- Hardened Nautilus/Files list parsing with safer URI decoding and clearer fallbacks.
-- Prevented duplicate-filter caching from hiding the first captured entry on restart.
+- Prevented optional pagination/action sections from short-circuiting `_refreshHistory()` on GNOME 42–44.
+- Resolved scenarios where rendered entry counts returned zero despite available history by automatically rebuilding the menu.
+- Avoided redundant clipboard interface error logs when Wayland temporarily withholds access.
 
 ---
 

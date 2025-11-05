@@ -122,6 +122,13 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         );
         historyBox.append(entriesPerPageBox);
 
+        const legacyRowsSwitch = this._createSwitchRow(
+            _('Use Legacy Menu Rows'),
+            _('Render the clipboard menu using the older popup layout in case the new Wayland-safe view has issues on your Shell version.'),
+            'use-legacy-menu-items'
+        );
+        historyBox.append(legacyRowsSwitch);
+
         // Clear history button
         const clearButton = new Gtk.Button({ label: _('Clear All History') });
         clearButton.set_halign(Gtk.Align.START);

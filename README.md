@@ -254,10 +254,10 @@ If you find ClipFlow Pro useful, please consider supporting its development:
 ## Changelog
 
 ### Version 1.1.2
-- Broadened clipboard MIME handling (HTML snippets, Nautilus file lists, URI targets) with smarter decoding on Wayland.
-- Added Wayland-safe monitoring guards and warm-start polling so history populates reliably after enable.
-- Introduced `verify_clipflow.sh` for one-command environment checks and refreshed troubleshooting guidance.
-- Build artifacts now bundle the project `LICENSE` automatically for extensions.gnome.org submissions.
+- Reworked the main history view with Wayland-safe `St` rows, inline pin/star badges, and improved hover/focus states.
+- Added an optional “Use Legacy Menu Rows” preference so older GNOME Shell builds can fall back to the previous popup layout.
+- Hardened menu assembly with guarded pagination/action sections plus an idle rebuild fallback to prevent blank lists.
+- Throttled copy notifications and error logging to avoid toast or journal spam during rapid clipboard activity.
 
 ### Version 1.1.1
 - Auto-focus search field when menu opens for faster access

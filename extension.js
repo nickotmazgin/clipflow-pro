@@ -58,6 +58,13 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._icon = null;
         this._panelSignalIds = [];
         this._displaySignalIds = [];
+        this._menuRebuildInProgress = false;
+        this._useLegacyHistoryRows = this._settings.get_boolean('use-legacy-menu-items');
+        this._copyNotifyMinIntervalMs = 1500;
+        this._lastCopyNotifyTime = 0;
+        this._lastCopyNotifyText = '';
+        this._logThrottle = new Map();
+        this._logRateLimitMs = 5000;
         
         // Initialize clipboard history
         this._clipboardHistory = [];
@@ -136,6 +143,10 @@ class ClipFlowIndicator extends PanelMenu.Button {
             }
             this._contextMenuRecentLimit = clamped;
             this._populateContextMenuRecentEntries();
+        }));
+        this._settingsSignalIds.push(this._settings.connect('changed::use-legacy-menu-items', () => {
+            this._useLegacyHistoryRows = this._settings.get_boolean('use-legacy-menu-items');
+            this._buildMenu();
         }));
         this._logEnabled = this._settings.get_boolean('enable-debug-logs');
         ['show-menu-shortcut', 'enhanced-copy-shortcut', 'enhanced-paste-shortcut'].forEach(key => {
@@ -559,6 +570,22 @@ class ClipFlowIndicator extends PanelMenu.Button {
         log(`[ClipFlow Pro] ${message}`);
     }
 
+    _logThrottled(key, message, minIntervalMs = this._logRateLimitMs) {
+        try {
+            const now = GLib.get_monotonic_time();
+            const intervalUs = Math.max(0, minIntervalMs) * 1000;
+            const lastLog = this._logThrottle.get(key) || 0;
+            if (now - lastLog < intervalUs) {
+                return;
+            }
+            this._logThrottle.set(key, now);
+            log(message);
+        } catch (error) {
+            // Fallback: if throttling fails, log once to avoid silence on critical errors
+            log(message);
+        }
+    }
+
     _validateSettings() {
         try {
             // Validate max-entries (10-1000)
@@ -762,11 +789,24 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
         container.add_child(this._historyScrollView);
 
-        const paginationRow = this._createPaginationControls();
-        container.add_child(paginationRow);
+        let paginationRow = null;
+        try {
+            paginationRow = this._createPaginationControls();
+            if (paginationRow) {
+                container.add_child(paginationRow);
+            }
+        } catch (e) {
+            this._debugLog(`Pagination build failed: ${e}`);
+        }
 
-        const actionRow = this._createActionButtons();
-        container.add_child(actionRow);
+        try {
+            const actionRow = this._createActionButtons();
+            if (actionRow) {
+                container.add_child(actionRow);
+            }
+        } catch (e) {
+            this._debugLog(`Action row build failed: ${e}`);
+        }
 
         // Load initial history - ensure container exists first
         this._debugLog(`Building menu complete - history container exists: ${!!this._historyContainer}, history count: ${this._clipboardHistory.length}`);
@@ -1569,7 +1609,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
         this._clipboard = this._obtainClipboardInterface();
         if (!this._clipboard) {
-            log('ClipFlow Pro: Clipboard interface unavailable – monitoring disabled.');
+            this._logThrottled('clipboard-interface-unavailable', 'ClipFlow Pro: Clipboard interface unavailable – monitoring disabled.');
             this._debugLog('FAILED to obtain clipboard interface');
             this._syncContextMenuToggles();
             this._scheduleClipboardRetry('interface-unavailable');
@@ -1890,7 +1930,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             }
         } catch (e) {
             this._debugLog(`Error checking clipboard: ${e.message}`);
-            log(`ClipFlow Pro: Error checking clipboard: ${e.message}`);
+            this._logThrottled('clipboard-check-error', `ClipFlow Pro: Error checking clipboard: ${e.message}`);
             if (e.stack) {
                 this._debugLog(`Stack trace: ${e.stack}`);
             }
@@ -1934,7 +1974,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             });
         } catch (error) {
             this._debugLog(`get_text failed for ${sourceLabel}: ${error.message}`);
-            log(`ClipFlow Pro: get_text error for ${sourceLabel}: ${error.message}`);
+            this._logThrottled(`clipboard-get-text-${sourceLabel}`, `ClipFlow Pro: get_text error for ${sourceLabel}: ${error.message}`);
             this._fallbackFetchClipboardText(clipboardType, sourceLabel, handleResult);
         }
     }
@@ -2470,6 +2510,21 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._populateContextMenuRecentEntries();
         const renderedCount = this._historyContainer && this._historyContainer.get_children ? this._historyContainer.get_children().length : visibleEntries.length;
         this._debugLog(`Rendered ${renderedCount} entries (page ${this._currentPage + 1}/${totalPages}, filtered: ${filteredHistory.length} of ${this._clipboardHistory.length} total)`);
+
+        if (!this._menuRebuildInProgress && sortedHistory.length > 0 && renderedCount === 0) {
+            this._debugLog('Rendered 0 items despite data; scheduling menu rebuild as fallback');
+            this._menuRebuildInProgress = true;
+            GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+                try {
+                    this._buildMenu();
+                } catch (error) {
+                    this._debugLog(`Menu rebuild fallback failed: ${error}`);
+                } finally {
+                    this._menuRebuildInProgress = false;
+                }
+                return GLib.SOURCE_REMOVE;
+            });
+        }
     }
 
     _clearHistoryContainer() {
@@ -2562,100 +2617,168 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _createHistoryItem(item, displayIndex) {
-        const historyRow = new St.BoxLayout({
-            vertical: false,
+        if (!this._historyContainer) {
+            return;
+        }
+
+        if (this._shouldUseLegacyHistoryRows()) {
+            this._createLegacyHistoryItem(item, displayIndex);
+            return;
+        }
+
+        const row = new St.BoxLayout({
+            style_class: 'clipflow-history-item',
+            x_expand: true,
+            y_expand: false,
             reactive: true,
             can_focus: true,
-            track_hover: true,
-            style_class: 'clipflow-history-item',
-            y_align: Clutter.ActorAlign.CENTER,
-            x_expand: true
+            track_hover: true
         });
+        row.y_align = Clutter.ActorAlign.CENTER;
+        const accessibleName = item.preview || item.text || _('Clipboard entry');
+        row.set_accessible_name(accessibleName);
 
-        historyRow.set_accessible_name(item.preview);
-
-        // Add content type styling with CSS classes
         if (item.contentType && item.contentType !== 'text') {
-            historyRow.add_style_class_name(`clipflow-type-${item.contentType}`);
+            row.add_style_class_name(`clipflow-type-${item.contentType}`);
         }
-
         if (item.pinned) {
-            historyRow.add_style_class_name('pinned');
+            row.add_style_class_name('pinned');
         }
-
         if (item.starred) {
-            historyRow.add_style_class_name('starred');
+            row.add_style_class_name('starred');
         }
 
-        if (typeof historyRow.set_spacing === 'function') {
-            historyRow.set_spacing(12);
-        } else if (typeof historyRow.get_layout_manager === 'function') {
-            const layout = historyRow.get_layout_manager();
+        if (typeof row.set_spacing === 'function') {
+            row.set_spacing(10);
+        } else if (typeof row.get_layout_manager === 'function') {
+            const layout = row.get_layout_manager();
             if (layout && 'spacing' in layout)
-                layout.spacing = 12;
+                layout.spacing = 10;
         }
+
+        const clickAction = new Clutter.ClickAction();
+        clickAction.connect('clicked', () => {
+            this._activateHistoryItem(item);
+        });
+        row.add_action(clickAction);
 
         if (this._settings.get_boolean('show-numbers')) {
-            const numberBadge = new St.Label({
+            const numberLabel = new St.Label({
                 text: `${displayIndex}.`,
-                style_class: 'clipflow-history-number'
+                style_class: 'clipflow-index clipflow-history-number'
             });
-            historyRow.add_child(numberBadge);
+            row.add_child(numberLabel);
         }
 
-        const contentBox = new St.BoxLayout({
-            vertical: true,
-            x_expand: true
-        });
+        this._appendHistoryBadges(row, item);
 
+        const contentBox = new St.BoxLayout({
+            vertical: false,
+            x_expand: true,
+            y_expand: false
+        });
         if (typeof contentBox.set_spacing === 'function') {
-            contentBox.set_spacing(2);
+            contentBox.set_spacing(8);
         } else if (typeof contentBox.get_layout_manager === 'function') {
             const layout = contentBox.get_layout_manager();
             if (layout && 'spacing' in layout)
-                layout.spacing = 2;
+                layout.spacing = 8;
         }
 
         const showPreview = this._settings.get_boolean('show-preview');
         const showTimestamps = this._settings.get_boolean('show-timestamps');
+        const shouldShowText = showPreview || !showTimestamps;
 
-        if (showPreview) {
+        if (shouldShowText) {
+            const text = showPreview
+                ? (item.preview || item.text || _('(Empty entry)'))
+                : (item.preview || _('Clipboard entry'));
             const textLabel = new St.Label({
-                text: item.preview,
-                style_class: 'clipflow-history-text',
-                x_expand: true
+                text,
+                style_class: 'clipflow-text clipflow-history-text',
+                x_expand: true,
+                y_expand: false
             });
-            textLabel.clutter_text.set_line_wrap(true);
+            if (textLabel.clutter_text) {
+                textLabel.clutter_text.set_single_line_mode(true);
+                textLabel.clutter_text.set_ellipsize(Pango.EllipsizeMode.END);
+            }
             contentBox.add_child(textLabel);
+        } else {
+            contentBox.set_x_expand(true);
         }
 
         if (showTimestamps) {
-            const characterCount = typeof item.length === 'number' ? item.length : item.text.length;
-            const dateLabel = item.timestamp.format('%m/%d %H:%M');
-            
-            const metaLabel = new St.Label({
-                text: `${dateLabel} • ${characterCount} chars`,
-                style_class: 'clipflow-history-meta'
-            });
-            contentBox.add_child(metaLabel);
+            const tsLabel = this._createTimestampLabel(item);
+            if (tsLabel) {
+                contentBox.add_child(tsLabel);
+            }
         }
 
-        if (!showPreview && !showTimestamps) {
-            const fallbackLabel = new St.Label({
-                text: item.preview,
-                style_class: 'clipflow-history-text',
-                x_expand: true
-            });
-            fallbackLabel.clutter_text.set_line_wrap(true);
-            contentBox.add_child(fallbackLabel);
+        row.add_child(contentBox);
+
+        const actionBox = this._createHistoryActionBox(item);
+        row.add_child(actionBox);
+
+        row.connect('button-press-event', (_actor, event) => {
+            if (event.get_button && event.get_button() === 3) {
+                this._openHistoryItemContextMenu(item, row);
+                return Clutter.EVENT_STOP;
+            }
+            return Clutter.EVENT_PROPAGATE;
+        });
+
+        row.connect('key-press-event', (_actor, event) => {
+            const key = event.get_key_symbol();
+            if (key === Clutter.KEY_Return || key === Clutter.KEY_KP_Enter || key === Clutter.KEY_space) {
+                this._activateHistoryItem(item);
+                return Clutter.EVENT_STOP;
+            }
+            return Clutter.EVENT_PROPAGATE;
+        });
+
+        this._historyContainer.add_child(row);
+    }
+
+    _shouldUseLegacyHistoryRows() {
+        return this._useLegacyHistoryRows === true;
+    }
+
+    _appendHistoryBadges(row, item) {
+        if (!item || (!item.pinned && !item.starred)) {
+            return;
         }
 
+        const badgeBox = new St.BoxLayout({
+            vertical: false,
+            style_class: 'clipflow-row-badges'
+        });
+        if (typeof badgeBox.set_spacing === 'function') {
+            badgeBox.set_spacing(4);
+        }
+        if (item.pinned) {
+            badgeBox.add_child(new St.Icon({
+                icon_name: 'emblem-important-symbolic',
+                icon_size: 14,
+                style_class: 'clipflow-badge-icon pin'
+            }));
+        }
+        if (item.starred) {
+            badgeBox.add_child(new St.Icon({
+                icon_name: 'emblem-favorite-symbolic',
+                icon_size: 14,
+                style_class: 'clipflow-badge-icon star'
+            }));
+        }
+        row.add_child(badgeBox);
+    }
+
+    _createHistoryActionBox(item) {
         const actionBox = new St.BoxLayout({
             vertical: false,
             style_class: 'clipflow-history-actions',
             x_align: Clutter.ActorAlign.END
         });
-
         if (typeof actionBox.set_spacing === 'function') {
             actionBox.set_spacing(6);
         } else if (typeof actionBox.get_layout_manager === 'function') {
@@ -2689,7 +2812,6 @@ class ClipFlowIndicator extends PanelMenu.Button {
         if (item.pinned) {
             pinButton.add_style_class_name('active');
         }
-
         if (item.starred) {
             starButton.add_style_class_name('active');
         }
@@ -2697,69 +2819,205 @@ class ClipFlowIndicator extends PanelMenu.Button {
         pinButton.set_accessible_name(item.pinned ? _('Unpin this entry') : _('Pin this entry'));
         starButton.set_accessible_name(item.starred ? _('Unstar this entry') : _('Star this entry'));
 
-        pinButton.connect('button-release-event', (_actor, event) => {
+        pinButton.connect('button-release-event', () => {
             this._togglePinItem(item.id);
             return Clutter.EVENT_STOP;
         });
 
-        starButton.connect('button-release-event', (_actor, event) => {
+        starButton.connect('button-release-event', () => {
             this._toggleStarItem(item.id);
             return Clutter.EVENT_STOP;
         });
 
         actionBox.add_child(pinButton);
         actionBox.add_child(starButton);
+        return actionBox;
+    }
+
+    _createLegacyHistoryItem(item, displayIndex) {
+        if (!this._historyContainer) {
+            return;
+        }
+
+        const historyRow = new St.BoxLayout({
+            vertical: false,
+            reactive: true,
+            can_focus: true,
+            track_hover: true,
+            style_class: 'clipflow-history-item',
+            y_align: Clutter.ActorAlign.CENTER,
+            x_expand: true
+        });
+
+        const accessibleName = item.preview || item.text || _('Clipboard entry');
+        historyRow.set_accessible_name(accessibleName);
+
+        if (item.contentType && item.contentType !== 'text') {
+            historyRow.add_style_class_name(`clipflow-type-${item.contentType}`);
+        }
+        if (item.pinned) {
+            historyRow.add_style_class_name('pinned');
+        }
+        if (item.starred) {
+            historyRow.add_style_class_name('starred');
+        }
+
+        if (typeof historyRow.set_spacing === 'function') {
+            historyRow.set_spacing(12);
+        } else if (typeof historyRow.get_layout_manager === 'function') {
+            const layout = historyRow.get_layout_manager();
+            if (layout && 'spacing' in layout)
+                layout.spacing = 12;
+        }
+
+        if (this._settings.get_boolean('show-numbers')) {
+            const numberBadge = new St.Label({
+                text: `${displayIndex}.`,
+                style_class: 'clipflow-history-number'
+            });
+            historyRow.add_child(numberBadge);
+        }
+
+        this._appendHistoryBadges(historyRow, item);
+
+        const contentBox = new St.BoxLayout({
+            vertical: true,
+            x_expand: true
+        });
+
+        if (typeof contentBox.set_spacing === 'function') {
+            contentBox.set_spacing(2);
+        } else if (typeof contentBox.get_layout_manager === 'function') {
+            const layout = contentBox.get_layout_manager();
+            if (layout && 'spacing' in layout)
+                layout.spacing = 2;
+        }
+
+        const showPreview = this._settings.get_boolean('show-preview');
+        const showTimestamps = this._settings.get_boolean('show-timestamps');
+
+        if (showPreview) {
+            const textLabel = new St.Label({
+                text: item.preview || item.text || _('(Empty entry)'),
+                style_class: 'clipflow-history-text',
+                x_expand: true
+            });
+            textLabel.clutter_text?.set_line_wrap(true);
+            textLabel.clutter_text?.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
+            contentBox.add_child(textLabel);
+        }
+
+        if (showTimestamps) {
+            const timestampLabel = this._createTimestampLabel(item);
+            if (timestampLabel) {
+                contentBox.add_child(timestampLabel);
+            }
+        }
+
+        if (!showPreview && !showTimestamps) {
+            const fallbackLabel = new St.Label({
+                text: item.preview || item.text || _('(Empty entry)'),
+                style_class: 'clipflow-history-text',
+                x_expand: true
+            });
+            fallbackLabel.clutter_text?.set_line_wrap(true);
+            fallbackLabel.clutter_text?.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
+            contentBox.add_child(fallbackLabel);
+        }
 
         historyRow.add_child(contentBox);
+
+        const actionBox = this._createHistoryActionBox(item);
         historyRow.add_child(actionBox);
 
         historyRow.connect('button-release-event', (_actor, event) => {
-            const button = event.get_button();
-            if (button === 1) { // Left-click
-                this._copyToClipboard(item.text);
-                if (this._settings.get_boolean('promote-on-copy')) {
-                    const index = this._clipboardHistory.findIndex(e => e.id === item.id);
-                    if (index !== -1) {
-                        const moved = this._clipboardHistory.splice(index, 1)[0];
-                        moved.timestamp = GLib.DateTime.new_now_local();
-                        moved.timestampUnix = moved.timestamp.to_unix();
-                        this._clipboardHistory.unshift(moved);
-                        this._queueHistorySave();
-                        this._refreshHistory();
-                    }
-                }
-                this.menu.close();
+            const button = event.get_button ? event.get_button() : 0;
+            if (button === 1) {
+                this._activateHistoryItem(item);
                 return Clutter.EVENT_STOP;
-            } else if (button === 3) { // Right-click
+            }
+            if (button === 3) {
                 this._openHistoryItemContextMenu(item, historyRow);
                 return Clutter.EVENT_STOP;
             }
-
             return Clutter.EVENT_PROPAGATE;
         });
 
         historyRow.connect('key-press-event', (_actor, event) => {
             const key = event.get_key_symbol();
             if (key === Clutter.KEY_Return || key === Clutter.KEY_KP_Enter || key === Clutter.KEY_space) {
-                this._copyToClipboard(item.text);
-                if (this._settings.get_boolean('promote-on-copy')) {
-                    const index = this._clipboardHistory.findIndex(e => e.id === item.id);
-                    if (index !== -1) {
-                        const moved = this._clipboardHistory.splice(index, 1)[0];
-                        moved.timestamp = GLib.DateTime.new_now_local();
-                        moved.timestampUnix = moved.timestamp.to_unix();
-                        this._clipboardHistory.unshift(moved);
-                        this._queueHistorySave();
-                        this._refreshHistory();
-                    }
-                }
-                this.menu.close();
+                this._activateHistoryItem(item);
                 return Clutter.EVENT_STOP;
             }
             return Clutter.EVENT_PROPAGATE;
         });
 
         this._historyContainer.add_child(historyRow);
+    }
+
+    _activateHistoryItem(item) {
+        if (!item) {
+            return;
+        }
+
+        this._copyToClipboard(item.text);
+        if (this._settings.get_boolean('promote-on-copy')) {
+            const index = this._clipboardHistory.findIndex(entry => entry.id === item.id);
+            if (index !== -1) {
+                const moved = this._clipboardHistory.splice(index, 1)[0];
+                moved.timestamp = GLib.DateTime.new_now_local();
+                moved.timestampUnix = moved.timestamp.to_unix();
+                this._clipboardHistory.unshift(moved);
+                this._queueHistorySave();
+                this._refreshHistory();
+            }
+        }
+
+        if (this.menu && typeof this.menu.close === 'function') {
+            this.menu.close();
+        }
+    }
+
+    _createTimestampLabel(item) {
+        let formatted = '';
+        try {
+            const timestamp = item.timestamp instanceof GLib.DateTime
+                ? item.timestamp
+                : (typeof item.timestampUnix === 'number'
+                    ? GLib.DateTime.new_from_unix_local(item.timestampUnix)
+                    : null);
+            if (timestamp && typeof timestamp.format === 'function') {
+                formatted = timestamp.format('%m/%d %H:%M');
+            }
+            if (!formatted && item.timestampHumanReadable) {
+                formatted = item.timestampHumanReadable;
+            }
+        } catch (e) {
+            this._debugLog(`Timestamp format failed: ${e}`);
+        }
+
+        if (formatted) {
+            const characterCount = typeof item.length === 'number'
+                ? item.length
+                : (typeof item.text === 'string' ? item.text.length : 0);
+            if (characterCount > 0) {
+                formatted = `${formatted} • ${characterCount} chars`;
+            }
+        }
+
+        if (!formatted) {
+            return null;
+        }
+
+        const label = new St.Label({
+            text: formatted,
+            style_class: 'clipflow-ts clipflow-history-meta',
+            x_expand: false,
+            y_expand: false
+        });
+        label.clutter_text?.set_single_line_mode(true);
+        label.clutter_text?.set_ellipsize(Pango.EllipsizeMode.END);
+        return label;
     }
 
     _openHistoryItemContextMenu(item, actor) {
@@ -2826,6 +3084,28 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _copyToClipboard(text, showToast = true) {
+        const wantToast = (() => {
+            try {
+                return this._settings.get_boolean('show-copy-notifications');
+            } catch (_e) {
+                return true;
+            }
+        })();
+        const wantPreview = (() => {
+            try {
+                return this._settings.get_boolean('show-copied-preview');
+            } catch (_e) {
+                return true;
+            }
+        })();
+        const previewLength = (() => {
+            try {
+                return this._settings.get_int('copied-preview-length');
+            } catch (_e) {
+                return 30;
+            }
+        })();
+
         try {
             const clipboard = St.Clipboard.get_default();
             clipboard.set_text(St.ClipboardType.CLIPBOARD, text);
@@ -2833,10 +3113,14 @@ class ClipFlowIndicator extends PanelMenu.Button {
             const cached = typeof text === 'string' ? text.trim() : '';
             this._lastClipboardText = cached;
             this._lastPrimaryText = cached;
-            if (showToast && this._settings.get_boolean('show-copy-notifications')) {
+            const now = GLib.get_monotonic_time();
+            const intervalUs = Math.max(0, this._copyNotifyMinIntervalMs) * 1000;
+            const allowNotify = cached !== this._lastCopyNotifyText || (now - this._lastCopyNotifyTime) >= intervalUs;
+
+            if (showToast && wantToast && allowNotify) {
                 let message = _('Text copied to clipboard');
-                if (this._settings.get_boolean('show-copied-preview')) {
-                    const max = Math.max(5, this._settings.get_int('copied-preview-length'));
+                if (wantPreview) {
+                    const max = Math.max(5, previewLength);
                     const cachedChars = this._getCharacterArray(cached);
                     const preview = cachedChars.length > max
                         ? `${cachedChars.slice(0, max - 3).join('')}...`
@@ -2844,9 +3128,11 @@ class ClipFlowIndicator extends PanelMenu.Button {
                     if (preview) message = _('Copied: %s').format(preview);
                 }
                 Main.notify('ClipFlow Pro', message);
+                this._lastCopyNotifyTime = now;
+                this._lastCopyNotifyText = cached;
             }
         } catch (e) {
-            if (this._settings.get_boolean('show-copy-notifications'))
+            if (wantToast)
                 Main.notify('ClipFlow Pro', _('Failed to copy text'));
         }
     }

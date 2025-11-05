@@ -150,6 +150,12 @@
       <summary>Show entry preview</summary>
       <description>Show preview of clipboard entry content in menu</description>
     </key>
+
+    <key name="use-legacy-menu-items" type="b">
+      <default>false</default>
+      <summary>Use legacy menu rows</summary>
+      <description>Render clipboard entries using the older popup-oriented layout instead of the Wayland-safe actor rows.</description>
+    </key>
     
     <key name="show-timestamps" type="b">
       <default>true</default>

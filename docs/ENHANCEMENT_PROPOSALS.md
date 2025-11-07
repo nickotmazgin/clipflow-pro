@@ -236,7 +236,7 @@ For each enhancement:
 ## 📊 Success Metrics
 
 - **Performance:** <50ms for search, <100ms for refresh
-- **Memory:** <50MB for 1000-entry history
-- **Stability:** 0 crashes in 1000 clipboard operations
+- **Memory:** <20MB for 100-entry history
+- **Stability:** 0 crashes in 500 clipboard operations
 - **Usability:** Complete workflow in <3 clicks
 - **Reliability:** 99.9% clipboard capture rate

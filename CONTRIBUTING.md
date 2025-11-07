@@ -86,6 +86,7 @@ Thank you for your interest in contributing to ClipFlow Pro! This guide will hel
    - Follow the existing code style and conventions
    - Add comments for complex logic
    - Update documentation if needed
+   - If you edit `schemas/*.gschema.xml`, run `glib-compile-schemas schemas/` so that `schemas/gschemas.compiled` stays in sync (this file is tracked to support rootless installs).
 
 3. **Test Your Changes**
    ```bash

@@ -13,6 +13,9 @@ try {
 }
 const ByteArray = imports.byteArray;
 
+const HISTORY_LIMIT_MIN = 10;
+const HISTORY_LIMIT_MAX = 100;
+
 // Get extension metadata
 const Me = ExtensionUtils.getCurrentExtension();
 const _ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
@@ -65,7 +68,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._lastCopyNotifyText = '';
         this._logThrottle = new Map();
         this._logRateLimitMs = 5000;
-        
+        this._deferredSourceIds = new Set();
+
         // Initialize clipboard history
         this._clipboardHistory = [];
         this._maxHistory = this._settings.get_int('max-entries');
@@ -89,6 +93,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._searchDebounceTimeout = 0;
         this._filteredHistoryCache = null;
         this._filterCacheValid = false;
+        this._lastSearchText = null;
         this._textMimeTypes = [
             'text/plain',
             'text/plain;charset=utf-8',
@@ -110,7 +115,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         // Connect to settings changes
         this._settingsSignalIds.push(this._settings.connect('changed::max-entries', () => {
             const newValue = this._settings.get_int('max-entries');
-            this._maxHistory = Math.max(10, Math.min(1000, newValue));
+            this._maxHistory = this._clampHistorySize(newValue);
             if (this._maxHistory !== newValue) {
                 this._settings.set_int('max-entries', this._maxHistory);
             }
@@ -597,15 +602,76 @@ class ClipFlowIndicator extends PanelMenu.Button {
         }
     }
 
+    _clampHistorySize(value) {
+        return Math.max(HISTORY_LIMIT_MIN, Math.min(HISTORY_LIMIT_MAX, value));
+    }
+
+    _invalidateFilterCache(resetSearch = false) {
+        this._filterCacheValid = false;
+        this._filteredHistoryCache = null;
+        if (resetSearch) {
+            this._lastSearchText = null;
+        }
+    }
+
+    _scheduleIdle(callback, priority = GLib.PRIORITY_DEFAULT_IDLE) {
+        let sourceId = 0;
+        sourceId = GLib.idle_add(priority, () => {
+            this._deferredSourceIds.delete(sourceId);
+            return callback();
+        });
+        if (sourceId) {
+            this._deferredSourceIds.add(sourceId);
+        }
+        return sourceId;
+    }
+
+    _scheduleTimeout(delayMs, callback, priority = GLib.PRIORITY_DEFAULT) {
+        let sourceId = 0;
+        sourceId = GLib.timeout_add(priority, delayMs, () => {
+            this._deferredSourceIds.delete(sourceId);
+            return callback();
+        });
+        if (sourceId) {
+            this._deferredSourceIds.add(sourceId);
+        }
+        return sourceId;
+    }
+
+    _clearDeferredSources() {
+        if (!this._deferredSourceIds) {
+            return;
+        }
+        for (const sourceId of this._deferredSourceIds) {
+            GLib.source_remove(sourceId);
+        }
+        this._deferredSourceIds.clear();
+    }
+
+    _destroyActor(actor) {
+        if (!actor) {
+            return;
+        }
+        try {
+            if (typeof actor.destroy === 'function') {
+                actor.destroy();
+            } else if (actor.actor && typeof actor.actor.destroy === 'function') {
+                actor.actor.destroy();
+            }
+        } catch (error) {
+            this._debugLog(`Actor destroy failed: ${error.message}`);
+        }
+    }
+
     _validateSettings() {
         try {
-            // Validate max-entries (10-1000)
+            // Validate max-entries (10-100)
             const maxEntries = this._settings.get_int('max-entries');
-            if (maxEntries < 10 || maxEntries > 1000) {
-                const corrected = Math.max(10, Math.min(1000, maxEntries));
-                this._settings.set_int('max-entries', corrected);
-                this._maxHistory = corrected;
+            const clampedEntries = this._clampHistorySize(maxEntries);
+            if (clampedEntries !== maxEntries) {
+                this._settings.set_int('max-entries', clampedEntries);
             }
+            this._maxHistory = clampedEntries;
 
             // Validate entries-per-page (5-50)
             const entriesPerPage = this._settings.get_int('entries-per-page');
@@ -937,7 +1003,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 this._refreshHistory();
                 // Focus search entry for immediate typing
                 if (this._searchEntry && typeof this._searchEntry.grab_key_focus === 'function') {
-                    GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+                    this._scheduleIdle(() => {
                         try {
                             this._searchEntry.grab_key_focus();
                         } catch (_e) {
@@ -1410,8 +1476,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             this._trimHistory(true);
             this._currentPage = 0;
             this._updateAutoClearTimers();
-            this._filterCacheValid = false;
-            this._filteredHistoryCache = null;
+            this._invalidateFilterCache(true);
             this._debugLog(`✅ Loaded ${this._clipboardHistory.length} history entries from disk`);
             if (this._clipboardHistory.length > 0) {
                 this._debugLog(`First entry preview: "${this._truncateText(this._clipboardHistory[0].text, 50)}..."`);
@@ -1603,9 +1668,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
         this._clearAutoClearTimer(itemId);
         this._clipboardHistory.splice(index, 1);
-        // Invalidate filter cache when item is removed
-        this._filterCacheValid = false;
-        this._filteredHistoryCache = null;
+        this._invalidateFilterCache();
         if (refresh) {
             this._populateContextMenuRecentEntries();
             this._refreshHistory();
@@ -1642,14 +1705,14 @@ class ClipFlowIndicator extends PanelMenu.Button {
         
         // Warm-poll: grab whatever is currently in the clipboard after connections are established
         // This ensures the menu isn't blank on the very first copy after enable/login
-        GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+        this._scheduleIdle(() => {
             this._debugLog('Warm-start check triggered');
             this._checkClipboard('warm-start');
             return GLib.SOURCE_REMOVE;
         });
-        
+
         // Perform an initial check, as the owner might not change if text is already present
-        GLib.timeout_add(GLib.PRIORITY_DEFAULT, 500, () => {
+        this._scheduleTimeout(500, () => {
             this._debugLog('Startup check triggered (500ms delay)');
             this._checkClipboard('startup');
             return GLib.SOURCE_REMOVE;
@@ -2434,9 +2497,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._scheduleAutoClear(historyItem);
         this._queueHistorySave();
         this._updateIconState();
-        // Invalidate filter cache when new item is added
-        this._filterCacheValid = false;
-        this._filteredHistoryCache = null;
+        this._invalidateFilterCache();
         this._debugLog(`✅ SUCCESS: Added history item #${this._clipboardHistory.length} - "${this._truncateText(text, 50)}..."`);
         this._debugLog(`History collection now has ${this._clipboardHistory.length} total entries.`);
         this._debugLog(`Calling _refreshHistory() to update UI...`);
@@ -2467,8 +2528,11 @@ class ClipFlowIndicator extends PanelMenu.Button {
             modified = true;
         }
 
-        if (modified && !skipSave) {
-            this._queueHistorySave();
+        if (modified) {
+            this._invalidateFilterCache();
+            if (!skipSave) {
+                this._queueHistorySave();
+            }
         }
     }
 
@@ -2525,7 +2589,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         if (!this._menuRebuildInProgress && sortedHistory.length > 0 && renderedCount === 0) {
             this._debugLog('Rendered 0 items despite data; scheduling menu rebuild as fallback');
             this._menuRebuildInProgress = true;
-            GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+            this._scheduleIdle(() => {
                 try {
                     this._buildMenu();
                 } catch (error) {
@@ -2542,20 +2606,19 @@ class ClipFlowIndicator extends PanelMenu.Button {
         if (!this._historyContainer) {
             return;
         }
+        const children = this._historyContainer.get_children ? [...this._historyContainer.get_children()] : [];
+        children.forEach(child => {
+            try {
+                if (child && typeof child.destroy === 'function') {
+                    child.destroy();
+                }
+            } catch (error) {
+                this._debugLog(`Failed to destroy history row actor: ${error.message}`);
+            }
+        });
 
         if (typeof this._historyContainer.remove_all_children === 'function') {
             this._historyContainer.remove_all_children();
-            return;
-        }
-
-        if (typeof this._historyContainer.destroy_all_children === 'function') {
-            this._historyContainer.destroy_all_children();
-            return;
-        }
-
-        const children = this._historyContainer.get_children ? this._historyContainer.get_children() : [];
-        if (children && Array.isArray(children)) {
-            children.forEach(child => child.destroy());
         }
     }
 
@@ -2602,9 +2665,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _filterHistory() {
-        this._filterCacheValid = false;
-        this._filteredHistoryCache = null;
-        this._lastSearchText = null;
+        this._invalidateFilterCache(true);
         this._currentPage = 0;
         this._refreshHistory();
     }
@@ -3152,6 +3213,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._clearAllAutoClearTimers();
         this._clipboardHistory = [];
         this._currentPage = 0;
+        this._invalidateFilterCache(true);
         this._updateIconState();
         this._populateContextMenuRecentEntries();
         this._refreshHistory();
@@ -3241,20 +3303,42 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._contextMenuNotificationItem = null;
         this._contextMenuRecentSection = null;
         if (this._menuContainerItem) {
+            // CRITICAL: Remove child before destroying St.Bin parent to avoid crash
+            if (this._menuContainerBox) {
+                try {
+                    if (typeof this._menuContainerItem.remove_child === 'function') {
+                        this._menuContainerItem.remove_child(this._menuContainerBox);
+                    } else if (this._menuContainerItem.actor && typeof this._menuContainerItem.actor.remove_child === 'function') {
+                        this._menuContainerItem.actor.remove_child(this._menuContainerBox);
+                    }
+                    this._menuContainerBox.destroy();
+                } catch (e) {
+                    log(`ClipFlow Pro: Error removing menu container box: ${e.message}`);
+                }
+                this._menuContainerBox = null;
+            }
             this._menuContainerItem.destroy();
             this._menuContainerItem = null;
-            this._menuContainerBox = null;
         }
-        this._historyScrollView = null;
+        this._clearHistoryContainer();
+        this._destroyActor(this._historyContainer);
         this._historyContainer = null;
+        this._destroyActor(this._historyScrollView);
+        this._historyScrollView = null;
+        this._destroyActor(this._paginationBox);
         this._paginationBox = null;
+        this._destroyActor(this._paginationLabel);
         this._paginationLabel = null;
+        this._destroyActor(this._paginationPrevButton);
         this._paginationPrevButton = null;
+        this._destroyActor(this._paginationNextButton);
         this._paginationNextButton = null;
+        this._destroyActor(this._searchEntry);
+        this._searchEntry = null;
         this._unregisterKeybindings();
         this._clearAllAutoClearTimers();
         this._cancelHistorySaveTimeout();
-        
+
         // Clean up monitoring resume timeout
         if (this._monitoringResumeTimeoutId) {
             GLib.source_remove(this._monitoringResumeTimeoutId);
@@ -3273,7 +3357,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         } else {
             this._flushHistorySave();
         }
-        
+
         // Disconnect settings
         if (this._settingsSignalIds && this._settingsSignalIds.length > 0) {
             this._settingsSignalIds.forEach(id => this._settings.disconnect(id));
@@ -3283,7 +3367,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
         // Clear pointers
         this._lastClipboardText = '';
         this._skipCleanupOnDestroy = false;
-        
+        this._clearDeferredSources();
+
         super.destroy();
     }
 });
@@ -3293,29 +3378,58 @@ class Extension {
         this._indicator = null;
         this._settings = null;
         this._panelPositionChangedId = 0;
+        this._pendingAttachIdleId = 0;
+    }
+
+    _clearPendingAttachIdle() {
+        if (this._pendingAttachIdleId) {
+            GLib.source_remove(this._pendingAttachIdleId);
+            this._pendingAttachIdleId = 0;
+        }
+    }
+
+    _disconnectPanelPositionWatcher() {
+        if (this._settings && this._panelPositionChangedId) {
+            try {
+                this._settings.disconnect(this._panelPositionChangedId);
+            } catch (_e) {}
+            this._panelPositionChangedId = 0;
+        }
+    }
+
+    _destroyIndicator() {
+        if (!this._indicator) {
+            return;
+        }
+        try {
+            this._indicator.destroy();
+        } catch (error) {
+            log(`ClipFlow Pro: Error destroying indicator: ${error.message}`);
+        }
+        this._indicator = null;
     }
 
     enable() {
         try {
             // Initialize translations
             ExtensionUtils.initTranslations();
-            
-            this._settings = ExtensionUtils.getSettings();
-            if (!this._settings) {
+            this._clearPendingAttachIdle();
+            this._disconnectPanelPositionWatcher();
+            this._destroyIndicator();
+
+            const settings = ExtensionUtils.getSettings();
+            if (!settings) {
                 const message = 'ClipFlow Pro: Settings schema not found. Run build.sh to compile gschemas.';
                 log(message);
                 Main.notify('ClipFlow Pro', _('Settings schema not found. Run the build script and reinstall the extension.'));
                 return;
             }
+            this._settings = settings;
 
             const panelPosition = this._normalizePanelPosition(this._settings.get_string('panel-position'));
             this._indicator = new ClipFlowIndicator(this._settings);
             this._attachIndicatorWithFallback(panelPosition);
 
-            if (this._panelPositionChangedId) {
-                this._settings.disconnect(this._panelPositionChangedId);
-                this._panelPositionChangedId = 0;
-            }
             this._panelPositionChangedId = this._settings.connect('changed::panel-position', () => {
                 this._relocateIndicator();
             });
@@ -3328,15 +3442,9 @@ class Extension {
 
     disable() {
         try {
-            if (this._settings && this._panelPositionChangedId) {
-                this._settings.disconnect(this._panelPositionChangedId);
-                this._panelPositionChangedId = 0;
-            }
-
-            if (this._indicator) {
-                this._indicator.destroy();
-                this._indicator = null;
-            }
+            this._clearPendingAttachIdle();
+            this._disconnectPanelPositionWatcher();
+            this._destroyIndicator();
             this._settings = null;
         } catch (e) {
             log(`ClipFlow Pro: Error disabling extension: ${e.message}`);
@@ -3345,12 +3453,12 @@ class Extension {
 
     _relocateIndicator() {
         const newPosition = this._normalizePanelPosition(this._settings ? this._settings.get_string('panel-position') : 'right');
+        this._clearPendingAttachIdle();
         if (this._indicator) {
             if (typeof this._indicator.prepareForReposition === 'function') {
                 this._indicator.prepareForReposition();
             }
-            this._indicator.destroy();
-            this._indicator = null;
+            this._destroyIndicator();
         }
 
         this._indicator = new ClipFlowIndicator(this._settings);
@@ -3372,6 +3480,7 @@ class Extension {
 
     _attachIndicatorWithFallback(preferred) {
         try {
+            this._clearPendingAttachIdle();
             const positions = ['right', 'center', 'left'];
             const startIndex = Math.max(0, positions.indexOf(preferred));
             const ordered = [...positions.slice(startIndex), ...positions.slice(0, startIndex)];
@@ -3380,15 +3489,22 @@ class Extension {
                 try {
                     Main.panel.addToStatusArea('clipflow-pro', this._indicator, 1, pos);
                     // Give Shell a tick to attach
-                    GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+                    let idleId = 0;
+                    idleId = GLib.idle_add(GLib.PRIORITY_DEFAULT_IDLE, () => {
+                        this._pendingAttachIdleId = 0;
                         try {
-                            const hasParent = Boolean(this._indicator.get_parent?.() || this._indicator.actor?.get_parent?.());
-                            if (!hasParent && this._indicator._createIcon) {
-                                this._indicator._createIcon();
+                            const indicator = this._indicator;
+                            if (!indicator) {
+                                return GLib.SOURCE_REMOVE;
+                            }
+                            const hasParent = Boolean(indicator.get_parent?.() || indicator.actor?.get_parent?.());
+                            if (!hasParent && indicator._createIcon) {
+                                indicator._createIcon();
                             }
                         } catch (_e) {}
                         return GLib.SOURCE_REMOVE;
                     });
+                    this._pendingAttachIdleId = idleId;
                     return;
                 } catch (error) {
                     log(`ClipFlow Pro: Failed to attach indicator to '${pos}': ${error}`);

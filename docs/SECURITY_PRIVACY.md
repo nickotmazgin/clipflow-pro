@@ -15,7 +15,7 @@ This document outlines ClipFlow Pro's security and privacy practices for extensi
 - **Where**: `~/.config/clipflow-pro/history.json` (local file)
 - **Who**: Only the user has access
 - **Why**: Provide clipboard history functionality
-- **How Long**: Configurable (default: 50 entries, user-configurable up to 1000)
+- **How Long**: Configurable (default: 50 entries, user-configurable up to 100)
 
 ## 🛡️ Security Measures
 

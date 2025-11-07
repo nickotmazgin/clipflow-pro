@@ -528,6 +528,20 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         developerBox.append(developerValue);
         appInfoBox.append(developerBox);
 
+        // Contact info
+        const contactBox = new Gtk.Box({ 
+            orientation: Gtk.Orientation.HORIZONTAL,
+            spacing: 10
+        });
+        const contactLabel = new Gtk.Label({ label: _('Contact:') });
+        const contactValue = new Gtk.Label({ 
+            label: '<a href="mailto:nickotmazgin.dev@gmail.com">nickotmazgin.dev@gmail.com</a>',
+            use_markup: true
+        });
+        contactBox.append(contactLabel);
+        contactBox.append(contactValue);
+        appInfoBox.append(contactBox);
+
         // License info
         const licenseBox = new Gtk.Box({ 
             orientation: Gtk.Orientation.HORIZONTAL,

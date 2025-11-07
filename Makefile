@@ -40,55 +40,11 @@ clean:
 
 # Build the extension
 build:
-	@echo "Building $(EXTENSION_NAME)..."
-	
-	# Create fresh build directory
-	rm -rf $(BUILD_DIR)
-	mkdir -p $(BUILD_DIR)
-	
-	# Copy extension files
-	cp extension.js $(BUILD_DIR)/
-	cp prefs.js $(BUILD_DIR)/
-	cp metadata.json $(BUILD_DIR)/
-	cp stylesheet.css $(BUILD_DIR)/
-	
-	# Copy icons
-	if [ -d "icons" ]; then \
-		cp -r icons $(BUILD_DIR)/; \
-	fi
-	
-	# Compile schemas if they exist
-	if [ -d "$(SCHEMAS_DIR)" ]; then \
-		mkdir -p $(BUILD_DIR)/schemas; \
-		cp $(SCHEMAS_DIR)/*.xml $(BUILD_DIR)/schemas/; \
-		glib-compile-schemas $(BUILD_DIR)/schemas/; \
-	fi
-	
-	# Copy locale files if they exist
-	if [ -d "$(LOCALE_DIR)" ]; then \
-		cp -r $(LOCALE_DIR) $(BUILD_DIR)/; \
-	fi
-	
-	@echo "Build complete!"
+	./build.sh
 
 # Install the extension locally
 install: build
-	@echo "Installing $(EXTENSION_NAME)..."
-	
-	# Create installation directory
-	rm -rf $(INSTALL_PATH)
-	mkdir -p $(INSTALL_PATH)
-	
-	# Copy all files
-	cp -r $(BUILD_DIR)/* $(INSTALL_PATH)/
-	
-	# Compile schemas
-	if [ -d "$(INSTALL_PATH)/schemas" ]; then \
-		glib-compile-schemas $(INSTALL_PATH)/schemas/; \
-	fi
-	
-	@echo "Extension installed to $(INSTALL_PATH)"
-	@echo "Restart GNOME Shell (Alt+F2, type 'r', press Enter) and enable the extension"
+	./install.sh
 
 # Uninstall the extension
 uninstall:

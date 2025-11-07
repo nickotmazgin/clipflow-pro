@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.1] - 2025-11-07
+
+### Added
+- `safe-reload.sh` helper that keeps GNOME Shell logs tailing while re-enabling the extension so crashes are captured immediately.
+- Bundled `schemas/gschemas.compiled` so strictly rootless installs still work even if `glib-compile-schemas` is missing.
+
+### Changed
+- Reduced the `max-entries` slider bounds to 10–100 to match real-world performance limits and keep the UI honest about what the extension can store sustainably.
+- INSTALL/CONTRIBUTING docs now focus on rootless workflows and document the schema compilation fallback.
+
+### Fixed
+- Panel indicator creation/destruction is now idempotent; pending idle callbacks and settings signals are cleared before reattaching so no duplicate icons linger after shell restarts or position changes.
+
+---
+
 ## [1.2.0] - 2025-11-05
 
 ### Added

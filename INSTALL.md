@@ -14,6 +14,8 @@ This guide provides detailed installation instructions for ClipFlow Pro on vario
 curl -fsSL https://raw.githubusercontent.com/nickotmazgin/clipflow-pro/main/install.sh | bash
 ```
 
+This script never touches system directories; everything is installed into `~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io/`, so it works even on systems where `sudo` is highly locked down.
+
 ### Method 3: Manual Installation
 ```bash
 # Download and extract
@@ -28,6 +30,29 @@ Alt + F2 → type 'r' → Enter
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 ```
 
+## Rootless workflow (no sudo required)
+
+ClipFlow Pro is intentionally designed to be built, installed, and updated entirely inside your home directory. If an aggressive sudoers policy kicks you out of the shell or blocks commands, keep everything confined to `~/.local` and `~/.config`:
+
+```bash
+# Stay in your home directory
+git clone https://github.com/nickotmazgin/clipflow-pro.git
+cd clipflow-pro
+
+# Build + install without elevated privileges
+./build.sh            # or: make build
+./install.sh          # or: make install
+
+# Enable after restarting GNOME Shell
+gnome-extensions enable clipflow-pro@nickotmazgin.github.io
+```
+
+Both scripts simply copy files under your user profile and run `glib-compile-schemas` inside that directory. No system-wide writes occur, so sudo is never invoked. If you need distro packages such as `glib2` or `gettext` but cannot use sudo, install them via a user-level toolbox/Flatpak/Nix/conda environment and run the commands inside that sandbox. Once those packages are available in `$PATH`, the rest of the workflow remains rootless.
+
+### Schema compilation without admin rights
+
+The repository ships with a precompiled `schemas/gschemas.compiled` file. During `build.sh`, `install.sh`, or `make install`, we first try to run `glib-compile-schemas` and fall back to that bundled file if the compiler is missing. That means the extension still installs even when you cannot install the GLib development utilities. If you edit `schemas/*.gschema.xml`, run `glib-compile-schemas schemas/` once (inside a Toolbox, Flatpak SDK, Nix shell, etc.), commit the updated `schemas/gschemas.compiled`, and the rest of your workflow stays rootless.
+
 ## Build from Source
 
 ### Prerequisites
@@ -35,6 +60,8 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 - GNOME Shell 40+
 - GLib development tools
 - Make
+
+> The commands below that start with `sudo` are only for installing missing build dependencies via your distro's package manager. The actual `make build`, `make install`, and `install.sh` steps never require elevated privileges—feel free to skip the dependency install commands if you already have the tools available or you are working inside a rootless development container.
 
 ### Create a package for extensions.gnome.org
 ```bash
@@ -172,6 +199,7 @@ make uninstall
 ## Advanced Installation
 
 ### System-wide Installation (Not Recommended)
+If your sudo policy is restrictive or managed by IT, skip this section—ClipFlow Pro works perfectly when installed in your home directory.
 ```bash
 # Install for all users (requires root)
 sudo mkdir -p /usr/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io/

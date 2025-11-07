@@ -12,11 +12,6 @@ ICON_DIR="icons"
 
 echo "Building ClipFlow Pro extension..."
 
-if ! command -v glib-compile-schemas >/dev/null 2>&1; then
-    echo "Error: glib-compile-schemas is required but was not found in PATH." >&2
-    exit 1
-fi
-
 echo "⟲ Resetting build directory..."
 rm -rf "${BUILD_DIR}"
 mkdir -p "${BUILD_DIR}"
@@ -41,7 +36,17 @@ echo "→ Preparing GSettings schemas..."
 if [[ -d "${SCHEMAS_DIR}" ]]; then
     mkdir -p "${BUILD_DIR}/schemas"
     cp "${SCHEMAS_DIR}"/*.xml "${BUILD_DIR}/schemas/"
-    glib-compile-schemas "${BUILD_DIR}/schemas/"
+
+    if command -v glib-compile-schemas >/dev/null 2>&1; then
+        glib-compile-schemas "${BUILD_DIR}/schemas/"
+    elif [[ -f "${SCHEMAS_DIR}/gschemas.compiled" ]]; then
+        echo "Warning: glib-compile-schemas not found; using precompiled schemas bundle." >&2
+        cp "${SCHEMAS_DIR}/gschemas.compiled" "${BUILD_DIR}/schemas/"
+    else
+        echo "Error: glib-compile-schemas not found and no precompiled schemas available." >&2
+        echo "Install GLib tooling or run 'glib-compile-schemas schemas/' once on a machine that has it, then re-run build.sh." >&2
+        exit 1
+    fi
 else
     echo "Warning: schemas directory not found; settings will not work." >&2
 fi

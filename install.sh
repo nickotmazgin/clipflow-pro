@@ -35,7 +35,15 @@ cp -r "${BUILD_DIR}/." "${TARGET_DIR}/"
 
 if [[ -d "${TARGET_DIR}/schemas" ]]; then
     echo "→ Compiling GSettings schemas..."
-    glib-compile-schemas "${TARGET_DIR}/schemas/"
+    if command -v glib-compile-schemas >/dev/null 2>&1; then
+        glib-compile-schemas "${TARGET_DIR}/schemas/"
+    elif [[ -f "${TARGET_DIR}/schemas/gschemas.compiled" ]]; then
+        echo "   glib-compile-schemas not found; using packaged compiled schemas."
+    else
+        echo "Error: glib-compile-schemas not found and no precompiled schemas bundled with the build." >&2
+        echo "Run 'glib-compile-schemas schemas/' once on a machine that has GLib tools, or install glib2 utilities in a toolbox/Flatpak container." >&2
+        exit 1
+    fi
 else
     echo "Warning: No schemas directory found; settings may not function correctly." >&2
 fi

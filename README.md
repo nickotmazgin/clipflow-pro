@@ -88,7 +88,7 @@ ClipFlow Pro is a powerful and intelligent clipboard manager that provides compr
 Access the settings by clicking the "Settings" button in the clipboard menu or through GNOME Extensions.
 
 #### General Settings
-- **Maximum Entries**: Set how many clipboard entries to keep (10-1000)
+- **Maximum Entries**: Set how many clipboard entries to keep (10-100)
 - **Maximum Entry Length**: Limit individual entry length (100-10000 characters)
 - **Entries Per Page**: Number of entries shown per page (5-50)
 - **Show Entry Numbers**: Display numbers next to entries
@@ -252,6 +252,12 @@ If you find ClipFlow Pro useful, please consider supporting its development:
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)
 
 ## Changelog
+
+### Version 1.2.1
+- Stabilized panel icon lifecycle to avoid duplicate indicators and Shell crashes when moving between left/center/right positions.
+- Limited the history slider to 10–100 entries so GNOME Shell no longer stalls on gigantic histories, keeping the advertised defaults in sync with what the code enforces.
+- Bundled a precompiled schema and updated the build/install scripts so rootless installs work even when `glib-compile-schemas` is unavailable.
+- Added `safe-reload.sh` for quick local reloads with crash monitoring during development.
 
 ### Version 1.2.0
 - Hardened clipboard HTML sanitization so embedded script/style tags are stripped reliably before copying back to the user.

@@ -5,7 +5,7 @@
     <!-- General Settings -->
     <key name="max-entries" type="i">
       <default>50</default>
-      <range min="10" max="1000"/>
+      <range min="10" max="100"/>
       <summary>Maximum clipboard entries</summary>
       <description>Maximum number of clipboard entries to keep in history</description>
     </key>

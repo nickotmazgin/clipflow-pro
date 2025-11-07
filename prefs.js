@@ -91,7 +91,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
             _('Maximum Entries'),
             _('Maximum number of clipboard entries to keep in history'),
             'max-entries',
-            10, 1000, 50
+            10, 100, 50
         );
         historyBox.append(maxEntriesBox);
 

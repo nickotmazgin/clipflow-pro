@@ -2,9 +2,6 @@
 build/
 dist/
 
-# Compiled schemas
-schemas/gschemas.compiled
-
 # OS generated files
 .DS_Store
 .DS_Store?
@@ -69,6 +66,16 @@ GITHUB_SETUP_COMPLETE.md
 
 # System scripts (not extension-related)
 tools/system_security_hardening.sh
+
+# Sudoers configuration files (system-specific, not part of extension)
+sudoers-*
+*-sudoers*
+*SUDOERS*
+fix-sudoers.sh
+fix-installation.sh
+verify-installation.sh
+verify-sudoers.sh
+check-sudoers.sh
 
 # Security: Never commit secrets or credentials
 *.env

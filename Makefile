@@ -156,13 +156,9 @@ help:
 
 # Version management
 version:
-	@echo "Current version: $$(grep '\"version\"' metadata.json | sed 's/.*: *\([0-9.]*\).*/\1/')"
+	@python3 tools/version.py show
 
 bump-version:
-	@echo "Bumping version..."
-	@current=$$(grep '\"version\"' metadata.json | sed 's/.*: *\([0-9.]*\).*/\1/'); \
-	new=$$(echo "$$current + 0.1" | bc); \
-	sed -i "s/\"version\": *[0-9.]*/\"version\": $$new/" metadata.json; \
-	echo "Version bumped from $$current to $$new"
+	@python3 tools/version.py bump
 
 .PHONY: all build install uninstall dist dev validate test package clean help version bump-version

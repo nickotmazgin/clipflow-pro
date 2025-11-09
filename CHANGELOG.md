@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- Prevented the `make bump-version` helper from writing non-integer version values to `metadata.json`, which previously produced invalid GNOME extension manifests.
+- Hardened clipboard list rendering so entries always appear in the main window even when history data is partially missing or malformed.
+
+### Improved
+- Hardened `safe-reload.sh` so it gracefully handles missing tooling (e.g. `jq`, `journalctl`, or the GNOME extensions CLI) while still guiding users through reload troubleshooting.
+
+---
+
 ## [1.2.3] - 2025-11-10
 
 ### Added

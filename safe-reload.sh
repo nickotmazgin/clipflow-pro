@@ -37,6 +37,17 @@ echo
 
 # Start journal monitoring in background
 journal_monitor_running=false
+JOURNAL_PID=""
+cleanup() {
+    if [ "$journal_monitor_running" = true ] && [ -n "$JOURNAL_PID" ]; then
+        kill "$JOURNAL_PID" 2>/dev/null || true
+        wait "$JOURNAL_PID" 2>/dev/null || true
+    fi
+    journal_monitor_running=false
+    JOURNAL_PID=""
+}
+trap cleanup EXIT
+
 if command -v journalctl >/dev/null 2>&1; then
     echo "📋 Monitoring GNOME Shell for crashes..."
     journalctl --user -f -o cat | command grep -i "JS ERROR\|segfault\|crashed" &
@@ -69,9 +80,7 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 sleep 3
 
 # Stop journal monitoring
-if [ "$journal_monitor_running" = true ]; then
-    kill "$JOURNAL_PID" 2>/dev/null
-fi
+cleanup
 
 # Check if still enabled
 if gnome-extensions list --enabled | command grep -q clipflow; then

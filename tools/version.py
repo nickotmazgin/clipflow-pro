@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """ClipFlow Pro version management helpers."""
 
-from __future__ import annotations
-
 import argparse
 import json
 from pathlib import Path
 import sys
+from typing import List, Optional
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 METADATA_PATH = REPO_ROOT / "metadata.json"
@@ -46,7 +45,7 @@ def cmd_bump(_args: argparse.Namespace) -> None:
     print(f"Version bumped from {version} to {data['version']}")
 
 
-def main(argv: list[str] | None = None) -> int:
+def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="ClipFlow Pro version helpers")
     subparsers = parser.add_subparsers(dest="command", required=True)
 

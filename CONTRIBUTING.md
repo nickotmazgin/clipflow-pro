@@ -111,6 +111,17 @@ Thank you for your interest in contributing to ClipFlow Pro! This guide will hel
    # Then create a pull request on GitHub
    ```
 
+### Managing Extension Versions
+
+- Run `make version` to print the current integer `metadata.json` version alongside the human-friendly `version-name`.
+- When preparing a release, use `make bump-version` to increment the numeric version safely. This command delegates to `tools/version.py`, which validates the manifest and keeps the version field as an integer so GNOME accepts the package.
+
+### Keeping Your Branch Up to Date
+
+- When a pull request falls behind `main`, click **Update branch** on GitHub (or merge `main` locally) to bring the latest changes into your topic branch. This does **not** discard or hide your commits—it simply adds a merge commit with the base branch’s updates.
+- If GitHub reports conflicts after updating, resolve them either through the **Resolve conflicts** web editor or by merging locally, fixing the files in your editor, and pushing the resolution.
+- You do not need to open a brand-new pull request after updating; pushing the resolved branch automatically refreshes the existing PR with the latest commits and merge state.
+
 ## 📝 Code Guidelines
 
 ### JavaScript/GJS Style

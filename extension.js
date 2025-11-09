@@ -2733,14 +2733,44 @@ class ClipFlowIndicator extends PanelMenu.Button {
         }
         
         // Filter and cache result
-        const filtered = this._clipboardHistory.filter(item => 
-            item.text.toLowerCase().includes(searchText)
-        );
+        const filtered = this._clipboardHistory.filter(item => {
+            if (!item) {
+                return false;
+            }
+
+            const haystack = this._safeHistoryText(item);
+            if (!haystack) {
+                return false;
+            }
+
+            try {
+                return haystack.toLowerCase().includes(searchText);
+            } catch (error) {
+                this._debugLog(`History filter failed for entry ${item.id || 'unknown'}: ${error}`);
+                return false;
+            }
+        });
         this._filteredHistoryCache = filtered;
         this._lastSearchText = searchText;
         this._filterCacheValid = true;
-        
+
         return filtered;
+    }
+
+    _safeHistoryText(item) {
+        if (!item) {
+            return '';
+        }
+
+        if (typeof item.text === 'string' && item.text.trim()) {
+            return item.text;
+        }
+
+        if (typeof item.preview === 'string' && item.preview.trim()) {
+            return item.preview;
+        }
+
+        return '';
     }
 
     _getSearchText() {
@@ -2775,10 +2805,38 @@ class ClipFlowIndicator extends PanelMenu.Button {
             if (a.starred !== b.starred) {
                 return a.starred ? -1 : 1;
             }
-            const aTime = typeof a.timestampUnix === 'number' ? a.timestampUnix : a.timestamp.to_unix();
-            const bTime = typeof b.timestampUnix === 'number' ? b.timestampUnix : b.timestamp.to_unix();
+
+            const aTime = this._coerceTimestamp(a);
+            const bTime = this._coerceTimestamp(b);
             return bTime - aTime;
         });
+    }
+
+    _coerceTimestamp(item) {
+        if (!item) {
+            return 0;
+        }
+
+        try {
+            if (typeof item.timestampUnix === 'number' && Number.isFinite(item.timestampUnix)) {
+                return item.timestampUnix;
+            }
+
+            if (item.timestamp instanceof GLib.DateTime) {
+                return item.timestamp.to_unix();
+            }
+
+            if (typeof item.timestampHumanReadable === 'string' && item.timestampHumanReadable.trim()) {
+                const parsed = Date.parse(item.timestampHumanReadable);
+                if (!Number.isNaN(parsed)) {
+                    return Math.floor(parsed / 1000);
+                }
+            }
+        } catch (error) {
+            this._debugLog(`Timestamp coercion failed for entry ${item.id || 'unknown'}: ${error}`);
+        }
+
+        return 0;
     }
 
     _createHistoryItem(item, displayIndex) {
@@ -2791,118 +2849,121 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return;
         }
 
-        const row = new St.BoxLayout({
-            style_class: 'clipflow-history-item',
-            x_expand: true,
-            y_expand: false,
-            reactive: true,
-            can_focus: true,
-            track_hover: true
-        });
-        row.y_align = Clutter.ActorAlign.CENTER;
-        const accessibleName = item.preview || item.text || _('Clipboard entry');
-        row.set_accessible_name(accessibleName);
-
-        if (item.contentType && item.contentType !== 'text') {
-            row.add_style_class_name(`clipflow-type-${item.contentType}`);
-        }
-        if (item.pinned) {
-            row.add_style_class_name('pinned');
-        }
-        if (item.starred) {
-            row.add_style_class_name('starred');
-        }
-
-        if (typeof row.set_spacing === 'function') {
-            row.set_spacing(10);
-        } else if (typeof row.get_layout_manager === 'function') {
-            const layout = row.get_layout_manager();
-            if (layout && 'spacing' in layout)
-                layout.spacing = 10;
-        }
-
-        const clickAction = new Clutter.ClickAction();
-        clickAction.connect('clicked', () => {
-            this._activateHistoryItem(item);
-        });
-        row.add_action(clickAction);
-
-        if (this._settings.get_boolean('show-numbers')) {
-            const numberLabel = new St.Label({
-                text: `${displayIndex}.`,
-                style_class: 'clipflow-index clipflow-history-number'
+        try {
+            const row = new St.BoxLayout({
+                style_class: 'clipflow-history-item',
+                x_expand: true,
+                y_expand: false,
+                reactive: true,
+                can_focus: true,
+                track_hover: true
             });
-            row.add_child(numberLabel);
-        }
+            row.y_align = Clutter.ActorAlign.CENTER;
+            const accessibleName = this._safeHistoryText(item) || _('Clipboard entry');
+            row.set_accessible_name(accessibleName);
 
-        this._appendHistoryBadges(row, item);
+            if (item.contentType && item.contentType !== 'text') {
+                row.add_style_class_name(`clipflow-type-${item.contentType}`);
+            }
+            if (item.pinned) {
+                row.add_style_class_name('pinned');
+            }
+            if (item.starred) {
+                row.add_style_class_name('starred');
+            }
 
-        const contentBox = new St.BoxLayout({
-            vertical: false,
-            x_expand: true,
-            y_expand: false
-        });
-        if (typeof contentBox.set_spacing === 'function') {
-            contentBox.set_spacing(8);
-        } else if (typeof contentBox.get_layout_manager === 'function') {
-            const layout = contentBox.get_layout_manager();
-            if (layout && 'spacing' in layout)
-                layout.spacing = 8;
-        }
+            if (typeof row.set_spacing === 'function') {
+                row.set_spacing(10);
+            } else if (typeof row.get_layout_manager === 'function') {
+                const layout = row.get_layout_manager();
+                if (layout && 'spacing' in layout)
+                    layout.spacing = 10;
+            }
 
-        const showPreview = this._settings.get_boolean('show-preview');
-        const showTimestamps = this._settings.get_boolean('show-timestamps');
-        const shouldShowText = showPreview || !showTimestamps;
+            const clickAction = new Clutter.ClickAction();
+            clickAction.connect('clicked', () => {
+                this._activateHistoryItem(item);
+            });
+            row.add_action(clickAction);
 
-        if (shouldShowText) {
-            const text = showPreview
-                ? (item.preview || item.text || _('(Empty entry)'))
-                : (item.preview || _('Clipboard entry'));
-            const textLabel = new St.Label({
-                text,
-                style_class: 'clipflow-text clipflow-history-text',
+            if (this._settings.get_boolean('show-numbers')) {
+                const numberLabel = new St.Label({
+                    text: `${displayIndex}.`,
+                    style_class: 'clipflow-index clipflow-history-number'
+                });
+                row.add_child(numberLabel);
+            }
+
+            this._appendHistoryBadges(row, item);
+
+            const contentBox = new St.BoxLayout({
+                vertical: false,
                 x_expand: true,
                 y_expand: false
             });
-            if (textLabel.clutter_text) {
-                textLabel.clutter_text.set_single_line_mode(true);
-                textLabel.clutter_text.set_ellipsize(Pango.EllipsizeMode.END);
+            if (typeof contentBox.set_spacing === 'function') {
+                contentBox.set_spacing(8);
+            } else if (typeof contentBox.get_layout_manager === 'function') {
+                const layout = contentBox.get_layout_manager();
+                if (layout && 'spacing' in layout)
+                    layout.spacing = 8;
             }
-            contentBox.add_child(textLabel);
-        } else {
-            contentBox.set_x_expand(true);
+
+            const showPreview = this._settings.get_boolean('show-preview');
+            const showTimestamps = this._settings.get_boolean('show-timestamps');
+            const shouldShowText = showPreview || !showTimestamps;
+
+            if (shouldShowText) {
+                const baseText = showPreview ? this._safeHistoryText(item) : (item.preview || '');
+                const text = baseText || _('(Empty entry)');
+                const textLabel = new St.Label({
+                    text,
+                    style_class: 'clipflow-text clipflow-history-text',
+                    x_expand: true,
+                    y_expand: false
+                });
+                if (textLabel.clutter_text) {
+                    textLabel.clutter_text.set_single_line_mode(true);
+                    textLabel.clutter_text.set_ellipsize(Pango.EllipsizeMode.END);
+                }
+                contentBox.add_child(textLabel);
+            } else {
+                contentBox.set_x_expand(true);
+            }
+
+            if (showTimestamps) {
+                const tsLabel = this._createTimestampLabel(item);
+                if (tsLabel) {
+                    contentBox.add_child(tsLabel);
+                }
+            }
+
+            row.add_child(contentBox);
+
+            const actionBox = this._createHistoryActionBox(item);
+            row.add_child(actionBox);
+
+            row.connect('button-press-event', (_actor, event) => {
+                if (event.get_button && event.get_button() === 3) {
+                    this._openHistoryItemContextMenu(item, row);
+                    return Clutter.EVENT_STOP;
+                }
+                return Clutter.EVENT_PROPAGATE;
+            });
+
+            row.connect('key-press-event', (_actor, event) => {
+                const key = event.get_key_symbol();
+                if (key === Clutter.KEY_Return || key === Clutter.KEY_KP_Enter || key === Clutter.KEY_space) {
+                    this._activateHistoryItem(item);
+                    return Clutter.EVENT_STOP;
+                }
+                return Clutter.EVENT_PROPAGATE;
+            });
+
+            this._historyContainer.add_child(row);
+        } catch (error) {
+            this._debugLog(`Failed to render history item ${item && item.id ? item.id : 'unknown'}: ${error}`);
         }
-
-        if (showTimestamps) {
-            const tsLabel = this._createTimestampLabel(item);
-            if (tsLabel) {
-                contentBox.add_child(tsLabel);
-            }
-        }
-
-        row.add_child(contentBox);
-
-        const actionBox = this._createHistoryActionBox(item);
-        row.add_child(actionBox);
-
-        row.connect('button-press-event', (_actor, event) => {
-            if (event.get_button && event.get_button() === 3) {
-                this._openHistoryItemContextMenu(item, row);
-                return Clutter.EVENT_STOP;
-            }
-            return Clutter.EVENT_PROPAGATE;
-        });
-
-        row.connect('key-press-event', (_actor, event) => {
-            const key = event.get_key_symbol();
-            if (key === Clutter.KEY_Return || key === Clutter.KEY_KP_Enter || key === Clutter.KEY_space) {
-                this._activateHistoryItem(item);
-                return Clutter.EVENT_STOP;
-            }
-            return Clutter.EVENT_PROPAGATE;
-        });
-
-        this._historyContainer.add_child(row);
     }
 
     _shouldUseLegacyHistoryRows() {
@@ -3014,7 +3075,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             x_expand: true
         });
 
-        const accessibleName = item.preview || item.text || _('Clipboard entry');
+        const accessibleName = this._safeHistoryText(item) || _('Clipboard entry');
         historyRow.set_accessible_name(accessibleName);
 
         if (item.contentType && item.contentType !== 'text') {
@@ -3063,7 +3124,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
         if (showPreview) {
             const textLabel = new St.Label({
-                text: item.preview || item.text || _('(Empty entry)'),
+                text: this._safeHistoryText(item) || _('(Empty entry)'),
                 style_class: 'clipflow-history-text',
                 x_expand: true
             });
@@ -3081,7 +3142,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
         if (!showPreview && !showTimestamps) {
             const fallbackLabel = new St.Label({
-                text: item.preview || item.text || _('(Empty entry)'),
+                text: this._safeHistoryText(item) || _('(Empty entry)'),
                 style_class: 'clipflow-history-text',
                 x_expand: true
             });
@@ -3146,11 +3207,15 @@ class ClipFlowIndicator extends PanelMenu.Button {
     _createTimestampLabel(item) {
         let formatted = '';
         try {
-            const timestamp = item.timestamp instanceof GLib.DateTime
-                ? item.timestamp
-                : (typeof item.timestampUnix === 'number'
-                    ? GLib.DateTime.new_from_unix_local(item.timestampUnix)
-                    : null);
+            let timestamp = null;
+            if (item.timestamp instanceof GLib.DateTime) {
+                timestamp = item.timestamp;
+            } else {
+                const unix = this._coerceTimestamp(item);
+                if (unix > 0) {
+                    timestamp = GLib.DateTime.new_from_unix_local(unix);
+                }
+            }
             if (timestamp && typeof timestamp.format === 'function') {
                 formatted = timestamp.format('%m/%d %H:%M');
             }

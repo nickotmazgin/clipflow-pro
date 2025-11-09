@@ -71,6 +71,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._deferredSourceIds = new Set();
         this._destroyed = false;
         this._clipboardNotifyShown = false;
+        this._useCompactUI = this._settings.get_boolean('use-compact-ui');
 
         // Initialize clipboard history
         this._clipboardHistory = [];
@@ -141,6 +142,10 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._settingsSignalIds.push(this._settings.connect('changed::enable-debug-logs', () => {
             this._logEnabled = this._settings.get_boolean('enable-debug-logs');
             this._debugLog('Debug logging toggled');
+        }));
+        this._settingsSignalIds.push(this._settings.connect('changed::use-compact-ui', () => {
+            this._useCompactUI = this._settings.get_boolean('use-compact-ui');
+            this._applyUiStyle();
         }));
         this._settingsSignalIds.push(this._settings.connect('changed::context-menu-items', () => {
             const newValue = this._settings.get_int('context-menu-items');
@@ -826,6 +831,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         }
         this.menu.addMenuItem(this._menuContainerItem);
         this._menuContainerBox = container;
+        this._applyUiStyle();
 
         const searchRow = this._createSearchRow();
         container.add_child(searchRow);
@@ -2675,6 +2681,18 @@ class ClipFlowIndicator extends PanelMenu.Button {
         }
         this._clipboardNotifyShown = true;
         Main.notify('ClipFlow Pro', _('Clipboard service not available yet. Waiting for GNOME Shell to grant access.'));
+    }
+
+    _applyUiStyle() {
+        if (!this._menuContainerBox) {
+            return;
+        }
+        const className = 'clipflow-compact';
+        if (this._useCompactUI) {
+            this._menuContainerBox.add_style_class_name(className);
+        } else {
+            this._menuContainerBox.remove_style_class_name(className);
+        }
     }
 
     _clearHistoryContainer() {

@@ -367,6 +367,13 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         themeInfo.set_halign(Gtk.Align.START);
         styleBox.append(themeInfo);
 
+        const compactToggle = this._createSwitchRow(
+            _('Use Compact UI Layout'),
+            _('Switch back to the slimmer legacy spacing and lighter backgrounds instead of the modern boxed look.'),
+            'use-compact-ui'
+        );
+        styleBox.append(compactToggle);
+
         appearanceBox.append(styleFrame);
 
         // App Exclusions

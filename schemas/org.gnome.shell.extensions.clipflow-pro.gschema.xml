@@ -151,6 +151,12 @@
       <description>Show preview of clipboard entry content in menu</description>
     </key>
 
+    <key name="use-compact-ui" type="b">
+      <default>false</default>
+      <summary>Use compact UI layout</summary>
+      <description>Toggle to use the slimmer legacy menu styling instead of the modern boxed look.</description>
+    </key>
+
     <key name="use-legacy-menu-items" type="b">
       <default>false</default>
       <summary>Use legacy menu rows</summary>

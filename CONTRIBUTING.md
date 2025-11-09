@@ -128,7 +128,6 @@ Thank you for your interest in contributing to ClipFlow Pro! This guide will hel
 - You do not need to open a brand-new pull request after updating; pushing the resolved branch automatically refreshes
   the existing PR with the latest commits and merge state.
 
-
 ## 📝 Code Guidelines
 
 ### JavaScript/GJS Style

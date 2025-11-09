@@ -44,6 +44,7 @@ cleanup() {
         wait "$JOURNAL_PID" 2>/dev/null || true
     fi
     journal_monitor_running=false
+    JOURNAL_PID=""
 }
 trap cleanup EXIT
 

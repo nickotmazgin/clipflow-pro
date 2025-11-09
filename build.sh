@@ -53,7 +53,12 @@ fi
 
 echo "→ Copying locale resources..."
 if [[ -d "${LOCALE_DIR}" ]]; then
-    cp -r "${LOCALE_DIR}" "${BUILD_DIR}/"
+    mapfile -t locale_binaries < <(find "${LOCALE_DIR}" -type f -name '*.mo' 2>/dev/null || true)
+    if (( ${#locale_binaries[@]} )); then
+        cp -r "${LOCALE_DIR}" "${BUILD_DIR}/"
+    else
+        echo "Note: no compiled translation files (*.mo) found; skipping locale/ in build output."
+    fi
 else
     echo "Note: locale directory not found; continuing without translations."
 fi

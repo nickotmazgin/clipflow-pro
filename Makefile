@@ -58,8 +58,13 @@ dist: build
 	
 	mkdir -p $(DIST_DIR)
 	
-	# Create zip file for GNOME Extensions website
-	cd $(BUILD_DIR) && zip -r ../$(DIST_DIR)/$(EXTENSION_UUID).zip .
+	# Stage files under UUID directory for GNOME Extensions upload
+	rm -rf $(DIST_DIR)/$(EXTENSION_UUID)
+	mkdir -p $(DIST_DIR)/$(EXTENSION_UUID)
+	cp -r $(BUILD_DIR)/* $(DIST_DIR)/$(EXTENSION_UUID)/
+	rm -f $(DIST_DIR)/$(EXTENSION_UUID).zip
+	cd $(DIST_DIR) && zip -r $(EXTENSION_UUID).zip $(EXTENSION_UUID)
+	rm -rf $(DIST_DIR)/$(EXTENSION_UUID)
 	
 	# Create source package
 	zip -r $(DIST_DIR)/clipflow-pro-source.zip \

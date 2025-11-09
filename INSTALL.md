@@ -18,10 +18,9 @@ This script never touches system directories; everything is installed into `~/.l
 
 ### Method 3: Manual Installation
 ```bash
-# Download and extract
+# Download and extract (archive already contains the UUID directory)
 wget https://github.com/nickotmazgin/clipflow-pro/releases/latest/download/clipflow-pro@nickotmazgin.github.io.zip
-mkdir -p ~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io
-unzip clipflow-pro@nickotmazgin.github.io.zip -d ~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io/
+unzip clipflow-pro@nickotmazgin.github.io.zip -d ~/.local/share/gnome-shell/extensions/
 
 # Restart GNOME Shell
 Alt + F2 → type 'r' → Enter

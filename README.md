@@ -256,6 +256,7 @@ If you find ClipFlow Pro useful, please consider supporting its development:
 
 ### Version 1.2.3
 - Appearance tab now includes a “Use Compact UI Layout” toggle so you can revert to the slimmer legacy styling if the boxed look isn’t your vibe.
+- Distribution zip now matches GNOME Extensions packaging rules (UUID directory root + compiled schemas/locales only).
 
 ### Version 1.2.2
 - Refreshed the clipboard window with a dedicated scroll lane, brighter history rows, and an animated empty state so users immediately know what to do when nothing has been copied yet.

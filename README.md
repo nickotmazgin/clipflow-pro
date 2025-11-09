@@ -254,6 +254,12 @@ If you find ClipFlow Pro useful, please consider supporting its development:
 
 ## Changelog
 
+### Version 1.2.2
+- Refreshed the clipboard window with a dedicated scroll lane, brighter history rows, and an animated empty state so users immediately know what to do when nothing has been copied yet.
+- Added `verify_clipflow.sh`, a diagnostic helper that recompiles schemas, syncs installs, and checks GNOME settings in one command.
+- Show a one-time toast when GNOME hasn’t granted clipboard access yet, making it clear why history entries aren’t flowing in on slow Wayland sessions.
+- Numerous fit-and-finish tweaks around pagination, margins, and schema validation to keep the UI consistent across shell versions.
+
 ### Version 1.2.1
 - Stabilized panel icon lifecycle to avoid duplicate indicators and Shell crashes when moving between left/center/right positions.
 - Limited the history slider to 10–100 entries so GNOME Shell no longer stalls on gigantic histories, keeping the advertised defaults in sync with what the code enforces.

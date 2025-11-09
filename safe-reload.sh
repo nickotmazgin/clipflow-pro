@@ -25,13 +25,26 @@ if [ ! -f ~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github
 fi
 
 echo "✅ Extension files ready"
-echo "✅ History preserved: $(cat ~/.config/clipflow-pro/history.json 2>/dev/null | jq 'length' 2>/dev/null || echo 0) entries"
+
+HISTORY_FILE="$HOME/.config/clipflow-pro/history.json"
+if command -v jq >/dev/null 2>&1; then
+    HISTORY_COUNT=$(jq 'length' "$HISTORY_FILE" 2>/dev/null || echo 0)
+    echo "✅ History preserved: ${HISTORY_COUNT} entries"
+else
+    echo "ℹ️  Install 'jq' to show history counts automatically (history file: ${HISTORY_FILE})"
+fi
 echo
 
 # Start journal monitoring in background
-echo "📋 Monitoring GNOME Shell for crashes..."
-journalctl --user -f -o cat | command grep -i "JS ERROR\|segfault\|crashed" &
-JOURNAL_PID=$!
+journal_monitor_running=false
+if command -v journalctl >/dev/null 2>&1; then
+    echo "📋 Monitoring GNOME Shell for crashes..."
+    journalctl --user -f -o cat | command grep -i "JS ERROR\|segfault\|crashed" &
+    JOURNAL_PID=$!
+    journal_monitor_running=true
+else
+    echo "⚠️  'journalctl' not available; skipping live crash monitoring."
+fi
 
 # Give user warning
 echo
@@ -45,13 +58,20 @@ read
 
 # Enable extension
 echo "Enabling extension..."
+if ! command -v gnome-extensions >/dev/null 2>&1; then
+    echo "❌ gnome-extensions CLI not installed. Install it and enable the extension manually." >&2
+    exit 1
+fi
+
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 
 # Wait and check
 sleep 3
 
 # Stop journal monitoring
-kill $JOURNAL_PID 2>/dev/null
+if [ "$journal_monitor_running" = true ]; then
+    kill "$JOURNAL_PID" 2>/dev/null
+fi
 
 # Check if still enabled
 if gnome-extensions list --enabled | command grep -q clipflow; then

@@ -12,6 +12,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Compact mode inherits the lighter backgrounds, borders, and spacing from the original layout while keeping the new empty-state/scroll fixes.
+- Release packaging now ships the extension inside the UUID directory with only compiled locale assets, aligning with extensions.gnome.org requirements.
 
 ---
 

@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.2] - 2025-11-09
+
+### Added
+- Modern empty-state banner with icon/hint text so the clipboard window always explains what to do next.
+- `verify_clipflow.sh` helper that recompiles schemas, resets risky settings, and guides Wayland users through log capture.
+- User-facing toast when GNOME hasn’t exposed the clipboard service yet, reducing confusion after login.
+
+### Changed
+- Restyled the history list with a dedicated scrollbar lane, brighter rows, and padded pagination buttons for better readability on dark themes.
+- Scrollbars now auto-hide when a page fits but never overlap the navigation controls.
+
+### Fixed
+- Ensured clipboard monitoring retries clear the previous warning flag so notifications don’t repeat forever.
+- Eliminated GNOME CSS warnings by removing unsupported properties in the new empty-state wrapper.
+
+---
+
 ## [1.2.1] - 2025-11-07
 
 ### Added

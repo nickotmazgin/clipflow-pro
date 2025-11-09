@@ -69,6 +69,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._logThrottle = new Map();
         this._logRateLimitMs = 5000;
         this._deferredSourceIds = new Set();
+        this._destroyed = false;
+        this._clipboardNotifyShown = false;
 
         // Initialize clipboard history
         this._clipboardHistory = [];
@@ -653,11 +655,15 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return;
         }
         try {
+            if (actor._clipflowDestroyed) {
+                return;
+            }
             if (typeof actor.destroy === 'function') {
                 actor.destroy();
             } else if (actor.actor && typeof actor.actor.destroy === 'function') {
                 actor.actor.destroy();
             }
+            actor._clipflowDestroyed = true;
         } catch (error) {
             this._debugLog(`Actor destroy failed: ${error.message}`);
         }
@@ -831,6 +837,12 @@ class ClipFlowIndicator extends PanelMenu.Button {
             x_expand: true,
             y_expand: true
         });
+        if (typeof this._historyScrollView.set_margin_right === 'function') {
+            this._historyScrollView.set_margin_right(10);
+        }
+        if (typeof this._historyScrollView.set_margin_bottom === 'function') {
+            this._historyScrollView.set_margin_bottom(8);
+        }
 
         if (typeof this._historyScrollView.set_policy === 'function') {
             if (St.PolicyType) {
@@ -1686,10 +1698,12 @@ class ClipFlowIndicator extends PanelMenu.Button {
             this._logThrottled('clipboard-interface-unavailable', 'ClipFlow Pro: Clipboard interface unavailable – monitoring disabled.');
             this._debugLog('FAILED to obtain clipboard interface');
             this._syncContextMenuToggles();
+            this._notifyClipboardUnavailable();
             this._scheduleClipboardRetry('interface-unavailable');
             return;
         }
 
+        this._clipboardNotifyShown = false;
         this._clearClipboardRetry();
         this._isMonitoring = true;
         this._lastClipboardText = null;
@@ -2547,8 +2561,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
         const filteredHistory = this._getFilteredHistory();
         const sortedHistory = this._sortHistory(filteredHistory);
         const totalEntries = sortedHistory.length;
-        this._debugLog(`🔄 Refreshing history view: totalEntries=${totalEntries}, filtered=${filteredHistory.length}, stored=${this._clipboardHistory.length}, currentPage=${this._currentPage}`);
         const pageSize = Math.max(1, this._entriesPerPage);
+        this._setHistoryScrollHidden(totalEntries <= pageSize);
+        this._debugLog(`🔄 Refreshing history view: totalEntries=${totalEntries}, filtered=${filteredHistory.length}, stored=${this._clipboardHistory.length}, currentPage=${this._currentPage}`);
         const totalPages = totalEntries === 0 ? 0 : Math.ceil(totalEntries / pageSize);
         if (totalPages > 0 && this._currentPage > totalPages - 1) {
             this._currentPage = totalPages - 1;
@@ -2559,16 +2574,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         
         if (totalEntries === 0) {
             const hasSearchFilter = this._searchEntry && this._getSearchText().trim();
-            const emptyText = hasSearchFilter
-                ? _('No matching entries found\nTry a different search term')
-                : _('No clipboard history yet\nCopy some text to get started!\n\nThe extension will automatically save your clipboard entries.');
-            const emptyItem = new St.Label({
-                text: emptyText,
-                style_class: 'clipflow-empty'
-            });
-            emptyItem.clutter_text.set_line_wrap(true);
-            emptyItem.clutter_text.set_line_wrap_mode(Pango.WrapMode.WORD);
-            this._historyContainer.add_child(emptyItem);
+            this._showEmptyState(hasSearchFilter);
             this._updatePaginationControls(0, 0);
             this._populateContextMenuRecentEntries();
             this._debugLog('History view empty');
@@ -2600,6 +2606,75 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 return GLib.SOURCE_REMOVE;
             });
         }
+    }
+
+    _setHistoryScrollHidden(hidden) {
+        if (!this._historyScrollView) {
+            return;
+        }
+
+        const className = 'clipflow-scrollbar-hidden';
+        if (hidden) {
+            if (typeof this._historyScrollView.add_style_class_name === 'function') {
+                this._historyScrollView.add_style_class_name(className);
+            }
+        } else if (typeof this._historyScrollView.remove_style_class_name === 'function') {
+            this._historyScrollView.remove_style_class_name(className);
+        }
+
+        if (typeof this._historyScrollView.set_policy === 'function') {
+            const policyEnum = St.PolicyType ?? Clutter.PolicyType;
+            if (policyEnum) {
+                const verticalPolicy = hidden ? policyEnum.NEVER : policyEnum.AUTOMATIC;
+                this._historyScrollView.set_policy(policyEnum.NEVER, verticalPolicy);
+            }
+        }
+    }
+
+    _showEmptyState(hasSearchFilter) {
+        if (!this._historyContainer) {
+            return;
+        }
+
+        const wrapper = new St.BoxLayout({
+            vertical: true,
+            x_expand: true,
+            y_expand: true,
+            style_class: 'clipflow-empty-wrapper'
+        });
+
+        const icon = new St.Icon({
+            icon_name: hasSearchFilter ? 'system-search-symbolic' : 'edit-copy-symbolic',
+            icon_size: 32,
+            style_class: 'clipflow-empty-icon'
+        });
+        wrapper.add_child(icon);
+
+        const title = new St.Label({
+            text: hasSearchFilter ? _('No matches found') : _('Nothing copied yet'),
+            style_class: 'clipflow-empty-text'
+        });
+        wrapper.add_child(title);
+
+        const hint = new St.Label({
+            text: hasSearchFilter
+                ? _('Try a different term or clear the filter to see all items.')
+                : _('Copy something and it will appear here instantly.'),
+            style_class: 'clipflow-empty-hint'
+        });
+        hint.clutter_text.set_line_wrap(true);
+        hint.clutter_text.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
+        wrapper.add_child(hint);
+
+        this._historyContainer.add_child(wrapper);
+    }
+
+    _notifyClipboardUnavailable() {
+        if (this._clipboardNotifyShown) {
+            return;
+        }
+        this._clipboardNotifyShown = true;
+        Main.notify('ClipFlow Pro', _('Clipboard service not available yet. Waiting for GNOME Shell to grant access.'));
     }
 
     _clearHistoryContainer() {
@@ -3262,10 +3337,23 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     destroy() {
+        if (this._destroyed) {
+            return;
+        }
+        this._destroyed = true;
+
         this._stopClipboardMonitoring();
 
         // Disconnect panel-related listeners
         this._disconnectPanelWatchers();
+
+        if (this.menu && typeof this.menu.removeAll === 'function') {
+            try {
+                this.menu.removeAll();
+            } catch (error) {
+                log(`ClipFlow Pro: Failed to clear menu: ${error.message}`);
+            }
+        }
 
         if (this._icon) {
             const parent = this._icon.get_parent();
@@ -3369,6 +3457,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._skipCleanupOnDestroy = false;
         this._clearDeferredSources();
 
+        this._clearDeferredSources();
         super.destroy();
     }
 });
@@ -3379,6 +3468,7 @@ class Extension {
         this._settings = null;
         this._panelPositionChangedId = 0;
         this._pendingAttachIdleId = 0;
+        this._isDisabled = false;
     }
 
     _clearPendingAttachIdle() {
@@ -3411,6 +3501,7 @@ class Extension {
 
     enable() {
         try {
+            this._isDisabled = false;
             // Initialize translations
             ExtensionUtils.initTranslations();
             this._clearPendingAttachIdle();
@@ -3442,6 +3533,10 @@ class Extension {
 
     disable() {
         try {
+            if (this._isDisabled) {
+                return;
+            }
+            this._isDisabled = true;
             this._clearPendingAttachIdle();
             this._disconnectPanelPositionWatcher();
             this._destroyIndicator();

@@ -35,7 +35,7 @@ else
 fi
 echo
 
-# Start journal monitoring in background
+# Ensure any background log monitor is stopped on exit
 journal_monitor_running=false
 JOURNAL_PID=""
 cleanup() {
@@ -48,6 +48,7 @@ cleanup() {
 }
 trap cleanup EXIT
 
+# Start journal monitoring in background
 if command -v journalctl >/dev/null 2>&1; then
     echo "📋 Monitoring GNOME Shell for crashes..."
     journalctl --user -f -o cat | command grep -i "JS ERROR\|segfault\|crashed" &

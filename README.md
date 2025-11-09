@@ -33,8 +33,6 @@ ClipFlow Pro is a powerful and intelligent clipboard manager that provides compr
 
 ## Screenshots
 
-![ClipFlow Pro overview collage](docs/screenshots/00-overview.png)
-
 <div align="center">
   <img src="docs/screenshots/01-panel-main-menu.png" alt="ClipFlow Pro panel indicator with the history menu open showing navigation buttons" width="720">
   <p><em>Panel indicator with the full clipboard history menu.</em></p>

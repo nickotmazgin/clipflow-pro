@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+_No changes yet._
+
+---
+
+## [1.2.4] - 2025-11-10
+
 ### Fixed
 - Prevented the `make bump-version` helper from writing non-integer version values to `metadata.json`, which previously produced invalid GNOME extension manifests.
 - Hardened clipboard list rendering so entries always appear in the main window even when history data is partially missing or malformed.

@@ -2879,12 +2879,23 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 if (layout && 'spacing' in layout)
                     layout.spacing = 10;
             }
-
-            const clickAction = new Clutter.ClickAction();
-            clickAction.connect('clicked', () => {
-                this._activateHistoryItem(item);
-            });
-            row.add_action(clickAction);
+            const supportsClickAction = typeof row.add_action === 'function' &&
+                Clutter && typeof Clutter.ClickAction === 'function';
+            if (supportsClickAction) {
+                const clickAction = new Clutter.ClickAction();
+                clickAction.connect('clicked', () => {
+                    this._activateHistoryItem(item);
+                });
+                row.add_action(clickAction);
+            } else {
+                row.connect('button-release-event', (_actor, event) => {
+                    if (event.get_button && event.get_button() === 1) {
+                        this._activateHistoryItem(item);
+                        return Clutter.EVENT_STOP;
+                    }
+                    return Clutter.EVENT_PROPAGATE;
+                });
+            }
 
             if (this._settings.get_boolean('show-numbers')) {
                 const numberLabel = new St.Label({

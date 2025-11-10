@@ -9,6 +9,34 @@ function init() {
     ExtensionUtils.initTranslations();
 }
 
+function _createPreferencesWidget() {
+    return new ClipFlowProPrefsWidget({
+        orientation: Gtk.Orientation.VERTICAL
+    });
+}
+
+function buildPrefsWidget() {
+    return _createPreferencesWidget();
+}
+
+function fillPreferencesWindow(window) {
+    const widget = _createPreferencesWidget();
+    widget.set_hexpand(true);
+    widget.set_vexpand(true);
+
+    if (typeof window.set_default_size === 'function') {
+        window.set_default_size(920, 640);
+    }
+
+    if (typeof window.set_content === 'function') {
+        window.set_content(widget);
+    } else if (typeof window.set_child === 'function') {
+        window.set_child(widget);
+    } else if (typeof window.add === 'function') {
+        window.add(widget);
+    }
+}
+
 const ClipFlowProPrefsWidget = GObject.registerClass(
 class ClipFlowProPrefsWidget extends Gtk.Box {
     _init(params) {

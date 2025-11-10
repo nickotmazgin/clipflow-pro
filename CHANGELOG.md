@@ -11,6 +11,16 @@ _No changes yet._
 
 ---
 
+## [1.2.6] - 2025-11-10
+
+### Added
+- Implemented the GNOME 45+ `fillPreferencesWindow()` path so the GTK4/libadwaita Extensions app can embed ClipFlow Pro’s preferences without falling back to the deprecated GTK3 widget loader.
+
+### Changed
+- Re-enabled official GNOME Shell 45–47 support in `metadata.json` after testing indicator, clipboard history, and shortcut handling on those releases.
+
+---
+
 ## [1.2.5] - 2025-11-10
 
 ### Changed

@@ -11,6 +11,13 @@ _No changes yet._
 
 ---
 
+## [1.2.5] - 2025-11-10
+
+### Changed
+- Restricted `metadata.json` compatibility list to GNOME Shell 42–44 so the extension is only advertised on versions that have been validated, addressing reviewer feedback about 45+ support.
+
+---
+
 ## [1.2.4] - 2025-11-10
 
 ### Fixed

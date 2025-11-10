@@ -295,6 +295,13 @@ If you find ClipFlow Pro useful, please consider supporting its development:
 
 ## Changelog
 
+### Version 1.2.6
+- Preferences now implement the GNOME 45+ `fillPreferencesWindow` contract (with backward-compatible `buildPrefsWidget`) so the settings dialog opens inside the GTK4/libadwaita Extensions app without errors.
+- Restored official support for GNOME Shell 45–47 after verifying the indicator, clipboard history UI, and shortcuts on newer Shell builds.
+
+### Version 1.2.5
+- Declared compatibility only for GNOME Shell 42–44 to match what is currently supported and avoid reviewer confusion while 45+ work continues.
+
 ### Version 1.2.4
 - History rows now render reliably across all supported GNOME Shell releases with a ClickAction fallback, so the main clipboard window never appears empty while entries still show up in the context menu.
 - Release helper scripts (`safe-reload.sh`, `make bump-version`) now degrade gracefully when dependencies are missing and keep `metadata.json` valid, preventing broken uploads to extensions.gnome.org.

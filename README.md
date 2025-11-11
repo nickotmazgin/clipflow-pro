@@ -1,9 +1,5 @@
 # ClipFlow Pro
 
-<div align="center">
-  <img src="docs/screenshots/00-banner.png" alt="ClipFlow Pro banner showcasing the refreshed UI" width="900">
-</div>
-
 **Advanced Clipboard Manager for GNOME Shell**
 
 ClipFlow Pro is a powerful and intelligent clipboard manager that provides comprehensive clipboard history management with advanced features like intelligent organization, search capabilities, pin/star functionality, and auto-copy on selection.

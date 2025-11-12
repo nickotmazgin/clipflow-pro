@@ -54,23 +54,16 @@ uninstall:
 
 # Create distribution package
 dist: build
-	@echo "Creating distribution package..."
-	
+	@echo "Creating distribution packages (EGO flat zip + source)..."
 	mkdir -p $(DIST_DIR)
-	
-	# Stage files under UUID directory for GNOME Extensions upload
-	rm -rf $(DIST_DIR)/$(EXTENSION_UUID)
-	mkdir -p $(DIST_DIR)/$(EXTENSION_UUID)
-	cp -r $(BUILD_DIR)/* $(DIST_DIR)/$(EXTENSION_UUID)/
-	rm -f $(DIST_DIR)/$(EXTENSION_UUID).zip
-	cd $(DIST_DIR) && zip -r $(EXTENSION_UUID).zip $(EXTENSION_UUID)
-	rm -rf $(DIST_DIR)/$(EXTENSION_UUID)
-	
-	# Create source package
+	# EGO flat zip (top-level files)
+	rm -f $(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip
+	cd $(BUILD_DIR) && zip -r ../$(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip .
+	# Source zip
+	rm -f $(DIST_DIR)/clipflow-pro-source.zip
 	zip -r $(DIST_DIR)/clipflow-pro-source.zip \
 		$(EXTENSION_FILES) $(EXTRA_FILES) Makefile \
 		$(SCHEMAS_DIR) $(LOCALE_DIR) 2>/dev/null || true
-	
 	@echo "Distribution packages created in $(DIST_DIR)/"
 
 # Pack using GNOME Extensions tool

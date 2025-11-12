@@ -15,8 +15,7 @@ export default class ClipFlowProPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
 
-        // Initialize translations for the preferences domain
-        this.initTranslations();
+        // Translations are provided via the extension's gettext domain.
 
         const widget = new ClipFlowProPrefsWidget({
             orientation: Gtk.Orientation.VERTICAL,

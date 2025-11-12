@@ -1,0 +1,56 @@
+name: "EGO Review Feedback"
+description: "Track feedback from extensions.gnome.org reviewers and plan fixes"
+title: "EGO Review: <summary>"
+labels:
+  - "ego-review"
+  - "triage"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Paste the reviewer link and summarize the feedback. Attach logs or screenshots where useful.
+  - type: input
+    id: review_link
+    attributes:
+      label: Review URL
+      placeholder: "https://extensions.gnome.org/review/*"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Extension version under review
+      placeholder: "1.2.7"
+    validations:
+      required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary of reviewer feedback
+      placeholder: "Summarize all points from the reviewer, one per line."
+    validations:
+      required: true
+  - type: checkboxes
+    id: shells
+    attributes:
+      label: Reported GNOME Shell versions
+      options:
+        - label: "45"
+        - label: "46"
+        - label: "47"
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps / logs
+      placeholder: "Steps to reproduce, and any journalctl lines (ClipFlow Pro)"
+  - type: textarea
+    id: actions
+    attributes:
+      label: Action items
+      placeholder: "- [ ] Update metadata\n- [ ] Port to ESM\n- [ ] Fix prefs window header\n- [ ] Repack flat zip"
+  - type: textarea
+    id: links
+    attributes:
+      label: Related PRs/commits
+      placeholder: "#123, #124"
+

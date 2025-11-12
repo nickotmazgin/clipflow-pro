@@ -8,6 +8,11 @@ Compatibility: GNOME Shell 45–47 (ESM)
 
 Note: This release uses the GNOME 45+ ES Modules format and libadwaita preferences. Older GNOME versions (≤44) are no longer declared as supported in this package.
 
+Developer tooling
+- Validate package layout before upload: `make ego-validate`
+- Create flat EGO zip + source zip: `make dist`
+- Issue templates: open “EGO Review Feedback” or “Release Checklist” from GitHub → New Issue
+
 ## Features
 
 ### 🚀 Core Features

@@ -1,0 +1,46 @@
+name: "Release Checklist"
+description: "Checklist to prepare a new release for GitHub and EGO"
+title: "Release: v<version>"
+labels:
+  - "release"
+  - "needs-review"
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this checklist to prepare a clean release that passes EGO review.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: "1.2.7"
+    validations:
+      required: true
+  - type: checkboxes
+    id: prep
+    attributes:
+      label: Prepare
+      options:
+        - label: "Bump metadata.json version + version-name"
+        - label: "Update CHANGELOG.md and RELEASE_NOTES.md"
+        - label: "Verify ESM imports (resource:/// and gi://)"
+        - label: "Verify Extension constructor calls super(metadata)"
+        - label: "Verify prefs.fillPreferencesWindow works on 45+"
+        - label: "Trim shell-version to tested set"
+  - type: checkboxes
+    id: package
+    attributes:
+      label: Package
+      options:
+        - label: "make dist (flat EGO zip + source zip)"
+        - label: "make ego-validate passes"
+        - label: "Local install test (make install; journalctl clean)"
+  - type: checkboxes
+    id: publish
+    attributes:
+      label: Publish
+      options:
+        - label: "Create GitHub tag and release with zips"
+        - label: "Upload flat zip to EGO"
+        - label: "Respond to EGO review feedback if needed"
+

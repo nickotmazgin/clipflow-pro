@@ -11,6 +11,18 @@ _No changes yet._
 
 ---
 
+## [1.2.7] - 2025-11-12
+
+### Changed
+- Ported extension runtime to GNOME 45+ ES Modules (ESM) using resource:/// imports; removed legacy imports.* usage in `extension.js`.
+- Preferences migrated to libadwaita integration and exported as an ESM `ExtensionPreferences` with `fillPreferencesWindow()`, restoring window header buttons on 45+.
+- Trimmed `metadata.json` shell versions to ["45", "46", "47"] per reviewer guidance to avoid advertising untested versions.
+
+### Notes
+- This package now targets GNOME Shell 45 and newer. Use an older release/branch for 42–44.
+
+---
+
 ## [1.2.6] - 2025-11-10
 
 ### Added

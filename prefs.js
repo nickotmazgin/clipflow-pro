@@ -1,48 +1,49 @@
 'use strict';
+import GObject from 'gi://GObject';
+import Gtk from 'gi://Gtk';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+import Pango from 'gi://Pango';
+import Gdk from 'gi://Gdk';
 
-const { GObject, Gtk, Gio, GLib, Pango, Gdk } = imports.gi;
-const ExtensionUtils = imports.misc.extensionUtils;
+import ExtensionUtils from 'resource:///org/gnome/shell/misc/extensionUtils.js';
+import { ExtensionPreferences, gettext as _ } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+
 const Me = ExtensionUtils.getCurrentExtension();
-const _ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
 
-function init() {
-    ExtensionUtils.initTranslations();
-}
+export default class ClipFlowProPreferences extends ExtensionPreferences {
+    fillPreferencesWindow(window) {
+        const settings = this.getSettings();
 
-function _createPreferencesWidget() {
-    return new ClipFlowProPrefsWidget({
-        orientation: Gtk.Orientation.VERTICAL
-    });
-}
+        // Translations are provided via the extension's gettext domain.
 
-function buildPrefsWidget() {
-    return _createPreferencesWidget();
-}
+        const widget = new ClipFlowProPrefsWidget({
+            orientation: Gtk.Orientation.VERTICAL,
+        }, settings);
 
-function fillPreferencesWindow(window) {
-    const widget = _createPreferencesWidget();
-    widget.set_hexpand(true);
-    widget.set_vexpand(true);
+        widget.set_hexpand(true);
+        widget.set_vexpand(true);
 
-    if (typeof window.set_default_size === 'function') {
-        window.set_default_size(920, 640);
-    }
+        if (typeof window.set_default_size === 'function') {
+            window.set_default_size(920, 640);
+        }
 
-    if (typeof window.set_content === 'function') {
-        window.set_content(widget);
-    } else if (typeof window.set_child === 'function') {
-        window.set_child(widget);
-    } else if (typeof window.add === 'function') {
-        window.add(widget);
+        // Attach our GTK widget as the window content. This keeps the Adw
+        // headerbar (close/minimize) while letting us reuse the existing UI.
+        if (typeof window.set_child === 'function') {
+            window.set_child(widget);
+        } else if (typeof window.add === 'function') {
+            window.add(widget);
+        }
     }
 }
 
 const ClipFlowProPrefsWidget = GObject.registerClass(
 class ClipFlowProPrefsWidget extends Gtk.Box {
-    _init(params) {
+    _init(params, settings) {
         super._init(params);
         
-        this._settings = ExtensionUtils.getSettings();
+        this._settings = settings ?? ExtensionUtils.getSettings();
         this._shortcutRows = new Map();
         this._tabIndexLookup = new Map();
         this._settingsSignals = [];

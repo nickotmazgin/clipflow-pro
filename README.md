@@ -320,6 +320,16 @@ If you find ClipFlow Pro useful, please consider supporting its development:
 
 ## Changelog
 
+### Version 1.2.8
+- Ported to GNOME 45+ ES Modules (ESM) with `resource:///` and `gi://` imports (no legacy `imports.*`).
+- Preferences integrated via `fillPreferencesWindow`; header bar (close/minimize) works on 45+.
+- Hardened extension constructor(metadata) to call `super(metadata)` for Shell 45+.
+- Packaging is a flat zip with required files (compiled schemas, icons, and no nested UUID dir).
+
+### Version 1.2.7
+- Migrated runtime to ESM and updated preferences integration for GNOME 45+.
+- Trimmed `metadata.json` `shell-version` to ["45","46","47"] as requested by reviewers.
+
 ### Version 1.2.6
 - Preferences now implement the GNOME 45+ `fillPreferencesWindow` contract (with backward-compatible `buildPrefsWidget`) so the settings dialog opens inside the GTK4/libadwaita Extensions app without errors.
 - Restored official support for GNOME Shell 45–47 after verifying the indicator, clipboard history UI, and shortcuts on newer Shell builds.

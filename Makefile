@@ -75,10 +75,11 @@ dist: build
 
 # Pack using GNOME Extensions tool
 pack: build
-	@echo "Packing with gnome-extensions..."
+	@echo "Packing flat zip for extensions.gnome.org..."
 	mkdir -p $(DIST_DIR)
-	gnome-extensions pack --force --out-dir $(DIST_DIR) $(BUILD_DIR)
-	@echo "Packed zip(s) in $(DIST_DIR)/"
+	rm -f $(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip
+	cd $(BUILD_DIR) && zip -r ../$(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip .
+	@echo "Packed: $(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip"
 
 # Development mode - install and watch for changes
 dev: install

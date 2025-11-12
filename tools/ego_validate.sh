@@ -37,67 +37,30 @@ else
 fi
 
 # Basic metadata sanity
-UUID=$(python3 - <<'PY'
-import json,sys
-data=json.load(open(sys.argv[1]))
-print(data.get('uuid',''))
-PY
-"$TMPDIR/metadata.json")
+UUID=$(python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));print(d.get("uuid",""))' "$TMPDIR/metadata.json")
 [ "$UUID" = "clipflow-pro@nickotmazgin.github.io" ] || fail "metadata.json uuid mismatch: $UUID"
 
-SHELLS=$(python3 - <<'PY'
-import json,sys
-data=json.load(open(sys.argv[1]))
-sv=data.get('shell-version',[])
-print(','.join(map(str,sv)))
-PY
-"$TMPDIR/metadata.json")
+SHELLS=$(python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));print(",".join(map(str,d.get("shell-version",[]))))' "$TMPDIR/metadata.json")
 echo "Shell versions: [$SHELLS]"
 
-VER=$(python3 - <<'PY'
-import json,sys
-data=json.load(open(sys.argv[1]))
-print(data.get('version'))
-PY
-"$TMPDIR/metadata.json")
+VER=$(python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));print(d.get("version"))' "$TMPDIR/metadata.json")
 [[ "$VER" =~ ^[0-9]+$ ]] || fail "metadata.json version is not an integer: $VER"
 
-VNAME=$(python3 - <<'PY'
-import json,sys
-data=json.load(open(sys.argv[1]))
-print(data.get('version-name',''))
-PY
-"$TMPDIR/metadata.json")
+VNAME=$(python3 -c 'import json,sys;d=json.load(open(sys.argv[1]));print(d.get("version-name",""))' "$TMPDIR/metadata.json")
 [ -n "$VNAME" ] || warn "metadata.json version-name missing"
 
 ok "metadata.json passes basic checks (uuid/version/version-name/shell-version)"
 
 # Validate schema id matches metadata settings-schema
-SCHEMA_ID=$(python3 - <<'PY'
-import xml.etree.ElementTree as ET,sys
-tree=ET.parse(sys.argv[1])
-root=tree.getroot()
-s=root.find('schema')
-print(s.get('id') if s is not None else '')
-PY
-"$TMPDIR/schema.xml") || true
-
 unzip -p "$ZIP" schemas/org.gnome.shell.extensions.clipflow-pro.gschema.xml > "$TMPDIR/schema.xml"
-SCHEMA_ID=$(python3 - <<'PY'
-import xml.etree.ElementTree as ET,sys
-tree=ET.parse(sys.argv[1])
-root=tree.getroot()
-s=root.find('schema')
-print(s.get('id') if s is not None else '')
-PY
-"$TMPDIR/schema.xml")
+SCHEMA_ID=$(python3 -c 'import xml.etree.ElementTree as ET,sys;tree=ET.parse(sys.argv[1]);root=tree.getroot();s=root.find("schema");print(s.get("id") if s is not None else "")' "$TMPDIR/schema.xml")
 [ "$SCHEMA_ID" = "org.gnome.shell.extensions.clipflow-pro" ] || fail "Schema id mismatch: $SCHEMA_ID"
 ok "Schema id matches"
 
 echo "--- extension.js constructor check ---"
 unzip -p "$ZIP" extension.js | grep -n "export default class" -n || warn "No default export class found"
-unzip -p "$ZIP" extension.js | grep -n "constructor(.*metadata" -n >/dev/null || fail "Extension constructor(metadata) not found"
-unzip -p "$ZIP" extension.js | grep -n "super(.*metadata)" -n >/dev/null || fail "Extension constructor does not call super(metadata)"
+unzip -p "$ZIP" extension.js | grep -En "constructor\s*\(\s*metadata\s*\)" >/dev/null || fail "Extension constructor(metadata) not found"
+unzip -p "$ZIP" extension.js | grep -En "super\s*\(\s*metadata\s*\)" >/dev/null || fail "Extension constructor does not call super(metadata)"
 ok "Extension constructor calls super(metadata)"
 
 echo "All checks passed."

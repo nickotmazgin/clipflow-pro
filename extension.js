@@ -3551,7 +3551,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
 });
 
 export default class ClipFlowProExtension extends Extension {
-    constructor() {
+    constructor(metadata) {
+        super(metadata);
         this._indicator = null;
         this._settings = null;
         this._panelPositionChangedId = 0;

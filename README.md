@@ -1,6 +1,7 @@
 # ClipFlow Pro
 
 ![EGO Validate](https://github.com/nickotmazgin/clipflow-pro/actions/workflows/ego-validate.yml/badge.svg)
+[![CodeQL](https://github.com/nickotmazgin/clipflow-pro/actions/workflows/codeql.yml/badge.svg)](https://github.com/nickotmazgin/clipflow-pro/actions/workflows/codeql.yml)
 
 **Advanced Clipboard Manager for GNOME Shell**
 

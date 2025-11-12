@@ -30,11 +30,11 @@ echo "Installing ClipFlow Pro to: ${TARGET_DIR}"
 rm -rf "${TARGET_DIR}"
 mkdir -p "${TARGET_DIR}"
 
-echo "→ Copying extension files..."
+echo "Copying extension files..."
 cp -r "${BUILD_DIR}/." "${TARGET_DIR}/"
 
 if [[ -d "${TARGET_DIR}/schemas" ]]; then
-    echo "→ Compiling GSettings schemas..."
+    echo "Compiling GSettings schemas..."
     if command -v glib-compile-schemas >/dev/null 2>&1; then
         glib-compile-schemas "${TARGET_DIR}/schemas/"
     elif [[ -f "${TARGET_DIR}/schemas/gschemas.compiled" ]]; then
@@ -74,4 +74,4 @@ echo "  • Shortcut Super+Shift+V opens the history menu."
 echo "Settings are available from the GNOME Extensions app."
 
 echo ""
-echo "Thank you for using ClipFlow Pro! 🎉"
+echo "Thank you for using ClipFlow Pro!"

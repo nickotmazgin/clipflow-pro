@@ -229,6 +229,20 @@ If clipboard history stays empty on Wayland:
 
 ### Performance Issues
 
+
+## Changelog (recent)
+
+- 1.2.8 (GNOME 45+ ESM)
+  - Hardened ESM runtime: Extension constructor(metadata) calls super(metadata)
+  - Added `make ego-validate` and CI workflow to lint EGO zips and metadata
+  - Packaging consolidated around flat EGO zip + source zip; README/dev docs updated
+
+- 1.2.7
+  - Ported to GNOME 45+ ES Modules (`resource:///`, `gi://`) and migrated preferences to `fillPreferencesWindow()`
+  - Restored header buttons in prefs on 45+; trimmed `shell-version` to ["45","46","47"]
+  - Produced reviewer‑ready flat EGO zip with compiled schemas and icons
+
+Full history: see CHANGELOG.md
 1. Reduce the maximum entries limit in settings
 2. Reduce the maximum entry length
 3. Enable auto-clear sensitive data to reduce memory usage

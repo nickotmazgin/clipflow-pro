@@ -74,6 +74,11 @@ pack: build
 	cd $(BUILD_DIR) && zip -r ../$(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip .
 	@echo "Packed: $(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip"
 
+# Validate EGO zip structure and metadata
+ego-validate: dist
+	@echo "Validating EGO zip structure and metadata..."
+	@bash tools/ego_validate.sh
+
 # Development mode - install and watch for changes
 dev: install
 	@echo "Development mode - watching for changes..."

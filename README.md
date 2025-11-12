@@ -4,6 +4,10 @@
 
 ClipFlow Pro is a powerful and intelligent clipboard manager that provides comprehensive clipboard history management with advanced features like intelligent organization, search capabilities, pin/star functionality, and auto-copy on selection.
 
+Compatibility: GNOME Shell 45–47 (ESM)
+
+Note: This release uses the GNOME 45+ ES Modules format and libadwaita preferences. Older GNOME versions (≤44) are no longer declared as supported in this package.
+
 ## Features
 
 ### 🚀 Core Features

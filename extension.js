@@ -1,24 +1,26 @@
 'use strict';
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const Main = imports.ui.main;
-const PanelMenu = imports.ui.panelMenu;
-const PopupMenu = imports.ui.popupMenu;
-const {St, GObject, GLib, Gio, Clutter, Meta, Shell, Pango} = imports.gi;
-let Gtk = null;
-try {
-    Gtk = imports.gi.Gtk;
-} catch (_err) {
-    Gtk = null;
-}
-const ByteArray = imports.byteArray;
+import St from 'gi://St';
+import GObject from 'gi://GObject';
+import GLib from 'gi://GLib';
+import Gio from 'gi://Gio';
+import Clutter from 'gi://Clutter';
+import Meta from 'gi://Meta';
+import Shell from 'gi://Shell';
+import Pango from 'gi://Pango';
+
+import * as Main from 'resource:///org/gnome/shell/ui/main.js';
+import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
+import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
+import * as ByteArray from 'resource:///org/gnome/gjs/modules/byteArray.js';
+import ExtensionUtils from 'resource:///org/gnome/shell/misc/extensionUtils.js';
+import { Extension, gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
 
 const HISTORY_LIMIT_MIN = 10;
 const HISTORY_LIMIT_MAX = 100;
 
 // Get extension metadata
 const Me = ExtensionUtils.getCurrentExtension();
-const _ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
 
 var ClipFlowIndicator = GObject.registerClass(
 class ClipFlowIndicator extends PanelMenu.Button {
@@ -572,13 +574,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
     _ensureIconThemeRegistered() {
         try {
             if (!this._iconThemeRegistered) {
-                const iconsDir = Me.dir.get_child('icons');
-                if (iconsDir && iconsDir.query_exists(null) && Gtk && Gtk.IconTheme) {
-                    const theme = Gtk.IconTheme.get_default();
-                    if (theme && typeof theme.add_search_path === 'function') {
-                        theme.add_search_path(iconsDir.get_path());
-                    }
-                }
+                // Icons are referenced via Gio.FileIcon; no theme path change needed.
                 this._iconThemeRegistered = true;
             }
         } catch (error) {
@@ -3550,13 +3546,11 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._lastClipboardText = '';
         this._skipCleanupOnDestroy = false;
         this._clearDeferredSources();
-
-        this._clearDeferredSources();
         super.destroy();
     }
 });
 
-class Extension {
+export default class ClipFlowProExtension extends Extension {
     constructor() {
         this._indicator = null;
         this._settings = null;
@@ -3597,12 +3591,12 @@ class Extension {
         try {
             this._isDisabled = false;
             // Initialize translations
-            ExtensionUtils.initTranslations();
+            this.initTranslations();
             this._clearPendingAttachIdle();
             this._disconnectPanelPositionWatcher();
             this._destroyIndicator();
 
-            const settings = ExtensionUtils.getSettings();
+            const settings = this.getSettings();
             if (!settings) {
                 const message = 'ClipFlow Pro: Settings schema not found. Run build.sh to compile gschemas.';
                 log(message);
@@ -3705,8 +3699,4 @@ class Extension {
             log(`ClipFlow Pro: attach fallback error: ${e.message}`);
         }
     }
-}
-
-function init() {
-    return new Extension();
 }

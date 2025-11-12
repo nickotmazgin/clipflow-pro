@@ -395,12 +395,4 @@ If you find ClipFlow Pro useful, please consider supporting its development:
 - Keyboard shortcuts support
 - Theme integration
 
-## Acknowledgments
-
-- GNOME Shell team for the excellent extension system
-- GNOME community for inspiration and feedback
-- All contributors and testers
-
----
-
-**Made with ❤️ for the GNOME community**
+<!-- Acknowledgments intentionally removed for a leaner README. -->

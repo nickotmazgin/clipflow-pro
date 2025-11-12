@@ -11,6 +11,20 @@ _No changes yet._
 
 ---
 
+## [1.2.8] - 2025-11-12
+
+### Fixed
+- Ensure Extension subclass constructor(metadata) calls super(metadata) for GNOME 45+ ESM runtime.
+
+### Added
+- EGO packaging validator and Makefile target (`make ego-validate`) to lint zip structure and metadata.
+- GitHub issue templates: EGO Review Feedback and Release Checklist.
+
+### Changed
+- Packaging Makefile consolidated around flat EGO zip + source zip and updated README developer tooling.
+
+---
+
 ## [1.2.7] - 2025-11-12
 
 ### Changed

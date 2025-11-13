@@ -738,12 +738,12 @@ class ClipFlowIndicator extends PanelMenu.Button {
     _safeGetInt(key, defaultValue) {
         try {
             if (!this._settings) {
-                this._debugLog(`⚠️ Settings object missing for key: ${key}, using default: ${defaultValue}`);
+                this._debugLog(`[WARN] Settings object missing for key: ${key}, using default: ${defaultValue}`);
                 return defaultValue;
             }
             return this._settings.get_int(key);
         } catch (error) {
-            this._debugLog(`⚠️ Error reading setting ${key}: ${error.message}, using default: ${defaultValue}`);
+            this._debugLog(`[WARN] Error reading setting ${key}: ${error.message}, using default: ${defaultValue}`);
             return defaultValue;
         }
     }
@@ -751,12 +751,12 @@ class ClipFlowIndicator extends PanelMenu.Button {
     _safeGetBoolean(key, defaultValue) {
         try {
             if (!this._settings) {
-                this._debugLog(`⚠️ Settings object missing for key: ${key}, using default: ${defaultValue}`);
+                this._debugLog(`[WARN] Settings object missing for key: ${key}, using default: ${defaultValue}`);
                 return defaultValue;
             }
             return this._settings.get_boolean(key);
         } catch (error) {
-            this._debugLog(`⚠️ Error reading setting ${key}: ${error.message}, using default: ${defaultValue}`);
+            this._debugLog(`[WARN] Error reading setting ${key}: ${error.message}, using default: ${defaultValue}`);
             return defaultValue;
         }
     }
@@ -764,12 +764,12 @@ class ClipFlowIndicator extends PanelMenu.Button {
     _safeGetString(key, defaultValue) {
         try {
             if (!this._settings) {
-                this._debugLog(`⚠️ Settings object missing for key: ${key}, using default: ${defaultValue}`);
+                this._debugLog(`[WARN] Settings object missing for key: ${key}, using default: ${defaultValue}`);
                 return defaultValue;
             }
             return this._settings.get_string(key) || defaultValue;
         } catch (error) {
-            this._debugLog(`⚠️ Error reading setting ${key}: ${error.message}, using default: ${defaultValue}`);
+            this._debugLog(`[WARN] Error reading setting ${key}: ${error.message}, using default: ${defaultValue}`);
             return defaultValue;
         }
     }
@@ -905,7 +905,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             this._refreshHistory();
             this._debugLog(`Initial history refresh called after menu build`);
         } else {
-            this._debugLog(`⚠️ WARNING: History container missing after menu build!`);
+            this._debugLog(`[WARN] History container missing after menu build!`);
         }
     }
 
@@ -1491,7 +1491,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             this._currentPage = 0;
             this._updateAutoClearTimers();
             this._invalidateFilterCache(true);
-            this._debugLog(`✅ Loaded ${this._clipboardHistory.length} history entries from disk`);
+            this._debugLog(`[OK] Loaded ${this._clipboardHistory.length} history entries from disk`);
             if (this._clipboardHistory.length > 0) {
                 this._debugLog(`First entry preview: "${this._truncateText(this._clipboardHistory[0].text, 50)}..."`);
             }
@@ -2514,7 +2514,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._queueHistorySave();
         this._updateIconState();
         this._invalidateFilterCache();
-        this._debugLog(`✅ SUCCESS: Added history item #${this._clipboardHistory.length} - "${this._truncateText(text, 50)}..."`);
+        this._debugLog(`[OK] Added history item #${this._clipboardHistory.length} - "${this._truncateText(text, 50)}..."`);
         this._debugLog(`History collection now has ${this._clipboardHistory.length} total entries.`);
         this._debugLog(`Calling _refreshHistory() to update UI...`);
         this._refreshHistory();
@@ -2554,7 +2554,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
     _refreshHistory() {
         if (!this._historyContainer) {
-            this._debugLog('⚠️ History container missing during refresh - cannot display entries');
+            this._debugLog('[WARN] History container missing during refresh - cannot display entries');
             return;
         }
 

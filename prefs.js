@@ -648,16 +648,16 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         featuresFrame.set_child(featuresBox);
 
         const features = [
-            _('• Advanced clipboard history management'),
-            _('• Intelligent search and filtering with debouncing'),
-            _('• Pin and star system for important entries'),
-            _('• Smart content type detection (URLs, emails, code)'),
-            _('• Password detection and filtering'),
-            _('• Secure local-only storage with privacy protection'),
-            _('• Keyboard shortcuts support'),
-            _('• Search-aware pagination'),
-            _('• GNOME theme integration'),
-            _('• Auto-clear sensitive data option')
+            _('- Advanced clipboard history management'),
+            _('- Intelligent search and filtering with debouncing'),
+            _('- Pin and star system for important entries'),
+            _('- Smart content type detection (URLs, emails, code)'),
+            _('- Password detection and filtering'),
+            _('- Secure local-only storage with privacy protection'),
+            _('- Keyboard shortcuts support'),
+            _('- Search-aware pagination'),
+            _('- GNOME theme integration'),
+            _('- Auto-clear sensitive data option')
         ];
 
         features.forEach(feature => {

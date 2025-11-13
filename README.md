@@ -321,6 +321,10 @@ If you find ClipFlow Pro useful, please consider supporting its development:
 
 ## Changelog
 
+### Version 1.2.9
+- ASCII-only runtime debug logs for maximum compatibility
+- Preferences About list uses ASCII dashes instead of Unicode bullets
+
 ### Version 1.2.8
 - Ported to GNOME 45+ ES Modules (ESM) with `resource:///` and `gi://` imports (no legacy `imports.*`).
 - Preferences integrated via `fillPreferencesWindow`; header bar (close/minimize) works on 45+.

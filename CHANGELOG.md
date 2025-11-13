@@ -11,6 +11,17 @@ _No changes yet._
 
 ---
 
+## [1.2.9] - 2025-11-12
+
+### Changed
+- ASCII-only runtime logs: replaced emoji symbols in extension.js debug messages with plain [OK]/[WARN] tags for maximum locale/terminal compatibility.
+- Preferences About list: replaced Unicode bullets with ASCII dashes.
+
+### Notes
+- No functional changes; packaging and EGO validation unchanged.
+
+---
+
 ## [1.2.8] - 2025-11-12
 
 ### Fixed

@@ -13,22 +13,21 @@ import * as Main from 'resource:///org/gnome/shell/ui/main.js';
 import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 import * as ByteArray from 'resource:///org/gnome/gjs/modules/byteArray.js';
-import ExtensionUtils from 'resource:///org/gnome/shell/misc/extensionUtils.js';
 import { Extension, gettext as _ } from 'resource:///org/gnome/shell/extensions/extension.js';
 
 const HISTORY_LIMIT_MIN = 10;
 const HISTORY_LIMIT_MAX = 100;
 
-// Get extension metadata
-const Me = ExtensionUtils.getCurrentExtension();
+// UUID constant used for opening prefs
+const UUID = 'clipflow-pro@nickotmazgin.github.io';
 
 var ClipFlowIndicator = GObject.registerClass(
 class ClipFlowIndicator extends PanelMenu.Button {
     _init(settings = null) {
         super._init(0.0, _('ClipFlow Pro'));
         
-        // Initialize settings
-        this._settings = settings ?? ExtensionUtils.getSettings();
+        // Initialize settings (passed from Extension.enable)
+        this._settings = settings;
         if (!this._settings) {
             throw new Error('ClipFlow Pro: Settings object is required to initialize the indicator.');
         }
@@ -195,24 +194,10 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _addIndicatorIcon() {
-        const iconFile = Me.dir.get_child('icons').get_child('clipflow-pro-symbolic.svg');
-        const props = {
-            style_class: 'system-status-icon clipflow-pro-panel-icon'
-        };
-
-        if (iconFile && iconFile.query_exists(null)) {
-            try {
-                props.gicon = new Gio.FileIcon({ file: iconFile });
-            } catch (error) {
-                log(`ClipFlow Pro: Failed to create panel icon from file: ${error}`);
-            }
-        }
-
-        if (!props.gicon) {
-            props.icon_name = 'edit-paste-symbolic';
-        }
-
-        const icon = new St.Icon(props);
+        const icon = new St.Icon({
+            style_class: 'system-status-icon clipflow-pro-panel-icon',
+            icon_name: 'edit-paste-symbolic'
+        });
         if (typeof icon.set_icon_size === 'function') {
             icon.set_icon_size(16);
         }
@@ -578,7 +563,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 this._iconThemeRegistered = true;
             }
         } catch (error) {
-            log(`ClipFlow Pro: Failed to register icon theme path: ${error}`);
+            console.warn(`ClipFlow Pro: Failed to register icon theme path: ${error}`);
         }
     }
 
@@ -586,7 +571,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         if (!this._logEnabled) {
             return;
         }
-        log(`[ClipFlow Pro] ${message}`);
+        console.debug(`[ClipFlow Pro] ${message}`);
     }
 
     _logThrottled(key, message, minIntervalMs = this._logRateLimitMs) {
@@ -598,10 +583,10 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 return;
             }
             this._logThrottle.set(key, now);
-            log(message);
+            console.warn(message);
         } catch (error) {
             // Fallback: if throttling fails, log once to avoid silence on critical errors
-            log(message);
+            console.warn(message);
         }
     }
 
@@ -730,7 +715,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 this._settings.set_int('pause-duration-minutes', corrected);
             }
         } catch (error) {
-            log(`ClipFlow Pro: Error validating settings: ${error}`);
+            console.warn(`ClipFlow Pro: Error validating settings: ${error}`);
         }
     }
 
@@ -1392,7 +1377,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 this._debugLog(`Failed to set directory permissions: ${permError.message}`);
             }
         } catch (error) {
-            log(`ClipFlow Pro: Failed to ensure storage directory: ${error}`);
+            console.warn(`ClipFlow Pro: Failed to ensure storage directory: ${error}`);
             throw error; // Re-throw so caller knows directory creation failed
         }
     }
@@ -1421,7 +1406,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             try {
                 parsed = JSON.parse(raw);
             } catch (jsonError) {
-                log(`ClipFlow Pro: Failed to parse history JSON (file may be corrupted): ${jsonError.message}`);
+                console.warn(`ClipFlow Pro: Failed to parse history JSON (file may be corrupted): ${jsonError.message}`);
                 // Backup the corrupted file before resetting
                 try {
                     const backupFile = Gio.File.new_for_path(this._historyFile + '.corrupted.' + Date.now());
@@ -1437,7 +1422,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             }
 
             if (!Array.isArray(parsed)) {
-                log(`ClipFlow Pro: History file does not contain an array, resetting history`);
+                console.warn(`ClipFlow Pro: History file does not contain an array, resetting history`);
                 this._clipboardHistory = [];
                 return;
             }
@@ -1480,7 +1465,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                             contentType: entry.contentType || this._detectContentType(cappedText)
                         };
                     } catch (error) {
-                        log(`ClipFlow Pro: Failed to parse history entry: ${error}`);
+                        console.warn(`ClipFlow Pro: Failed to parse history entry: ${error}`);
                         return null;
                     }
                 })
@@ -1496,7 +1481,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 this._debugLog(`First entry preview: "${this._truncateText(this._clipboardHistory[0].text, 50)}..."`);
             }
         } catch (error) {
-            log(`ClipFlow Pro: Failed to load history: ${error}`);
+            console.warn(`ClipFlow Pro: Failed to load history: ${error}`);
             this._clipboardHistory = [];
         }
     }
@@ -1535,7 +1520,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             try {
                 this._ensureStorageDir();
             } catch (dirError) {
-                log(`ClipFlow Pro: Cannot save history - storage directory unavailable: ${dirError.message}`);
+                console.warn(`ClipFlow Pro: Cannot save history - storage directory unavailable: ${dirError.message}`);
                 return; // Cannot save without storage directory
             }
             const serialised = this._clipboardHistory.map(item => ({
@@ -1565,7 +1550,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 this._debugLog(`Failed to set file permissions (history still saved): ${permError.message}`);
             }
         } catch (error) {
-            log(`ClipFlow Pro: Failed to save history: ${error}`);
+            console.warn(`ClipFlow Pro: Failed to save history: ${error}`);
         }
     }
 
@@ -1577,7 +1562,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 file.delete(null);
             }
         } catch (error) {
-            log(`ClipFlow Pro: Failed to clear history storage: ${error}`);
+            console.warn(`ClipFlow Pro: Failed to clear history storage: ${error}`);
         }
     }
 
@@ -1943,7 +1928,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             try {
                 this._clipboard.disconnect(this._clipboardOwnerChangeId);
             } catch (error) {
-                log(`ClipFlow Pro: Error disconnecting clipboard signal: ${error.message}`);
+                console.warn(`ClipFlow Pro: Error disconnecting clipboard signal: ${error.message}`);
             }
         }
         this._clipboardOwnerChangeId = 0;
@@ -2269,7 +2254,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 }
             }
         } catch (error) {
-            log(`ClipFlow Pro: Unable to determine action mode mask: ${error}`);
+            console.warn(`ClipFlow Pro: Unable to determine action mode mask: ${error}`);
         }
 
         return 0;
@@ -2292,7 +2277,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 try {
                     handler();
                 } catch (error) {
-                    log(`ClipFlow Pro: Keybinding ${name} handler failed: ${error}`);
+            console.warn(`ClipFlow Pro: Keybinding ${name} handler failed: ${error}`);
                 }
             };
 
@@ -2311,7 +2296,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                     }
                 }
             } catch (error) {
-                log(`ClipFlow Pro: Failed to register keybinding ${name} via Main.wm: ${error}`);
+                console.warn(`ClipFlow Pro: Failed to register keybinding ${name} via Main.wm: ${error}`);
             }
 
             try {
@@ -2326,7 +2311,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                     this._keybindingRegistrations.set(name, 'display');
                 }
             } catch (error) {
-                log(`ClipFlow Pro: Failed to register keybinding ${name} via global.display: ${error}`);
+                console.warn(`ClipFlow Pro: Failed to register keybinding ${name} via global.display: ${error}`);
             }
         };
 
@@ -2352,7 +2337,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                     global.display.remove_keybinding(name);
                 }
             } catch (error) {
-                log(`ClipFlow Pro: Failed to remove keybinding ${name}: ${error}`);
+                console.warn(`ClipFlow Pro: Failed to remove keybinding ${name}: ${error}`);
             }
         }
 
@@ -2389,7 +2374,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 });
             });
         } catch (error) {
-            log(`ClipFlow Pro: Enhanced copy shortcut failed: ${error}`);
+            console.warn(`ClipFlow Pro: Enhanced copy shortcut failed: ${error}`);
         }
     }
 
@@ -2413,7 +2398,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 }
             });
         } catch (error) {
-            log(`ClipFlow Pro: Enhanced paste shortcut failed: ${error}`);
+            console.warn(`ClipFlow Pro: Enhanced paste shortcut failed: ${error}`);
         }
     }
 
@@ -3409,7 +3394,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
     _openPreferencesTab(target = 'general') {
         try {
             this._setPrefsTarget(target);
-            ExtensionUtils.openPrefs();
+            Main.extensionManager?.openExtensionPrefs?.(UUID, '', null);
         } catch (e) {
             Main.notify('ClipFlow Pro', _('Settings not available'));
         }
@@ -3422,7 +3407,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 this._settings.set_string('target-prefs-tab', target);
             }
         } catch (e) {
-            log(`ClipFlow Pro: Unable to set target preferences tab: ${e.message}`);
+            console.warn(`ClipFlow Pro: Unable to set target preferences tab: ${e.message}`);
         }
     }
 
@@ -3441,7 +3426,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             try {
                 this.menu.removeAll();
             } catch (error) {
-                log(`ClipFlow Pro: Failed to clear menu: ${error.message}`);
+            console.warn(`ClipFlow Pro: Failed to clear menu: ${error.message}`);
             }
         }
 
@@ -3491,7 +3476,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                     }
                     this._menuContainerBox.destroy();
                 } catch (e) {
-                    log(`ClipFlow Pro: Error removing menu container box: ${e.message}`);
+                    console.warn(`ClipFlow Pro: Error removing menu container box: ${e.message}`);
                 }
                 this._menuContainerBox = null;
             }
@@ -3557,7 +3542,6 @@ export default class ClipFlowProExtension extends Extension {
         this._settings = null;
         this._panelPositionChangedId = 0;
         this._pendingAttachIdleId = 0;
-        this._isDisabled = false;
     }
 
     _clearPendingAttachIdle() {
@@ -3583,27 +3567,21 @@ export default class ClipFlowProExtension extends Extension {
         try {
             this._indicator.destroy();
         } catch (error) {
-            log(`ClipFlow Pro: Error destroying indicator: ${error.message}`);
+            console.warn(`ClipFlow Pro: Error destroying indicator: ${error.message}`);
         }
         this._indicator = null;
     }
 
     enable() {
         try {
-            this._isDisabled = false;
-            // Initialize translations
-            this.initTranslations();
+            // No-op: GNOME Shell initiates translations via gettext-domain in metadata
             this._clearPendingAttachIdle();
             this._disconnectPanelPositionWatcher();
             this._destroyIndicator();
 
             const settings = this.getSettings();
-            if (!settings) {
-                const message = 'ClipFlow Pro: Settings schema not found. Run build.sh to compile gschemas.';
-                log(message);
-                Main.notify('ClipFlow Pro', _('Settings schema not found. Run the build script and reinstall the extension.'));
-                return;
-            }
+            if (!settings)
+                throw new Error('Settings schema not found.');
             this._settings = settings;
 
             const panelPosition = this._normalizePanelPosition(this._settings.get_string('panel-position'));
@@ -3615,23 +3593,18 @@ export default class ClipFlowProExtension extends Extension {
             });
 
         } catch (e) {
-            log(`ClipFlow Pro: Error enabling extension: ${e.message}`);
-            Main.notify('ClipFlow Pro', _('Failed to enable extension. Check logs for details.'));
+            console.error(`ClipFlow Pro: Error enabling extension: ${e.message}`);
         }
     }
 
     disable() {
         try {
-            if (this._isDisabled) {
-                return;
-            }
-            this._isDisabled = true;
             this._clearPendingAttachIdle();
             this._disconnectPanelPositionWatcher();
             this._destroyIndicator();
             this._settings = null;
         } catch (e) {
-            log(`ClipFlow Pro: Error disabling extension: ${e.message}`);
+            console.error(`ClipFlow Pro: Error disabling extension: ${e.message}`);
         }
     }
 
@@ -3655,7 +3628,7 @@ export default class ClipFlowProExtension extends Extension {
             return position;
         }
 
-        log(`ClipFlow Pro: Invalid panel-position '${position}', defaulting to 'right'.`);
+        console.warn(`ClipFlow Pro: Invalid panel-position '${position}', defaulting to 'right'.`);
         if (this._settings) {
             this._settings.set_string('panel-position', 'right');
         }
@@ -3691,13 +3664,13 @@ export default class ClipFlowProExtension extends Extension {
                     this._pendingAttachIdleId = idleId;
                     return;
                 } catch (error) {
-                    log(`ClipFlow Pro: Failed to attach indicator to '${pos}': ${error}`);
+                    console.warn(`ClipFlow Pro: Failed to attach indicator to '${pos}': ${error}`);
                     continue;
                 }
             }
-            log('ClipFlow Pro: Unable to attach indicator to any panel position.');
+            console.warn('ClipFlow Pro: Unable to attach indicator to any panel position.');
         } catch (e) {
-            log(`ClipFlow Pro: attach fallback error: ${e.message}`);
+            console.warn(`ClipFlow Pro: attach fallback error: ${e.message}`);
         }
     }
 }

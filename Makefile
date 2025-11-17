@@ -56,9 +56,9 @@ uninstall:
 dist: build
 	@echo "Creating distribution packages (EGO flat zip + source)..."
 	mkdir -p $(DIST_DIR)
-	# EGO flat zip (top-level files)
+	# EGO flat zip (top-level files) - exclude compiled schemas per GNOME 45+ guidance
 	rm -f $(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip
-	cd $(BUILD_DIR) && zip -r ../$(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip .
+	cd $(BUILD_DIR) && zip -r ../$(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip . -x "schemas/gschemas.compiled"
 	# Source zip
 	rm -f $(DIST_DIR)/clipflow-pro-source.zip
 	zip -r $(DIST_DIR)/clipflow-pro-source.zip \

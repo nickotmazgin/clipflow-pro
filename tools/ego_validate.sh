@@ -2,7 +2,7 @@
 set -euo pipefail
 
 ZIP="dist/clipflow-pro@nickotmazgin.github.io.shell-extension.zip"
-REQ=("metadata.json" "extension.js" "prefs.js" "stylesheet.css" "schemas/gschemas.compiled" "schemas/org.gnome.shell.extensions.clipflow-pro.gschema.xml" "icons/clipflow-pro-symbolic.svg")
+REQ=("metadata.json" "extension.js" "prefs.js" "stylesheet.css" "schemas/org.gnome.shell.extensions.clipflow-pro.gschema.xml" "icons/clipflow-pro-symbolic.svg")
 
 fail() { echo "[ERROR] $*" >&2; exit 1; }
 warn() { echo "[WARN]  $*" >&2; }

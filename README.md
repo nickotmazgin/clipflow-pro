@@ -400,3 +400,9 @@ If you find ClipFlow Pro useful, please consider supporting its development:
 - Theme integration
 
 <!-- Acknowledgments intentionally removed for a leaner README. -->
+- 1.2.10
+  - Removed compiled schemas from EGO zip (45+)
+  - Dropped ExtensionUtils (ESM); open prefs via Main.extensionManager
+  - Prefs destroy() + super.destroy(); removed self-check logs
+  - Use console.* logging; debug via console.debug only
+  - Trimmed try/catch and typeof guards

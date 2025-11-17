@@ -6,10 +6,7 @@ import GLib from 'gi://GLib';
 import Pango from 'gi://Pango';
 import Gdk from 'gi://Gdk';
 
-import ExtensionUtils from 'resource:///org/gnome/shell/misc/extensionUtils.js';
 import { ExtensionPreferences, gettext as _ } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
-
-const Me = ExtensionUtils.getCurrentExtension();
 
 export default class ClipFlowProPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
@@ -19,48 +16,52 @@ export default class ClipFlowProPreferences extends ExtensionPreferences {
 
         const widget = new ClipFlowProPrefsWidget({
             orientation: Gtk.Orientation.VERTICAL,
-        }, settings);
+        }, settings, this.metadata);
 
         widget.set_hexpand(true);
         widget.set_vexpand(true);
 
-        if (typeof window.set_default_size === 'function') {
-            window.set_default_size(920, 640);
-        }
+        window.set_default_size?.(920, 640);
 
         // Attach our GTK widget as the window content. This keeps the Adw
         // headerbar (close/minimize) while letting us reuse the existing UI.
-        if (typeof window.set_child === 'function') {
-            window.set_child(widget);
-        } else if (typeof window.add === 'function') {
-            window.add(widget);
-        }
+        window.set_child?.(widget) ?? window.add?.(widget);
     }
 }
 
 const ClipFlowProPrefsWidget = GObject.registerClass(
 class ClipFlowProPrefsWidget extends Gtk.Box {
-    _init(params, settings) {
+    _init(params, settings, metadata) {
         super._init(params);
         
-        this._settings = settings ?? ExtensionUtils.getSettings();
+        this._settings = settings;
+        this._metadata = metadata ?? {};
         this._shortcutRows = new Map();
         this._tabIndexLookup = new Map();
         this._settingsSignals = [];
         this._buildUI();
     }
 
-    vfunc_dispose() {
+    destroy() {
         if (this._settings && this._settingsSignals) {
             this._settingsSignals.forEach(id => this._settings.disconnect(id));
             this._settingsSignals = [];
         }
 
         this._shortcutRows?.clear();
-        super.vfunc_dispose();
+        super.destroy();
     }
 
     _buildUI() {
+        // Helper to access metadata from ExtensionPreferences via a global getter
+        this._getMeta = (key) => {
+            try {
+                // GNOME 45+ exposes metadata through the preferences extension context
+                return this.get_root()?.get_ancestor?.(Gtk.Window)?.application?.metadata?.[key] ?? null;
+            } catch (_e) {
+                return null;
+            }
+        };
         this.set_orientation(Gtk.Orientation.VERTICAL);
         this.set_spacing(20);
         this.set_margin_start(20);
@@ -547,7 +548,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         });
         const versionLabel = new Gtk.Label({ label: _('Version:') });
         const versionValue = new Gtk.Label({
-            label: Me.metadata['version-name'] || String(Me.metadata.version ?? ''),
+            label: (this._metadata['version-name'] || String(this._metadata.version ?? ''))
         });
         versionBox.append(versionLabel);
         versionBox.append(versionValue);
@@ -730,7 +731,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
             this._settings.set_string('target-prefs-tab', 'general');
         } catch (e) {
-            log(`ClipFlow Pro: Failed to apply initial preferences tab: ${e.message}`);
+            console.warn(`ClipFlow Pro: Failed to apply initial preferences tab: ${e.message}`);
         }
     }
 
@@ -1226,7 +1227,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
                         GLib.unlink(historyFile);
                     }
                 } catch (e) {
-                    log(`ClipFlow Pro: Error clearing history: ${e}`);
+                    console.warn(`ClipFlow Pro: Error clearing history: ${e}`);
                 }
             }
             dlg.destroy();
@@ -1236,41 +1237,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
     }
 
     _runSelfCheck() {
-        try {
-            const shellVersion = Me.metadata['shell-version'] || [];
-            const envWayland = GLib.getenv('XDG_SESSION_TYPE') || '';
-            const platform = envWayland.toLowerCase();
-            const now = GLib.DateTime.new_now_local().format('%Y-%m-%d %H:%M:%S');
-            log(`[ClipFlow Pro] Self-check @ ${now}`);
-            log(`[ClipFlow Pro] GNOME Shell versions supported: ${JSON.stringify(shellVersion)}`);
-            log(`[ClipFlow Pro] Session type: ${platform}`);
-            const settings = this._settings;
-            log(`[ClipFlow Pro] Settings snapshot: capture-primary=${settings.get_boolean('capture-primary')}, dedupe-mode=${settings.get_string('dedupe-mode')}, min-entry-length=${settings.get_int('min-entry-length')}, max-entry-length=${settings.get_int('max-entry-length')}, entries-per-page=${settings.get_int('entries-per-page')}, icon-size-override=${settings.get_int('icon-size-override')}`);
-            log('[ClipFlow Pro] Self-check completed. Open GNOME Shell logs to view details.');
-            // Provide immediate UI feedback
-            const dlg = new Gtk.MessageDialog({
-                transient_for: this.get_root(),
-                modal: true,
-                buttons: Gtk.ButtonsType.OK,
-                message_type: Gtk.MessageType.INFO,
-                text: _('Self-check completed'),
-                secondary_text: _('Details written to system logs. Look for "ClipFlow Pro" in GNOME Shell logs.'),
-            });
-            dlg.connect('response', () => dlg.destroy());
-            dlg.present();
-        } catch (e) {
-            log(`[ClipFlow Pro] Self-check failed: ${e.message}`);
-            const dlg = new Gtk.MessageDialog({
-                transient_for: this.get_root(),
-                modal: true,
-                buttons: Gtk.ButtonsType.OK,
-                message_type: Gtk.MessageType.ERROR,
-                text: _('Self-check failed'),
-                secondary_text: String(e?.message ?? e),
-            });
-            dlg.connect('response', () => dlg.destroy());
-            dlg.present();
-        }
+        // Removed noisy self-check logging per reviewer guidance
     }
 });
 

@@ -11,6 +11,20 @@ _No changes yet._
 
 ---
 
+## [1.2.10] - 2025-11-17
+
+### Changed
+- Removed `schemas/gschemas.compiled` from EGO package for GNOME 45+.
+- Removed ExtensionUtils usage in ESM (no `Me`, settings passed from Extension; prefs opened via `Main.extensionManager.openExtensionPrefs`).
+- Prefs: use `destroy()` + `super.destroy()`, removed noisy self-check and Me access, simplified 45+ window API.
+- Logging: replaced `log()` with `console.*`; `console.debug()` only when debug enabled.
+- Reduced unnecessary try/catch and type checks for readability.
+
+### Notes
+- Packaging remains flat; required files only (schemas XML, icons included).
+
+---
+
 ## [1.2.9] - 2025-11-12
 
 ### Changed

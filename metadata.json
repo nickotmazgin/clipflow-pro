@@ -7,8 +7,8 @@
     "46",
     "47"
   ],
-  "version": 15,
-  "version-name": "1.2.9",
+  "version": 16,
+  "version-name": "1.2.10",
   "url": "https://github.com/nickotmazgin/clipflow-pro",
   "settings-schema": "org.gnome.shell.extensions.clipflow-pro",
   "gettext-domain": "clipflow-pro"

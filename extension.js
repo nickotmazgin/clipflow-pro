@@ -865,24 +865,13 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
         container.add_child(this._historyScrollView);
 
-        let paginationRow = null;
-        try {
-            paginationRow = this._createPaginationControls();
-            if (paginationRow) {
-                container.add_child(paginationRow);
-            }
-        } catch (e) {
-            this._debugLog(`Pagination build failed: ${e}`);
-        }
+        const paginationRow = this._createPaginationControls();
+        if (paginationRow)
+            container.add_child(paginationRow);
 
-        try {
-            const actionRow = this._createActionButtons();
-            if (actionRow) {
-                container.add_child(actionRow);
-            }
-        } catch (e) {
-            this._debugLog(`Action row build failed: ${e}`);
-        }
+        const actionRow = this._createActionButtons();
+        if (actionRow)
+            container.add_child(actionRow);
 
         // Load initial history - ensure container exists first
         this._debugLog(`Building menu complete - history container exists: ${!!this._historyContainer}, history count: ${this._clipboardHistory.length}`);

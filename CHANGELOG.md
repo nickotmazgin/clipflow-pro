@@ -11,6 +11,17 @@ _No changes yet._
 
 ---
 
+## [1.2.11] - 2025-11-17
+
+### Changed
+- Removed remaining unnecessary try/catch wrappers around UI assembly (pagination/action rows) to simplify code and follow 45+ style guidance.
+- Bumped version to 17 (1.2.11).
+
+### Notes
+- Packaging, logging, and prefs changes from 1.2.10 remain in effect; no functional changes.
+
+---
+
 ## [1.2.10] - 2025-11-17
 
 ### Changed

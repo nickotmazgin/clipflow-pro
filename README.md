@@ -406,3 +406,6 @@ If you find ClipFlow Pro useful, please consider supporting its development:
   - Prefs destroy() + super.destroy(); removed self-check logs
   - Use console.* logging; debug via console.debug only
   - Trimmed try/catch and typeof guards
+
+- 1.2.11
+  - Removed remaining unnecessary try/catch wrappers around UI assembly

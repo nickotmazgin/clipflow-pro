@@ -93,9 +93,29 @@ Developer tooling
   </tr>
 </table>
 
-## Installation
+## 📥 Installation
 
-### Method 1: Manual Installation
+### 🌐 Method 1: Install from extensions.gnome.org (Recommended)
+
+**ClipFlow Pro is officially available on extensions.gnome.org!**
+
+[**👉 Install ClipFlow Pro from extensions.gnome.org**](https://extensions.gnome.org/extension/8793/clipflow-pro/)
+
+**Direct link:** https://extensions.gnome.org/extension/8793/clipflow-pro/
+
+**Benefits:**
+- ✅ One-click installation
+- ✅ Automatic updates
+- ✅ Easy management via Extensions app
+- ✅ Official GNOME Extensions platform
+
+**How to install:**
+1. Visit [extensions.gnome.org/extension/8793/clipflow-pro/](https://extensions.gnome.org/extension/8793/clipflow-pro/)
+2. Click the "Install" button
+3. Follow the on-screen instructions
+4. Enable the extension in GNOME Extensions app
+
+### 📦 Method 2: Manual Installation
 
 1. **Download the extension**:
    ```bash

@@ -4,9 +4,32 @@ This guide provides detailed installation instructions for ClipFlow Pro on vario
 
 ## Quick Install
 
-### Method 1: From GNOME Extensions (Recommended)
+### Method 1: From GNOME Extensions / extensions.gnome.org (Recommended)
+
+ClipFlow Pro is available on [extensions.gnome.org](https://extensions.gnome.org/extension/8793/clipflow-pro/) and can be installed through multiple ways:
+
+**Via GNOME Extensions App (System Extensions Manager):**
+1. Open **GNOME Extensions** app (search for "Extensions" in your application menu or Activities overview)
+2. Click the **Browse** tab or use the search function
+3. Search for "ClipFlow Pro"
+4. Click **Install** or toggle the switch to enable
+5. The extension will be automatically installed and enabled
+
+**Via Web Browser:**
+1. Visit [extensions.gnome.org/extension/8793/clipflow-pro/](https://extensions.gnome.org/extension/8793/clipflow-pro/)
+2. Click the "Install" button
+3. Follow the on-screen instructions
+4. Enable the extension in GNOME Extensions app
+
+**Via Command Line:**
 ```bash
-# Coming soon - will be available at extensions.gnome.org
+# Install via gnome-extensions tool (if available)
+gnome-extensions install clipflow-pro@nickotmazgin.github.io
+
+# Enable the extension
+gnome-extensions enable clipflow-pro@nickotmazgin.github.io
+
+# Restart GNOME Shell (Alt+F2, type 'r', press Enter)
 ```
 
 ### Method 2: Automatic Install Script
@@ -118,13 +141,22 @@ make install
 ## Post-Installation
 
 ### Enable the Extension
+
+**Via GNOME Extensions App (System Extensions Manager):**
+1. Open **GNOME Extensions** app
+2. Search for "ClipFlow Pro" in the installed extensions list
+3. Toggle the switch to **ON**
+
+**Via Command Line:**
 ```bash
 # Enable via command line
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
-
-# Or use GNOME Extensions app
-# Search for "ClipFlow Pro" and toggle ON
 ```
+
+**Note:** The extension is searchable and manageable through:
+- GNOME Extensions app (system extensions manager)
+- Command line tools (`gnome-extensions`)
+- extensions.gnome.org website
 
 ### Restart GNOME Shell
 - **Wayland**: Log out and back in

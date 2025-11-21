@@ -8,6 +8,8 @@
 
 ClipFlow Pro is a powerful and intelligent clipboard manager that provides comprehensive clipboard history management with advanced features like intelligent organization, search capabilities, pin/star functionality, and auto-copy on selection.
 
+**Available on:** [extensions.gnome.org](https://extensions.gnome.org/extension/8793/clipflow-pro/) | Searchable in GNOME Extensions app | Installable via system extensions manager
+
 Compatibility: GNOME Shell 45–47 (ESM)
 
 Note: This release uses the GNOME 45+ ES Modules format and libadwaita preferences. Older GNOME versions (≤44) are no longer declared as supported in this package.
@@ -87,6 +89,8 @@ Developer tooling:
 
 ## 📥 Installation
 
+ClipFlow Pro can be installed through multiple methods. Choose the one that works best for you:
+
 ### 🌐 Method 1: Install from extensions.gnome.org (Recommended)
 
 **ClipFlow Pro is officially available on extensions.gnome.org!**
@@ -100,12 +104,31 @@ Developer tooling:
 - ✅ Automatic updates
 - ✅ Easy management via Extensions app
 - ✅ Official GNOME Extensions platform
+- ✅ Searchable and installable via GNOME Extensions app
 
 **How to install:**
+
+**Option A: Via Web Browser**
 1. Visit [extensions.gnome.org/extension/8793/clipflow-pro/](https://extensions.gnome.org/extension/8793/clipflow-pro/)
 2. Click the "Install" button
 3. Follow the on-screen instructions
 4. Enable the extension in GNOME Extensions app
+
+**Option B: Via GNOME Extensions App (System Extensions Manager)**
+1. Open **GNOME Extensions** app (search for "Extensions" in your application menu)
+2. Click the **Browse** tab or search for "ClipFlow Pro"
+3. Find ClipFlow Pro in the search results
+4. Click **Install** or toggle the switch to enable
+5. The extension will be automatically installed and enabled
+
+**Option C: Via Command Line**
+```bash
+# Search and install via gnome-extensions tool
+gnome-extensions install clipflow-pro@nickotmazgin.github.io
+
+# Or enable if already installed
+gnome-extensions enable clipflow-pro@nickotmazgin.github.io
+```
 
 ### 📦 Method 2: Manual Installation
 

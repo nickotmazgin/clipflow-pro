@@ -1,6 +1,6 @@
-# ClipFlow Pro v1.2.17 - Bug Fix Release
+# ClipFlow Pro v1.2.17 - Bug Fix & Security Release
 
-## 🐛 Bug Fix
+## 🐛 Bug Fix & 🔒 Security
 
 This release fixes a critical issue with clipboard content decoding that was preventing HTML/URI payloads from being properly decoded.
 

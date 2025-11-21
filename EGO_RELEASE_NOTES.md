@@ -14,6 +14,8 @@ Release Notes (1.2.17)
 
 Fixed GLib.Bytes handling: fixed _decodeClipboardBytes to properly handle GLib.Bytes objects that expose get_data() and get_size() methods. This resolves issues where clipboard content from get_content() (HTML/URI payloads) was not being decoded correctly.
 
+Security fix: fixed clear-text logging of sensitive information. Added _sanitizeLogMessage() to prevent sensitive clipboard data from being exposed in error logs. Error messages now only log error types, not full messages that could contain sensitive data.
+
 Release Notes (1.2.16)
 
 Removed buildPrefsWidget() function: removed legacy buildPrefsWidget() function from prefs.js (not needed for GNOME 45+ packages).

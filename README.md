@@ -2,10 +2,19 @@
 
 ![EGO Validate](https://github.com/nickotmazgin/clipflow-pro/actions/workflows/ego-validate.yml/badge.svg)
 [![CodeQL](https://github.com/nickotmazgin/clipflow-pro/actions/workflows/codeql.yml/badge.svg)](https://github.com/nickotmazgin/clipflow-pro/actions/workflows/codeql.yml)
+[![Get it on extensions.gnome.org](https://img.shields.io/badge/Get%20it%20on-extensions.gnome.org-4A86CF?logo=gnome)](https://extensions.gnome.org/extension/8793/clipflow-pro/)
 
 **Advanced Clipboard Manager for GNOME Shell**
 
 ClipFlow Pro is a powerful and intelligent clipboard manager that provides comprehensive clipboard history management with advanced features like intelligent organization, search capabilities, pin/star functionality, and auto-copy on selection.
+
+## 🚀 Install Now
+
+**📦 Available on extensions.gnome.org:**
+
+[**👉 Install ClipFlow Pro from extensions.gnome.org**](https://extensions.gnome.org/extension/8793/clipflow-pro/)
+
+The easiest way to install, manage, and update ClipFlow Pro is through the [GNOME Extensions website](https://extensions.gnome.org/extension/8793/clipflow-pro/) or the Extensions app.
 
 Compatibility: GNOME Shell 45–47 (ESM)
 

@@ -564,11 +564,29 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 return;
             }
             this._logThrottle.set(key, now);
-            console.warn(message);
+            // Sanitize message to prevent logging sensitive data
+            const sanitized = this._sanitizeLogMessage(message);
+            console.warn(sanitized);
         } catch (error) {
             // Fallback: if throttling fails, log once to avoid silence on critical errors
-            console.warn(message);
+            // Sanitize to prevent sensitive data exposure
+            const sanitized = this._sanitizeLogMessage(message);
+            console.warn(sanitized);
         }
+    }
+
+    _sanitizeLogMessage(message) {
+        if (!message || typeof message !== 'string') {
+            return String(message || '');
+        }
+        // Remove potential sensitive data patterns
+        // Limit message length to prevent accidental data exposure
+        const maxLength = 200;
+        let sanitized = message.substring(0, maxLength);
+        // Remove any clipboard-like content that might have leaked into error messages
+        // This is a safety measure - error messages should not contain clipboard data
+        sanitized = sanitized.replace(/clipboard[:\s]+[^\n]{20,}/gi, 'clipboard: [redacted]');
+        return sanitized;
     }
 
     _clampHistorySize(value) {
@@ -1914,7 +1932,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
             } else {
             }
         } catch (e) {
-            this._logThrottled('clipboard-check-error', `ClipFlow Pro: Error checking clipboard: ${e.message}`);
+            // Only log error type, not message which might contain sensitive data
+            const errorType = e?.name || e?.constructor?.name || 'Error';
+            this._logThrottled('clipboard-check-error', `ClipFlow Pro: Error checking clipboard: ${errorType}`);
             if (e.stack) {
             }
             this._scheduleClipboardRetry('clipboard-check-error');
@@ -1948,7 +1968,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 this._fallbackFetchClipboardText(clipboardType, sourceLabel, handleResult);
             });
         } catch (error) {
-            this._logThrottled(`clipboard-get-text-${sourceLabel}`, `ClipFlow Pro: get_text error for ${sourceLabel}: ${error.message}`);
+            // Only log error type, not message which might contain sensitive data
+            const errorType = error?.name || error?.constructor?.name || 'Error';
+            this._logThrottled(`clipboard-get-text-${sourceLabel}`, `ClipFlow Pro: get_text error for ${sourceLabel}: ${errorType}`);
             this._fallbackFetchClipboardText(clipboardType, sourceLabel, handleResult);
         }
     }

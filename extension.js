@@ -342,6 +342,16 @@ class ClipFlowIndicator extends PanelMenu.Button {
         try {
             if (typeof bytes === 'string') {
                 text = bytes;
+            } else if (bytes && typeof bytes.get_data === 'function' && typeof bytes.get_size === 'function') {
+                // GLib.Bytes object: use get_data() and get_size()
+                const size = bytes.get_size();
+                if (size > 0) {
+                    const data = bytes.get_data();
+                    if (data) {
+                        const u8 = new Uint8Array(data);
+                        text = new TextDecoder('utf-8').decode(u8);
+                    }
+                }
             } else if (bytes && typeof bytes.toArray === 'function') {
                 const u8 = Uint8Array.from(bytes.toArray());
                 text = new TextDecoder('utf-8').decode(u8);

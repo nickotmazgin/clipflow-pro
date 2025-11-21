@@ -119,13 +119,6 @@
       <description>Either ignore duplicate entries or move the latest duplicate to the top</description>
     </key>
 
-    <!-- Diagnostics -->
-    <key name="enable-debug-logs" type="b">
-      <default>false</default>
-      <summary>Enable debug logging</summary>
-      <description>Write verbose ClipFlow Pro diagnostics to the GNOME Shell log to help troubleshoot clipboard activity</description>
-    </key>
-    
     <!-- Appearance -->
     <key name="panel-position" type="s">
       <choices>

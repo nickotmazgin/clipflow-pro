@@ -6,6 +6,7 @@ We actively support the following versions with security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
+| 1.2.x   | :white_check_mark: |
 | 1.1.x   | :white_check_mark: |
 | < 1.1   | :x:                |
 
@@ -14,7 +15,7 @@ We actively support the following versions with security updates:
 We take security seriously. If you discover a security vulnerability, please follow these steps:
 
 1. **DO NOT** open a public issue
-2. Email the details to: [Your Security Email]
+2. Email the details to: nickotmazgin.dev@gmail.com
 3. Include the following information:
    - Description of the vulnerability
    - Steps to reproduce

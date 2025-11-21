@@ -10,6 +10,10 @@ About
 
 ClipFlow Pro brings a full‑featured clipboard experience to the GNOME Shell panel. Browse and search your recent copies, pin or star favorites, and jump in with Super+Shift+V. Switch between the sleek boxed layout and the compact view, while your history remains private under ~/.config/clipflow-pro. Source, docs, and issues: https://github.com/nickotmazgin/clipflow-pro
 
+Release Notes (1.2.17)
+
+Fixed GLib.Bytes handling: fixed _decodeClipboardBytes to properly handle GLib.Bytes objects that expose get_data() and get_size() methods. This resolves issues where clipboard content from get_content() (HTML/URI payloads) was not being decoded correctly.
+
 Release Notes (1.2.16)
 
 Removed buildPrefsWidget() function: removed legacy buildPrefsWidget() function from prefs.js (not needed for GNOME 45+ packages).

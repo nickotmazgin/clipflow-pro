@@ -11,6 +11,70 @@ _No changes yet._
 
 ---
 
+## [1.2.17] - 2025-11-21
+
+### Fixed
+- Fixed `_decodeClipboardBytes` to properly handle GLib.Bytes objects with `get_data()`/`get_size()` methods
+- Resolves issue where clipboard content from `get_content()` (HTML/URI payloads) was not being decoded correctly
+- Fixes Codex review feedback about missing GLib.Bytes handling in clipboard decoding
+- Security: Fixed clear-text logging of sensitive information in error messages
+- Added `_sanitizeLogMessage()` to prevent sensitive clipboard data from being exposed in logs
+
+---
+
+## [1.2.16] - 2025-11-21
+
+### Changed
+- Updated PayPal donations field in metadata.json to use PayPal username format (nickotmazgin)
+
+---
+
+## [1.2.15] - 2025-11-21
+
+### Changed
+- Updated PayPal donations field in metadata.json to use donation URL instead of email address
+
+---
+
+## [1.2.14] - 2025-11-21
+
+### Removed
+- Removed `buildPrefsWidget()` function from prefs.js (not needed for GNOME 45+ packages)
+
+### Added
+- Added `donations` field to metadata.json with PayPal support
+
+---
+
+## [1.2.13] - 2025-11-20
+
+### Removed
+- Removed all debug/debugging code completely from prefs.js (Diagnostics section, self-check functionality)
+- Removed all `_debugLog()` calls and method from extension.js
+- Removed unnecessary try/catch blocks that only logged errors (per JustPerfection review feedback)
+
+### Changed
+- Simplified error handling: removed try/catch wrappers that only logged; errors now bubble with automatic backtraces in logs
+- Removed `enable-debug-logs` setting connection and `_logEnabled` property
+
+### Notes
+- All debug logging code has been completely removed as requested
+- ByteArray was already removed in 1.2.12
+- Packaging and other functionality unchanged
+
+---
+
+## [1.2.12] - 2025-11-20
+
+### Changed
+- Removed deprecated ByteArray module usage from the ESM build; switched to TextEncoder/TextDecoder and GLib.Bytes toArray() where needed.
+- Reduced additional try/catch wrappers that only logged; simplified context menu styling without try/catch.
+
+### Notes
+- Packaging unchanged (flat zip; no compiled schemas), prefs destroy()+super.destroy(), console.* logging remain in place.
+
+---
+
 ## [1.2.11] - 2025-11-17
 
 ### Changed

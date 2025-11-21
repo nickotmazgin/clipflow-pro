@@ -54,14 +54,9 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
     _buildUI() {
         // Helper to access metadata from ExtensionPreferences via a global getter
-        this._getMeta = (key) => {
-            try {
-                // GNOME 45+ exposes metadata through the preferences extension context
-                return this.get_root()?.get_ancestor?.(Gtk.Window)?.application?.metadata?.[key] ?? null;
-            } catch (_e) {
-                return null;
-            }
-        };
+        this._getMeta = (key) => (
+            this.get_root()?.get_ancestor?.(Gtk.Window)?.application?.metadata?.[key] ?? null
+        );
         this.set_orientation(Gtk.Orientation.VERTICAL);
         this.set_spacing(20);
         this.set_margin_start(20);
@@ -201,28 +196,6 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         privacyBox.append(autoClearSensitiveBox);
 
         generalBox.append(privacyFrame);
-
-        // Diagnostics
-        const diagnosticsFrame = this._createFrame(_('Diagnostics'));
-        const diagnosticsBox = new Gtk.Box({
-            orientation: Gtk.Orientation.VERTICAL,
-            spacing: 10
-        });
-        diagnosticsFrame.set_child(diagnosticsBox);
-
-        const debugLoggingRow = this._createSwitchRow(
-            _('Enable Debug Logging'),
-            _('Write extra information to GNOME Shell logs to help troubleshoot problems'),
-            'enable-debug-logs'
-        );
-        diagnosticsBox.append(debugLoggingRow);
-
-        const selfCheckButton = new Gtk.Button({ label: _('Run self-check and log environment info') });
-        selfCheckButton.set_halign(Gtk.Align.START);
-        selfCheckButton.connect('clicked', () => this._runSelfCheck());
-        diagnosticsBox.append(selfCheckButton);
-
-        generalBox.append(diagnosticsFrame);
 
         // Add to notebook
         this._notebook.append_page(generalBox, new Gtk.Label({ label: _('General') }));
@@ -716,23 +689,16 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
     }
 
     _applyInitialTab() {
-        try {
-            const schema = this._settings.settings_schema;
-            if (!schema || typeof schema.has_key !== 'function' || !schema.has_key('target-prefs-tab')) {
-                return;
-            }
+        const schema = this._settings?.settings_schema;
+        if (!schema?.has_key?.('target-prefs-tab'))
+            return;
 
-            const target = this._settings.get_string('target-prefs-tab');
-            const tabIndex = this._resolveTabIndex(target);
+        const target = this._settings.get_string('target-prefs-tab');
+        const tabIndex = this._resolveTabIndex(target);
+        if (typeof tabIndex === 'number')
+            this._notebook.set_current_page(tabIndex);
 
-            if (typeof tabIndex === 'number') {
-                this._notebook.set_current_page(tabIndex);
-            }
-
-            this._settings.set_string('target-prefs-tab', 'general');
-        } catch (e) {
-            console.warn(`ClipFlow Pro: Failed to apply initial preferences tab: ${e.message}`);
-        }
+        this._settings.set_string('target-prefs-tab', 'general');
     }
 
     _createSectionHeader(title) {
@@ -1220,15 +1186,10 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
         dialog.connect('response', (dlg, response) => {
             if (response === Gtk.ResponseType.OK) {
-                try {
-                    const configDir = GLib.get_user_config_dir();
-                    const historyFile = GLib.build_filenamev([configDir, 'clipflow-pro', 'history.json']);
-                    if (GLib.file_test(historyFile, GLib.FileTest.EXISTS)) {
-                        GLib.unlink(historyFile);
-                    }
-                } catch (e) {
-                    console.warn(`ClipFlow Pro: Error clearing history: ${e}`);
-                }
+                const configDir = GLib.get_user_config_dir();
+                const historyFile = GLib.build_filenamev([configDir, 'clipflow-pro', 'history.json']);
+                if (GLib.file_test(historyFile, GLib.FileTest.EXISTS))
+                    GLib.unlink(historyFile);
             }
             dlg.destroy();
         });
@@ -1236,11 +1197,4 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         dialog.present();
     }
 
-    _runSelfCheck() {
-        // Removed noisy self-check logging per reviewer guidance
-    }
 });
-
-function buildPrefsWidget() {
-    return new ClipFlowProPrefsWidget();
-}

@@ -2,10 +2,19 @@
 
 ![EGO Validate](https://github.com/nickotmazgin/clipflow-pro/actions/workflows/ego-validate.yml/badge.svg)
 [![CodeQL](https://github.com/nickotmazgin/clipflow-pro/actions/workflows/codeql.yml/badge.svg)](https://github.com/nickotmazgin/clipflow-pro/actions/workflows/codeql.yml)
+[![Get it on extensions.gnome.org](https://img.shields.io/badge/Get%20it%20on-extensions.gnome.org-4A86CF?logo=gnome)](https://extensions.gnome.org/extension/8793/clipflow-pro/)
 
 **Advanced Clipboard Manager for GNOME Shell**
 
 ClipFlow Pro is a powerful and intelligent clipboard manager that provides comprehensive clipboard history management with advanced features like intelligent organization, search capabilities, pin/star functionality, and auto-copy on selection.
+
+## 🚀 Install Now
+
+**📦 Available on extensions.gnome.org:**
+
+[**👉 Install ClipFlow Pro from extensions.gnome.org**](https://extensions.gnome.org/extension/8793/clipflow-pro/)
+
+The easiest way to install, manage, and update ClipFlow Pro is through the [GNOME Extensions website](https://extensions.gnome.org/extension/8793/clipflow-pro/) or the Extensions app.
 
 Compatibility: GNOME Shell 45–47 (ESM)
 
@@ -84,9 +93,29 @@ Developer tooling
   </tr>
 </table>
 
-## Installation
+## 📥 Installation
 
-### Method 1: Manual Installation
+### 🌐 Method 1: Install from extensions.gnome.org (Recommended)
+
+**ClipFlow Pro is officially available on extensions.gnome.org!**
+
+[**👉 Install ClipFlow Pro from extensions.gnome.org**](https://extensions.gnome.org/extension/8793/clipflow-pro/)
+
+**Direct link:** https://extensions.gnome.org/extension/8793/clipflow-pro/
+
+**Benefits:**
+- ✅ One-click installation
+- ✅ Automatic updates
+- ✅ Easy management via Extensions app
+- ✅ Official GNOME Extensions platform
+
+**How to install:**
+1. Visit [extensions.gnome.org/extension/8793/clipflow-pro/](https://extensions.gnome.org/extension/8793/clipflow-pro/)
+2. Click the "Install" button
+3. Follow the on-screen instructions
+4. Enable the extension in GNOME Extensions app
+
+### 📦 Method 2: Manual Installation
 
 1. **Download the extension**:
    ```bash
@@ -112,11 +141,17 @@ Developer tooling
 
 5. **Restart GNOME Shell** (Alt+F2, type `r`, press Enter)
 
-### Method 2: GNOME Extensions Website
+### Method 2: GNOME Extensions Website (Recommended)
 
-1. Visit [extensions.gnome.org](https://extensions.gnome.org)
-2. Search for "ClipFlow Pro"
-3. Click "Install" and follow the instructions
+**Install directly from extensions.gnome.org:**
+
+[![Get it on extensions.gnome.org](https://img.shields.io/badge/Get%20it%20on-extensions.gnome.org-4A86CF?logo=gnome)](https://extensions.gnome.org/extension/8793/clipflow-pro/)
+
+1. Visit [ClipFlow Pro on extensions.gnome.org](https://extensions.gnome.org/extension/8793/clipflow-pro/)
+2. Click "Install" and follow the instructions
+3. The extension will be automatically installed and enabled
+
+**Note:** ClipFlow Pro is now available on extensions.gnome.org and can be installed, managed, and updated directly through the GNOME Extensions website or the Extensions app.
 
 ## Usage
 
@@ -231,7 +266,48 @@ If clipboard history stays empty on Wayland:
 ### Performance Issues
 
 
+## Installation via extensions.gnome.org
+
+ClipFlow Pro is now available on [extensions.gnome.org](https://extensions.gnome.org/extension/8793/clipflow-pro/)! You can install, manage, and update it directly through the GNOME Extensions website or the Extensions app.
+
+**Direct link:** https://extensions.gnome.org/extension/8793/clipflow-pro/
+
 ## Changelog (recent)
+
+- 1.2.17
+  - Fixed GLib.Bytes handling in _decodeClipboardBytes
+  - Properly decodes clipboard content from get_content() (HTML/URI payloads)
+  - Security: Fixed clear-text logging of sensitive information
+  - Resolves Codex review feedback about missing GLib.Bytes handling
+
+- 1.2.16
+  - Removed buildPrefsWidget() function (not needed for GNOME 45+ packages)
+  - Added donations field to metadata.json with PayPal support
+  - Updated PayPal donations to use username format
+
+- 1.2.15
+  - Updated PayPal donations field format
+
+- 1.2.14
+  - Removed buildPrefsWidget() function
+  - Added donations support
+
+- 1.2.13
+  - Removed all debug/debugging code completely
+  - Removed unnecessary try/catch blocks that only logged errors
+  - All debug logging code eliminated
+
+- 1.2.12
+  - Removed deprecated ByteArray usage
+  - Reduced try/catch wrappers
+
+- 1.2.11
+  - Removed remaining unnecessary try/catch wrappers
+
+- 1.2.10
+  - Removed compiled schemas from EGO zip (45+)
+  - Dropped ExtensionUtils (ESM)
+  - Prefs destroy() + super.destroy()
 
 - 1.2.8 (GNOME 45+ ESM)
   - Hardened ESM runtime: Extension constructor(metadata) calls super(metadata)
@@ -309,6 +385,7 @@ This project is licensed under the GPL-3.0-or-later License - see the [LICENSE](
 
 ## Support
 
+- **🌐 extensions.gnome.org**: [Install and manage ClipFlow Pro](https://extensions.gnome.org/extension/8793/clipflow-pro/)
 - **GitHub Issues**: [Report bugs or request features](https://github.com/nickotmazgin/clipflow-pro/issues)
 - **GitHub Discussions**: [Ask questions or discuss ideas](https://github.com/nickotmazgin/clipflow-pro/discussions)
 - **Email**: [nickotmazgin.dev@gmail.com](mailto:nickotmazgin.dev@gmail.com)
@@ -409,3 +486,7 @@ If you find ClipFlow Pro useful, please consider supporting its development:
 
 - 1.2.11
   - Removed remaining unnecessary try/catch wrappers around UI assembly
+
+- 1.2.12
+  - Removed deprecated ByteArray usage; switched to TextEncoder/TextDecoder
+  - Further reduced try/catch wrappers; simplified context styling

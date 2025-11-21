@@ -7,9 +7,12 @@
     "46",
     "47"
   ],
-  "version": 17,
-  "version-name": "1.2.11",
+  "version": 23,
+  "version-name": "1.2.17",
   "url": "https://github.com/nickotmazgin/clipflow-pro",
   "settings-schema": "org.gnome.shell.extensions.clipflow-pro",
-  "gettext-domain": "clipflow-pro"
+  "gettext-domain": "clipflow-pro",
+  "donations": {
+    "paypal": "nickotmazgin"
+  }
 }

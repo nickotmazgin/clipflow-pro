@@ -12,21 +12,11 @@ ClipFlow Pro brings a full‑featured clipboard experience to the GNOME Shell pa
 
 Release Notes (1.2.17)
 
-Fixed GLib.Bytes handling: fixed _decodeClipboardBytes to properly handle GLib.Bytes objects that expose get_data() and get_size() methods. This resolves issues where clipboard content from get_content() (HTML/URI payloads) was not being decoded correctly.
+Security fix: fixed clear-text logging of sensitive information (identified by GitHub CodeQL security scanning). Added _sanitizeLogMessage() function to prevent sensitive clipboard data from being exposed in error logs. Error logging now only includes error types, not full messages that could contain sensitive data. Removed all _logEnabled and console.debug calls. Resolves CodeQL security alert 7.
 
-Security fix: fixed clear-text logging of sensitive information. Added _sanitizeLogMessage() to prevent sensitive clipboard data from being exposed in error logs. Error messages now only log error types, not full messages that could contain sensitive data.
+GLib.Bytes handling fix: fixed _decodeClipboardBytes to properly handle GLib.Bytes objects that expose get_data() and get_size() methods (identified by GitHub Codex automated code review). This resolves issues where clipboard content from get_content() (HTML/URI payloads) was not being decoded correctly. All clipboard decoding paths now work correctly.
 
-Release Notes (1.2.16)
-
-Removed buildPrefsWidget() function: removed legacy buildPrefsWidget() function from prefs.js (not needed for GNOME 45+ packages).
-
-Added donations support: added donations field to metadata.json with PayPal support.
-
-Debug code removal: completely eliminated all debug/debugging functionality. Removed Diagnostics section from preferences (Enable Debug Logging switch and self-check button). Removed all _debugLog() calls and method definition (104+ instances). Removed enable-debug-logs setting from schema.
-
-Error handling cleanup: removed unnecessary try/catch blocks that only logged errors (per JustPerfection review feedback). Errors now bubble with automatic backtraces in logs. Kept minimal try/catch only for actual I/O operations (file reading/writing, JSON parsing) to prevent crashes on corrupted data.
-
-ByteArray deprecation: verified ByteArray is completely removed (fixed in 1.2.12). All clipboard decoding uses TextDecoder/GLib.Bytes toArray() as required by EGO guidelines.
+Code cleanup: removed buildPrefsWidget() function (not needed for GNOME 45+ packages). Removed _runSelfCheck() method. Removed all debug/debugging code completely. Removed enable-debug-logs setting from schema. Removed deprecated ByteArray usage. Removed unnecessary try/catch blocks that only logged errors.
 
 Packaging (45+): flat zip with required files only; removed schemas/gschemas.compiled.
 

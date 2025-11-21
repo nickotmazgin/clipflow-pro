@@ -274,6 +274,11 @@ ClipFlow Pro is now available on [extensions.gnome.org](https://extensions.gnome
 
 ## Changelog (recent)
 
+- 1.2.17
+  - Fixed GLib.Bytes handling in _decodeClipboardBytes
+  - Properly decodes clipboard content from get_content() (HTML/URI payloads)
+  - Resolves Codex review feedback about missing GLib.Bytes handling
+
 - 1.2.16
   - Removed buildPrefsWidget() function (not needed for GNOME 45+ packages)
   - Added donations field to metadata.json with PayPal support

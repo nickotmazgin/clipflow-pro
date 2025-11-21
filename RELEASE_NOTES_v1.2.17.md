@@ -8,6 +8,7 @@ This release fixes a critical issue with clipboard content decoding.
 
 - **GLib.Bytes handling**: Fixed `_decodeClipboardBytes` to properly handle GLib.Bytes objects that expose `get_data()` and `get_size()` methods
 - **Clipboard content decoding**: Resolves issue where clipboard content from `get_content()` (HTML/URI payloads) was not being decoded correctly
+- **Security fix**: Fixed clear-text logging of sensitive information - added `_sanitizeLogMessage()` to prevent sensitive clipboard data from being exposed in error logs
 - **Codex review feedback**: Addresses automated code review feedback about missing GLib.Bytes handling
 
 ### Technical Details

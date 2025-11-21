@@ -379,6 +379,7 @@ This project is licensed under the GPL-3.0-or-later License - see the [LICENSE](
 
 ## Support
 
+- **🌐 extensions.gnome.org**: [Install and manage ClipFlow Pro](https://extensions.gnome.org/extension/8793/clipflow-pro/)
 - **GitHub Issues**: [Report bugs or request features](https://github.com/nickotmazgin/clipflow-pro/issues)
 - **GitHub Discussions**: [Ask questions or discuss ideas](https://github.com/nickotmazgin/clipflow-pro/discussions)
 - **Email**: [nickotmazgin.dev@gmail.com](mailto:nickotmazgin.dev@gmail.com)

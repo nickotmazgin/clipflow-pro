@@ -11,6 +11,15 @@ _No changes yet._
 
 ---
 
+## [1.2.17] - 2025-11-21
+
+### Fixed
+- Fixed `_decodeClipboardBytes` to properly handle GLib.Bytes objects with `get_data()`/`get_size()` methods
+- Resolves issue where clipboard content from `get_content()` (HTML/URI payloads) was not being decoded correctly
+- Fixes Codex review feedback about missing GLib.Bytes handling in clipboard decoding
+
+---
+
 ## [1.2.16] - 2025-11-21
 
 ### Changed

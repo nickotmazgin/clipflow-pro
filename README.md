@@ -8,22 +8,14 @@
 
 ClipFlow Pro is a powerful and intelligent clipboard manager that provides comprehensive clipboard history management with advanced features like intelligent organization, search capabilities, pin/star functionality, and auto-copy on selection.
 
-## 🚀 Install Now
-
-**📦 Available on extensions.gnome.org:**
-
-[**👉 Install ClipFlow Pro from extensions.gnome.org**](https://extensions.gnome.org/extension/8793/clipflow-pro/)
-
-The easiest way to install, manage, and update ClipFlow Pro is through the [GNOME Extensions website](https://extensions.gnome.org/extension/8793/clipflow-pro/) or the Extensions app.
-
 Compatibility: GNOME Shell 45–47 (ESM)
 
 Note: This release uses the GNOME 45+ ES Modules format and libadwaita preferences. Older GNOME versions (≤44) are no longer declared as supported in this package.
 
-Developer tooling
+Developer tooling:
 - Validate package layout before upload: `make ego-validate`
 - Create flat EGO zip + source zip: `make dist`
-- Issue templates: open “EGO Review Feedback” or “Release Checklist” from GitHub → New Issue
+- Issue templates: open "EGO Review Feedback" or "Release Checklist" from GitHub → New Issue
 
 ## Features
 
@@ -141,18 +133,6 @@ Developer tooling
 
 5. **Restart GNOME Shell** (Alt+F2, type `r`, press Enter)
 
-### Method 2: GNOME Extensions Website (Recommended)
-
-**Install directly from extensions.gnome.org:**
-
-[![Get it on extensions.gnome.org](https://img.shields.io/badge/Get%20it%20on-extensions.gnome.org-4A86CF?logo=gnome)](https://extensions.gnome.org/extension/8793/clipflow-pro/)
-
-1. Visit [ClipFlow Pro on extensions.gnome.org](https://extensions.gnome.org/extension/8793/clipflow-pro/)
-2. Click "Install" and follow the instructions
-3. The extension will be automatically installed and enabled
-
-**Note:** ClipFlow Pro is now available on extensions.gnome.org and can be installed, managed, and updated directly through the GNOME Extensions website or the Extensions app.
-
 ## Usage
 
 ### Basic Usage
@@ -265,64 +245,28 @@ If clipboard history stays empty on Wayland:
 
 ### Performance Issues
 
+If the extension is slow or using too much memory:
 
-## Installation via extensions.gnome.org
-
-ClipFlow Pro is now available on [extensions.gnome.org](https://extensions.gnome.org/extension/8793/clipflow-pro/)! You can install, manage, and update it directly through the GNOME Extensions website or the Extensions app.
-
-**Direct link:** https://extensions.gnome.org/extension/8793/clipflow-pro/
-
-## Changelog (recent)
-
-- 1.2.17
-  - Fixed GLib.Bytes handling in _decodeClipboardBytes
-  - Properly decodes clipboard content from get_content() (HTML/URI payloads)
-  - Security: Fixed clear-text logging of sensitive information
-  - Resolves Codex review feedback about missing GLib.Bytes handling
-
-- 1.2.16
-  - Removed buildPrefsWidget() function (not needed for GNOME 45+ packages)
-  - Added donations field to metadata.json with PayPal support
-  - Updated PayPal donations to use username format
-
-- 1.2.15
-  - Updated PayPal donations field format
-
-- 1.2.14
-  - Removed buildPrefsWidget() function
-  - Added donations support
-
-- 1.2.13
-  - Removed all debug/debugging code completely
-  - Removed unnecessary try/catch blocks that only logged errors
-  - All debug logging code eliminated
-
-- 1.2.12
-  - Removed deprecated ByteArray usage
-  - Reduced try/catch wrappers
-
-- 1.2.11
-  - Removed remaining unnecessary try/catch wrappers
-
-- 1.2.10
-  - Removed compiled schemas from EGO zip (45+)
-  - Dropped ExtensionUtils (ESM)
-  - Prefs destroy() + super.destroy()
-
-- 1.2.8 (GNOME 45+ ESM)
-  - Hardened ESM runtime: Extension constructor(metadata) calls super(metadata)
-  - Added `make ego-validate` and CI workflow to lint EGO zips and metadata
-  - Packaging consolidated around flat EGO zip + source zip; README/dev docs updated
-
-- 1.2.7
-  - Ported to GNOME 45+ ES Modules (`resource:///`, `gi://`) and migrated preferences to `fillPreferencesWindow()`
-  - Restored header buttons in prefs on 45+; trimmed `shell-version` to ["45","46","47"]
-  - Produced reviewer‑ready flat EGO zip with compiled schemas and icons
-
-Full history: see CHANGELOG.md
 1. Reduce the maximum entries limit in settings
 2. Reduce the maximum entry length
 3. Enable auto-clear sensitive data to reduce memory usage
+
+## Changelog
+
+### Recent Versions
+
+- **1.2.17** - Fixed GLib.Bytes handling in _decodeClipboardBytes; Security: Fixed clear-text logging of sensitive information
+- **1.2.16** - Removed buildPrefsWidget() function; Added donations field to metadata.json with PayPal support
+- **1.2.15** - Updated PayPal donations field format
+- **1.2.14** - Removed buildPrefsWidget() function; Added donations support
+- **1.2.13** - Removed all debug/debugging code completely; Removed unnecessary try/catch blocks
+- **1.2.12** - Removed deprecated ByteArray usage; Reduced try/catch wrappers
+- **1.2.11** - Removed remaining unnecessary try/catch wrappers
+- **1.2.10** - Removed compiled schemas from EGO zip (45+); Dropped ExtensionUtils (ESM)
+- **1.2.8** - Hardened ESM runtime; Added `make ego-validate` and CI workflow
+- **1.2.7** - Ported to GNOME 45+ ES Modules; Migrated preferences to `fillPreferencesWindow()`
+
+For complete version history, see [CHANGELOG.md](CHANGELOG.md).
 
 ## Development
 
@@ -396,97 +340,3 @@ If you find ClipFlow Pro useful, please consider supporting its development:
 
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)
 
-## Changelog
-
-### Version 1.2.9
-- ASCII-only runtime debug logs for maximum compatibility
-- Preferences About list uses ASCII dashes instead of Unicode bullets
-
-### Version 1.2.8
-- Ported to GNOME 45+ ES Modules (ESM) with `resource:///` and `gi://` imports (no legacy `imports.*`).
-- Preferences integrated via `fillPreferencesWindow`; header bar (close/minimize) works on 45+.
-- Hardened extension constructor(metadata) to call `super(metadata)` for Shell 45+.
-- Packaging is a flat zip with required files (compiled schemas, icons, and no nested UUID dir).
-
-### Version 1.2.7
-- Migrated runtime to ESM and updated preferences integration for GNOME 45+.
-- Trimmed `metadata.json` `shell-version` to ["45","46","47"] as requested by reviewers.
-
-### Version 1.2.6
-- Preferences now implement the GNOME 45+ `fillPreferencesWindow` contract (with backward-compatible `buildPrefsWidget`) so the settings dialog opens inside the GTK4/libadwaita Extensions app without errors.
-- Restored official support for GNOME Shell 45–47 after verifying the indicator, clipboard history UI, and shortcuts on newer Shell builds.
-
-### Version 1.2.5
-- Declared compatibility only for GNOME Shell 42–44 to match what is currently supported and avoid reviewer confusion while 45+ work continues.
-
-### Version 1.2.4
-- History rows now render reliably across all supported GNOME Shell releases with a ClickAction fallback, so the main clipboard window never appears empty while entries still show up in the context menu.
-- Release helper scripts (`safe-reload.sh`, `make bump-version`) now degrade gracefully when dependencies are missing and keep `metadata.json` valid, preventing broken uploads to extensions.gnome.org.
-
-### Version 1.2.3
-- Appearance tab now includes a “Use Compact UI Layout” toggle so you can revert to the slimmer legacy styling if the boxed look isn’t your vibe.
-- Distribution zip now matches GNOME Extensions packaging rules (UUID directory root + compiled schemas/locales only).
-
-### Version 1.2.2
-- Refreshed the clipboard window with a dedicated scroll lane, brighter history rows, and an animated empty state so users immediately know what to do when nothing has been copied yet.
-- Added `verify_clipflow.sh`, a diagnostic helper that recompiles schemas, syncs installs, and checks GNOME settings in one command.
-- Show a one-time toast when GNOME hasn’t granted clipboard access yet, making it clear why history entries aren’t flowing in on slow Wayland sessions.
-- Numerous fit-and-finish tweaks around pagination, margins, and schema validation to keep the UI consistent across shell versions.
-
-### Version 1.2.1
-- Stabilized panel icon lifecycle to avoid duplicate indicators and Shell crashes when moving between left/center/right positions.
-- Limited the history slider to 10–100 entries so GNOME Shell no longer stalls on gigantic histories, keeping the advertised defaults in sync with what the code enforces.
-- Bundled a precompiled schema and updated the build/install scripts so rootless installs work even when `glib-compile-schemas` is unavailable.
-- Added `safe-reload.sh` for quick local reloads with crash monitoring during development.
-
-### Version 1.2.0
-- Hardened clipboard HTML sanitization so embedded script/style tags are stripped reliably before copying back to the user.
-- Added automated CodeQL scanning for every push/PR (and weekly), keeping the JavaScript codebase checked for vulnerabilities.
-- Enabled GitHub security features (secret scanning with push protection, vulnerability alerts) to guard the project supply chain.
-### Version 1.1.2
-- Reworked the main history view with Wayland-safe `St` rows, inline pin/star badges, and improved hover/focus states.
-- Added an optional “Use Legacy Menu Rows” preference so older GNOME Shell builds can fall back to the previous popup layout.
-- Hardened menu assembly with guarded pagination/action sections plus an idle rebuild fallback to prevent blank lists.
-- Throttled copy notifications and error logging to avoid toast or journal spam during rapid clipboard activity.
-
-### Version 1.1.1
-- Auto-focus search field when menu opens for faster access
-- Settings validation with automatic bounds checking
-- Content type styling now uses CSS classes for visual distinction
-- Improved empty state messaging with helpful guidance
-- Performance optimization with cached filtered results
-- Fixed keyboard navigation to respect promote-on-copy setting
-
-### Version 1.1.0
-- Persistent clipboard history saved to `~/.config/clipflow-pro/history.json`
-- Search-aware pagination with configurable page size
-- Auto-clearing timers for sensitive entries
-- Custom ClipFlow Pro panel icon and reorganised project docs/tools
-- Asynchronous conflict detection and refined context menu integration
-
-### Version 1.0.0
-- Initial release
-- Advanced clipboard history management
-- Intelligent search and filtering
-- Pin and star system
-- Auto-copy on selection
-- File manager integration
-- Comprehensive settings panel
-- Security and privacy features
-- Keyboard shortcuts support
-- Theme integration
-
-<!-- Acknowledgments intentionally removed for a leaner README. -->
-- 1.2.10
-  - Removed compiled schemas from EGO zip (45+)
-  - Dropped ExtensionUtils (ESM); open prefs via Main.extensionManager
-  - Prefs destroy() + super.destroy(); removed self-check logs
-  - Use console.* logging; debug via console.debug only
-  - Trimmed try/catch and typeof guards
-
-- 1.2.11
-  - Removed remaining unnecessary try/catch wrappers around UI assembly
-
-- 1.2.12
-  - Removed deprecated ByteArray usage; switched to TextEncoder/TextDecoder
-  - Further reduced try/catch wrappers; simplified context styling

@@ -1,3 +1,4 @@
 build
 *.zip
 schemas/gschemas.compiled
+gschemas.compiled

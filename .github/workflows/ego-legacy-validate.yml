@@ -1,0 +1,89 @@
+name: EGO Legacy Validate
+
+on:
+  push:
+    branches: [ "gnome43-44" ]
+  pull_request:
+    branches: [ "gnome43-44" ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install dependencies (glib tools)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libglib2.0-bin unzip jq
+
+      - name: Build legacy zip (flat)
+        run: |
+          bash ./build.sh
+          cd build
+          zip -r9 ../clipflow-pro@nickotmazgin.github.io.shell-extension.zip .
+          cd ..
+
+      - name: Validate EGO package
+        run: |
+          set -euo pipefail
+          Z=clipflow-pro@nickotmazgin.github.io.shell-extension.zip
+          unzip -Z1 "$Z" > entries.txt
+          # Required files
+          req=(
+            metadata.json
+            extension.js
+            prefs.js
+            stylesheet.css
+            schemas/org.gnome.shell.extensions.clipflow-pro.gschema.xml
+            icons/clipflow-pro-symbolic.svg
+          )
+          for f in "${req[@]}"; do
+            grep -qx "$f" entries.txt || { echo "Missing required file: $f"; exit 1; }
+          done
+          # No compiled schemas
+          if grep -q "^schemas/gschemas.compiled$" entries.txt; then
+            echo "schemas/gschemas.compiled must NOT be shipped"; exit 1; fi
+
+          # Metadata checks
+          unzip -p "$Z" metadata.json > meta.json
+          python3 -m json.tool meta.json >/dev/null
+          uuid=$(jq -r '.uuid' meta.json)
+          ver=$(jq -r '.version' meta.json)
+          vname=$(jq -r '."version-name" // empty' meta.json)
+          shells=$(jq -r '."shell-version"|join(",")' meta.json)
+          schema=$(jq -r '."settings-schema"' meta.json)
+
+          [ "$uuid" = "clipflow-pro@nickotmazgin.github.io" ] || { echo "UUID mismatch: $uuid"; exit 1; }
+          [[ "$ver" =~ ^[0-9]+$ ]] || { echo "version must be integer"; exit 1; }
+          # version-name ASCII and <=16 chars if present
+          if [ -n "$vname" ]; then
+            python3 - <<PY
+name = "$vname"
+import sys
+try:
+    name.encode('ascii')
+except UnicodeEncodeError:
+    print('version-name must be ASCII'); sys.exit(1)
+print(len(name))
+if len(name) > 16:
+    print('version-name too long (>16)'); sys.exit(1)
+PY
+          fi
+          [ "$shells" = "43,44" ] || { echo "shell-version must be 43,44 (got $shells)"; exit 1; }
+
+          # Schema id match
+          unzip -p "$Z" schemas/org.gnome.shell.extensions.clipflow-pro.gschema.xml > schema.xml
+          python3 - <<PY
+import xml.etree.ElementTree as ET
+root=ET.parse('schema.xml').getroot()
+s=root.find('schema')
+assert s is not None and s.get('id')=='org.gnome.shell.extensions.clipflow-pro', 'Schema id mismatch'
+PY
+
+      - name: Upload validation artifact (zip)
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-ego-zip
+          path: clipflow-pro@nickotmazgin.github.io.shell-extension.zip

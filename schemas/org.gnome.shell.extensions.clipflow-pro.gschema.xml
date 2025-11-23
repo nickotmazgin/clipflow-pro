@@ -42,6 +42,36 @@
       <summary>Show clipboard menu shortcut</summary>
       <description>Keyboard shortcut to show clipboard history menu</description>
     </key>
+
+    <key name="classic-filter-all-shortcut" type="as">
+      <default>[]</default>
+      <summary>Classic: Filter All</summary>
+      <description>Keyboard shortcut to switch Classic list filter to All items and open the menu.</description>
+    </key>
+
+    <key name="classic-filter-pinned-shortcut" type="as">
+      <default>[]</default>
+      <summary>Classic: Filter Pinned</summary>
+      <description>Keyboard shortcut to switch Classic list filter to only pinned items and open the menu.</description>
+    </key>
+
+    <key name="classic-filter-starred-shortcut" type="as">
+      <default>[]</default>
+      <summary>Classic: Filter Starred</summary>
+      <description>Keyboard shortcut to switch Classic list filter to only starred items and open the menu.</description>
+    </key>
+
+    <key name="classic-toggle-pin-top-shortcut" type="as">
+      <default>[]</default>
+      <summary>Classic: Toggle pin top</summary>
+      <description>Keyboard shortcut to toggle pinned state on the most recent history item.</description>
+    </key>
+
+    <key name="classic-toggle-star-top-shortcut" type="as">
+      <default>[]</default>
+      <summary>Classic: Toggle star top</summary>
+      <description>Keyboard shortcut to toggle starred state on the most recent history item.</description>
+    </key>
     
     <!-- UI Settings -->
     <key name="show-numbers" type="b">
@@ -81,6 +111,24 @@
       <default>false</default>
       <summary>Auto-clear sensitive data</summary>
       <description>Automatically remove password-like entries after 5 minutes</description>
+    </key>
+
+    <key name="pause-on-lock" type="b">
+      <default>false</default>
+      <summary>Pause on screen lock</summary>
+      <description>Pause clipboard monitoring when the screen is locked and resume on unlock.</description>
+    </key>
+
+    <key name="clear-on-lock" type="b">
+      <default>false</default>
+      <summary>Clear on screen lock</summary>
+      <description>Clear clipboard history when the screen is locked.</description>
+    </key>
+
+    <key name="copy-as-plain-text" type="b">
+      <default>false</default>
+      <summary>Copy as plain text</summary>
+      <description>Sanitize copied text by stripping zero-width and control characters and normalizing whitespace.</description>
     </key>
 
     <key name="show-copy-notifications" type="b">
@@ -155,6 +203,36 @@
       <summary>Use legacy menu rows</summary>
       <description>Render clipboard entries using the older popup-oriented layout instead of the Wayland-safe actor rows.</description>
     </key>
+
+    <key name="rendering-mode" type="s">
+      <choices>
+        <choice value="auto"/>
+        <choice value="classic"/>
+        <choice value="enhanced"/>
+      </choices>
+      <default>'auto'</default>
+      <summary>Rendering mode</summary>
+      <description>Choose how entries are rendered: auto (detect/fallback), classic (PopupMenu rows), or enhanced (container + pagination).</description>
+    </key>
+
+    <key name="classic-max-rows" type="i">
+      <default>50</default>
+      <range min="10" max="200"/>
+      <summary>Classic mode: max rows</summary>
+      <description>Maximum number of rows to show in classic rendering mode.</description>
+    </key>
+
+    <key name="disable-css" type="b">
+      <default>false</default>
+      <summary>Disable extension CSS</summary>
+      <description>Do not apply the ClipFlow Pro stylesheet; useful for theme compatibility troubleshooting.</description>
+    </key>
+
+    <key name="warn-conflicts" type="b">
+      <default>true</default>
+      <summary>Warn about other clipboard managers</summary>
+      <description>Show a one-time notification if likely conflicting clipboard managers are running.</description>
+    </key>
     
     <key name="show-timestamps" type="b">
       <default>true</default>
@@ -172,6 +250,12 @@
       <default>false</default>
       <summary>Promote on copy</summary>
       <description>When clicking an entry to copy, move it to the top and refresh its timestamp</description>
+    </key>
+
+    <key name="migration-complete-43" type="b">
+      <default>false</default>
+      <summary>Migration complete from 43 schema</summary>
+      <description>Internal flag to avoid repeating one-time settings migration from the GNOME 43 schema.</description>
     </key>
 
     <!-- Pause Monitoring -->

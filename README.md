@@ -10,7 +10,11 @@ ClipFlow Pro is a powerful and intelligent clipboard manager that provides compr
 
 **Available on:** [extensions.gnome.org](https://extensions.gnome.org/extension/8793/clipflow-pro/) | Searchable in GNOME Extensions app | Installable via system extensions manager
 
-Compatibility: GNOME Shell 45–47 (ESM)
+Compatibility: GNOME Shell 43–47
+
+- GNOME 43–44: Classic UI is default (Enhanced available via toggle)
+- GNOME 45–47: Enhanced UI is default (Classic available via toggle)
+- Auto‑fallback to Classic if Enhanced rendering is blocked by theme/layout
 
 Note: This release uses the GNOME 45+ ES Modules format and libadwaita preferences. Older GNOME versions (≤44) are no longer declared as supported in this package.
 
@@ -35,10 +39,11 @@ Developer tooling:
 - **Secure Data Handling**: Proper cleanup of sensitive information
 
 ### 🎨 User Experience
-- **Modern UI**: Beautiful, responsive interface that adapts to your GNOME theme
+- **Classic+ UI**: Pinned strip, Starred section, quick filters (All/Pinned/Starred), per‑row actions (Pin/Star/Copy/Clean Copy/Delete), Show more/less
+- **Enhanced UI**: Modern layout with per‑row actions (Copy/Clean Copy); auto‑fallback to Classic when needed
 - **Intelligent Categorization**: Automatically categorize entries (URLs, emails, code, files, etc.)
-- **Pagination Support**: Handle large clipboard histories efficiently
-- **Right-click Integration**: Context menu integration for file operations
+- **Pagination / Expansion**: Efficient handling of large histories
+- **Right-click Integration**: Context menu integration for per‑item actions
 
 ### ⚙️ Customization
 - **Comprehensive Settings**: Extensive configuration options
@@ -362,4 +367,3 @@ This project is licensed under the GPL-3.0-or-later License - see the [LICENSE](
 If you find ClipFlow Pro useful, please consider supporting its development:
 
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)
-

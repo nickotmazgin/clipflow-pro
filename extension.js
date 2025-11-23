@@ -72,6 +72,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._destroyed = false;
         this._clipboardNotifyShown = false;
         this._useCompactUI = this._settings.get_boolean('use-compact-ui');
+        this._filterMode = 'all';
 
         // Initialize clipboard history
         this._clipboardHistory = [];
@@ -1153,6 +1154,18 @@ class ClipFlowIndicator extends PanelMenu.Button {
         });
         
         searchContainer.add_child(this._searchEntry);
+        // Quick filter buttons: All / Pinned / Starred
+        const mkFilterBtn = (label, mode) => {
+            const b = new St.Button({ label, style_class: 'clipflow-button' });
+            b.add_style_class_name('clipflow-button-secondary');
+            b.connect('clicked', () => { this._filterMode = mode; this._filterHistory(); });
+            return b;
+        };
+        try {
+            searchContainer.add_child(mkFilterBtn(_('All'), 'all'));
+            searchContainer.add_child(mkFilterBtn(_('Pinned'), 'pinned'));
+            searchContainer.add_child(mkFilterBtn(_('Starred'), 'starred'));
+        } catch (_e) {}
 
         return searchContainer;
     }
@@ -2219,6 +2232,32 @@ class ClipFlowIndicator extends PanelMenu.Button {
         register('show-menu-shortcut', this._handleShowMenuShortcut.bind(this));
         register('enhanced-copy-shortcut', this._handleEnhancedCopyShortcut.bind(this));
         register('enhanced-paste-shortcut', this._handleEnhancedPasteShortcut.bind(this));
+        // Classic quick filters and top toggles
+        register('classic-filter-all-shortcut', () => this._handleFilterShortcut('all'));
+        register('classic-filter-pinned-shortcut', () => this._handleFilterShortcut('pinned'));
+        register('classic-filter-starred-shortcut', () => this._handleFilterShortcut('starred'));
+        register('classic-toggle-pin-top-shortcut', () => this._toggleTopItem('pin'));
+        register('classic-toggle-star-top-shortcut', () => this._toggleTopItem('star'));
+    }
+
+    _handleFilterShortcut(mode) {
+        try {
+            this._filterMode = mode;
+            this._filterHistory();
+            if (this.menu && !this.menu.isOpen) this.menu.open(true);
+        } catch (_e) {}
+    }
+
+    _toggleTopItem(kind) {
+        try {
+            if (!Array.isArray(this._clipboardHistory) || this._clipboardHistory.length === 0) return;
+            const item = this._clipboardHistory[0];
+            if (!item) return;
+            if (kind === 'pin') item.pinned = !item.pinned;
+            if (kind === 'star') item.starred = !item.starred;
+            this._queueHistorySave();
+            this._refreshHistory();
+        } catch (_e) {}
     }
 
     _unregisterKeybindings() {
@@ -2443,10 +2482,15 @@ class ClipFlowIndicator extends PanelMenu.Button {
         
         const filteredHistory = this._getFilteredHistory();
         const sortedHistory = this._sortHistory(filteredHistory);
+        // Group by pinned/starred for Classic-like sections even in ESM
+        const pinned = sortedHistory.filter(i => i && i.pinned);
+        const starred = sortedHistory.filter(i => i && i.starred && !i.pinned);
+        const othersAll = sortedHistory.filter(i => i && !i.pinned && !i.starred);
+        const othersTotal = othersAll.length;
         const totalEntries = sortedHistory.length;
         const pageSize = Math.max(1, this._entriesPerPage);
-        this._setHistoryScrollHidden(totalEntries <= pageSize);
-        const totalPages = totalEntries === 0 ? 0 : Math.ceil(totalEntries / pageSize);
+        this._setHistoryScrollHidden(othersTotal <= pageSize);
+        const totalPages = othersTotal === 0 ? 0 : Math.ceil(othersTotal / pageSize);
         if (totalPages > 0 && this._currentPage > totalPages - 1) {
             this._currentPage = totalPages - 1;
         }
@@ -2454,23 +2498,45 @@ class ClipFlowIndicator extends PanelMenu.Button {
             this._currentPage = 0;
         }
         
-        if (totalEntries === 0) {
+        if (sortedHistory.length === 0) {
             const hasSearchFilter = this._searchEntry && this._getSearchText().trim();
             this._showEmptyState(hasSearchFilter);
             this._updatePaginationControls(0, 0);
             this._populateContextMenuRecentEntries();
             return;
         }
+        // Pinned strip at top
+        if (pinned.length > 0) {
+            const strip = new St.BoxLayout({ vertical: false });
+            const label = new St.Label({ text: `${_('Pinned')} (${pinned.length}):`, style_class: 'clipflow-history-meta' });
+            strip.add_child(label);
+            pinned.slice(0, 12).forEach(p => {
+                const preview = this._truncateText(this._safeHistoryText(p) || p.preview || _('(Empty)'), 18);
+                const btn = new St.Button({ label: preview, style_class: 'clipflow-button' });
+                btn.add_style_class_name('clipflow-button-secondary');
+                btn.connect('clicked', () => this._activateHistoryItem(p));
+                strip.add_child(btn);
+            });
+            this._historyContainer.add_child(strip);
+            this._historyContainer.add_child(new St.BoxLayout({ vertical: false }));
+        }
+        // Starred section
+        if (starred.length > 0) {
+            const header = new St.Label({ text: `${_('Starred')} (${starred.length})`, style_class: 'clipflow-history-meta' });
+            this._historyContainer.add_child(header);
+            starred.forEach((s, idx) => this._createHistoryItem(s, idx + 1));
+            this._historyContainer.add_child(new St.BoxLayout({ vertical: false }));
+        }
 
+        // Others with pagination
         const startIndex = this._currentPage * pageSize;
-        const visibleEntries = sortedHistory.slice(startIndex, startIndex + pageSize);
-
-        visibleEntries.forEach((item, index) => {
+        const visibleOthers = othersAll.slice(startIndex, startIndex + pageSize);
+        visibleOthers.forEach((item, index) => {
             this._createHistoryItem(item, startIndex + index + 1);
         });
         this._updatePaginationControls(totalEntries, totalPages);
         this._populateContextMenuRecentEntries();
-        const renderedCount = this._historyContainer && this._historyContainer.get_children ? this._historyContainer.get_children().length : visibleEntries.length;
+        const renderedCount = this._historyContainer && this._historyContainer.get_children ? this._historyContainer.get_children().length : (visibleOthers.length + pinned.length + starred.length);
 
         if (!this._menuRebuildInProgress && sortedHistory.length > 0 && renderedCount === 0) {
             this._menuRebuildInProgress = true;
@@ -2544,6 +2610,14 @@ class ClipFlowIndicator extends PanelMenu.Button {
         hint.clutter_text.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
         wrapper.add_child(hint);
 
+        // Reset UI mode button to Classic when empty
+        try {
+            const resetButton = new St.Button({ label: _('Reset to Classic UI'), style_class: 'clipflow-button' });
+            resetButton.add_style_class_name('clipflow-button-secondary');
+            resetButton.connect('clicked', () => { try { this._settings.set_string('rendering-mode', 'classic'); this._filterHistory(); } catch (_e) {} });
+            wrapper.add_child(resetButton);
+        } catch (_e) {}
+
         this._historyContainer.add_child(wrapper);
     }
 
@@ -2588,13 +2662,19 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
     _getFilteredHistory() {
         if (!this._searchEntry) {
-            return this._clipboardHistory;
+            const base = this._clipboardHistory;
+            if (this._filterMode === 'pinned') return base.filter(i => i && i.pinned);
+            if (this._filterMode === 'starred') return base.filter(i => i && i.starred);
+            return base;
         }
 
         const searchText = this._getSearchText().toLowerCase();
         
         if (!searchText) {
-            return this._clipboardHistory;
+            const base = this._clipboardHistory;
+            if (this._filterMode === 'pinned') return base.filter(i => i && i.pinned);
+            if (this._filterMode === 'starred') return base.filter(i => i && i.starred);
+            return base;
         }
         
         // Use cache if available and search hasn't changed
@@ -2620,11 +2700,12 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 return false;
             }
         });
-        this._filteredHistoryCache = filtered;
+        const post = (this._filterMode === 'pinned') ? filtered.filter(i => i && i.pinned) : (this._filterMode === 'starred') ? filtered.filter(i => i && i.starred) : filtered;
+        this._filteredHistoryCache = post;
         this._lastSearchText = searchText;
         this._filterCacheValid = true;
 
-        return filtered;
+        return post;
     }
 
     _safeHistoryText(item) {
@@ -2934,8 +3015,26 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return Clutter.EVENT_STOP;
         });
 
+        const copyButton = new St.Button({
+            style_class: 'clipflow-action-button',
+            child: new St.Icon({ icon_name: 'edit-copy-symbolic', icon_size: 14 }),
+            reactive: true, can_focus: false, track_hover: true
+        });
+        copyButton.set_accessible_name(_('Copy this entry'));
+        copyButton.connect('button-release-event', () => { this._copyToClipboard(item.text); return Clutter.EVENT_STOP; });
+
+        const cleanCopyButton = new St.Button({
+            style_class: 'clipflow-action-button',
+            child: new St.Icon({ icon_name: 'document-send-symbolic', icon_size: 14 }),
+            reactive: true, can_focus: false, track_hover: true
+        });
+        cleanCopyButton.set_accessible_name(_('Copy cleaned (plain text)'));
+        cleanCopyButton.connect('button-release-event', () => { const cleaned = this._sanitizeForPaste(item.text || ''); this._copyToClipboard(cleaned); return Clutter.EVENT_STOP; });
+
         actionBox.add_child(pinButton);
         actionBox.add_child(starButton);
+        actionBox.add_child(copyButton);
+        actionBox.add_child(cleanCopyButton);
         return actionBox;
     }
 
@@ -3466,6 +3565,36 @@ export default class ClipFlowProExtension extends Extension {
                 throw new Error('Settings schema not found.');
             this._settings = settings;
 
+            // One-time migration from 43 schema if present
+            try {
+                const OLD_SCHEMA = 'org.gnome.shell.extensions.clipflow-pro-gnome43';
+                const MIGRATION_FLAG = 'migration-complete-43';
+                if (!this._settings.get_boolean(MIGRATION_FLAG)) {
+                    const oldSettings = new Gio.Settings({ schema_id: OLD_SCHEMA });
+                    const copyString = key => { try { this._settings.set_string(key, oldSettings.get_string(key)); } catch (_e) {} };
+                    const copyInt = key => { try { this._settings.set_int(key, oldSettings.get_int(key)); } catch (_e) {} };
+                    const copyBool = key => { try { this._settings.set_boolean(key, oldSettings.get_boolean(key)); } catch (_e) {} };
+                    const copyStrv = key => { try { this._settings.set_strv(key, oldSettings.get_strv(key)); } catch (_e) {} };
+                    // Known keys to migrate
+                    ['panel-position','ignore-apps','dedupe-mode'].forEach(copyString);
+                    ['max-entries','max-entry-length','min-entry-length','entries-per-page','context-menu-items','copied-preview-length','pause-duration-minutes'].forEach(copyInt);
+                    ['ignore-passwords','show-numbers','show-preview','use-compact-ui','use-legacy-menu-items','show-timestamps','promote-on-copy','capture-primary','show-copy-notifications','show-copied-preview','copy-as-plain-text','pause-on-lock','clear-on-lock'].forEach(copyBool);
+                    ['show-menu-shortcut','enhanced-copy-shortcut','enhanced-paste-shortcut'].forEach(copyStrv);
+                    this._settings.set_boolean(MIGRATION_FLAG, true);
+                }
+            } catch (_e) {}
+
+            // Heuristic: prefer right placement if Zorin taskbar is present
+            try {
+                const shellSettings = new Gio.Settings({ schema_id: 'org.gnome.shell' });
+                const extList = shellSettings.get_strv('enabled-extensions') || [];
+                if (extList.indexOf('zorin-taskbar@zorinos.com') !== -1) {
+                    const current = this._settings.get_string('panel-position');
+                    if (current !== 'right' && current !== 'left') {
+                        this._settings.set_string('panel-position', 'right');
+                    }
+                }
+            } catch (_e) {}
             const panelPosition = this._normalizePanelPosition(this._settings.get_string('panel-position'));
             this._indicator = new ClipFlowIndicator(this._settings);
             this._attachIndicatorWithFallback(panelPosition);

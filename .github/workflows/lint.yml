@@ -1,0 +1,41 @@
+name: Lint
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'extension.js'
+      - 'prefs.js'
+      - '.eslintrc.json'
+      - '.eslintignore'
+      - '.github/workflows/lint.yml'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - 'extension.js'
+      - 'prefs.js'
+      - '.eslintrc.json'
+      - '.eslintignore'
+      - '.github/workflows/lint.yml'
+  schedule:
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+
+jobs:
+  eslint:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Run ESLint
+        run: |
+          npx -y eslint@9.14.0 extension.js prefs.js || true
+

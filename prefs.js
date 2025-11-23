@@ -464,6 +464,47 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         );
         shortcutsListBox.append(pasteShortcutBox);
 
+        // Classic filter shortcuts
+        const filterAllBox = this._createShortcutRow(
+            _('Classic: Filter All'),
+            _('Switch Classic filter to All and open the menu'),
+            'classic-filter-all-shortcut',
+            ''
+        );
+        shortcutsListBox.append(filterAllBox);
+
+        const filterPinnedBox = this._createShortcutRow(
+            _('Classic: Filter Pinned'),
+            _('Switch Classic filter to Pinned and open the menu'),
+            'classic-filter-pinned-shortcut',
+            ''
+        );
+        shortcutsListBox.append(filterPinnedBox);
+
+        const filterStarredBox = this._createShortcutRow(
+            _('Classic: Filter Starred'),
+            _('Switch Classic filter to Starred and open the menu'),
+            'classic-filter-starred-shortcut',
+            ''
+        );
+        shortcutsListBox.append(filterStarredBox);
+
+        const togglePinTopBox = this._createShortcutRow(
+            _('Classic: Toggle Pin (Top)'),
+            _('Toggle pinned on the most recent history item'),
+            'classic-toggle-pin-top-shortcut',
+            ''
+        );
+        shortcutsListBox.append(togglePinTopBox);
+
+        const toggleStarTopBox = this._createShortcutRow(
+            _('Classic: Toggle Star (Top)'),
+            _('Toggle starred on the most recent history item'),
+            'classic-toggle-star-top-shortcut',
+            ''
+        );
+        shortcutsListBox.append(toggleStarTopBox);
+
         shortcutsBox.append(shortcutsFrame);
 
         // Shortcut info

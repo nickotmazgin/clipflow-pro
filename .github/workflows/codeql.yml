@@ -1,0 +1,30 @@
+name: CodeQL
+
+on:
+  push:
+    branches: ["gnome43-44"]
+  pull_request:
+    branches: ["gnome43-44"]
+  schedule:
+    - cron: "30 4 * * 6"
+
+jobs:
+  analyze:
+    permissions:
+      contents: read
+      security-events: write
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'javascript' ]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v4
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4

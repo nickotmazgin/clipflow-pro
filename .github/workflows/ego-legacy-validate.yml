@@ -1,10 +1,11 @@
-name: EGO Legacy Validate
+name: Legacy EGO Validate
 
 on:
   push:
     branches: [ "gnome43-44" ]
   pull_request:
     branches: [ "gnome43-44" ]
+  workflow_dispatch:
 
 jobs:
   validate:

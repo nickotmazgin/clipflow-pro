@@ -396,3 +396,23 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 ## License
 
 ClipFlow Pro is licensed under the [GPL-3.0-or-later](LICENSE) license.
+## 1.3.0 — Unified Classic+ and Enhanced, GNOME 43–47
+
+- One UUID across releases: `clipflow-pro@nickotmazgin.github.io`
+- Two zips for EGO (same UUID):
+  - GNOME 43–44 (legacy GJS) — Classic+ default
+  - GNOME 45–47 (ESM) — Enhanced default
+- Classic+ (both builds):
+  - Pinned strip, Starred section, Others list
+  - Quick filters (All / Pinned / Starred) with active highlighting
+  - Per‑row actions: Pin, Star, Copy, Copy Cleaned, Delete
+  - Show more / Show less
+  - Keyboard shortcuts for filters and top item toggles
+  - Export / Import, Purge duplicates, Pin Top 3/5, Unpin All
+  - Reset to Defaults in Preferences → About → Maintenance
+- Enhanced (45+):
+  - Per‑row Copy & Copy Cleaned actions
+  - Auto‑fallback to Classic if rendering blocked by theme/layout
+- Stability:
+  - Deferred clipboard monitoring start; throttled xclip/xsel fallbacks
+  - Lazy menu build on first open

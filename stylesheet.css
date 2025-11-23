@@ -112,7 +112,7 @@
     background-color: rgba(255, 255, 255, 0.16);
 }
 
-/* Active state for filter chips */
+/* Active/selected state for filter chips */
 .clipflow-button-secondary.active {
     background-color: rgba(148, 193, 255, 0.35);
     border-color: rgba(148, 193, 255, 0.8);
@@ -213,6 +213,7 @@
     background-color: rgba(255, 255, 255, 0.03);
     color: #f6f8ff;
     transition: background-color 120ms ease, border-color 120ms ease, box-shadow 120ms ease;
+    min-height: 24px; /* ensure rows have visible height on GNOME 43 */
 }
 
 .clipflow-history-item:hover {
@@ -284,6 +285,7 @@
     font-size: 12px;
     line-height: 1.35;
     color: #f7f9ff;
+    opacity: 1.0; /* avoid theme making text fully transparent */
 }
 
 .clipflow-compact .clipflow-history-text {
@@ -293,6 +295,16 @@
 .clipflow-history-item.clipflow-type-code .clipflow-history-text,
 .clipflow-history-item.clipflow-type-json .clipflow-history-text {
     font-family: monospace;
+}
+
+/* Ensure label colors remain visible even with shell themes (Zorin, etc.) */
+.clipflow-menu StLabel,
+.clipflow-history-list StLabel,
+.clipflow-history-item StLabel,
+.clipflow-history-meta,
+.clipflow-history-number {
+    color: #f7f9ff;
+    opacity: 1.0;
 }
 
 .clipflow-history-meta {

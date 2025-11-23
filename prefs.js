@@ -1,32 +1,25 @@
 'use strict';
-import GObject from 'gi://GObject';
-import Gtk from 'gi://Gtk';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import Pango from 'gi://Pango';
-import Gdk from 'gi://Gdk';
 
-import { ExtensionPreferences, gettext as _ } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+const ExtensionUtils = imports.misc.extensionUtils;
+const {GObject, Gtk, Gio, GLib, Pango, Gdk} = imports.gi;
 
-export default class ClipFlowProPreferences extends ExtensionPreferences {
-    fillPreferencesWindow(window) {
-        const settings = this.getSettings();
+const Me = ExtensionUtils.getCurrentExtension();
+const _ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
 
-        // Translations are provided via the extension's gettext domain.
+function init() {
+    ExtensionUtils.initTranslations();
+}
 
-        const widget = new ClipFlowProPrefsWidget({
-            orientation: Gtk.Orientation.VERTICAL,
-        }, settings, this.metadata);
+function buildPrefsWidget() {
+    const settings = ExtensionUtils.getSettings();
+    const widget = new ClipFlowProPrefsWidget({
+        orientation: Gtk.Orientation.VERTICAL,
+    }, settings, Me.metadata);
 
-        widget.set_hexpand(true);
-        widget.set_vexpand(true);
+    widget.set_hexpand(true);
+    widget.set_vexpand(true);
 
-        window.set_default_size?.(920, 640);
-
-        // Attach our GTK widget as the window content. This keeps the Adw
-        // headerbar (close/minimize) while letting us reuse the existing UI.
-        window.set_child?.(widget) ?? window.add?.(widget);
-    }
+    return widget;
 }
 
 const ClipFlowProPrefsWidget = GObject.registerClass(
@@ -53,9 +46,9 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
     }
 
     _buildUI() {
-        // Helper to access metadata from ExtensionPreferences via a global getter
+        // Helper to access metadata from Me (legacy format)
         this._getMeta = (key) => (
-            this.get_root()?.get_ancestor?.(Gtk.Window)?.application?.metadata?.[key] ?? null
+            Me.metadata?.[key] ?? null
         );
         this.set_orientation(Gtk.Orientation.VERTICAL);
         this.set_spacing(20);
@@ -351,6 +344,14 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         );
         displayBox.append(showTimestampsBox);
 
+        // Plain text sanitize toggle
+        const plainToggle = this._createSwitchRow(
+            _('Copy as Plain Text'),
+            _('Strip zero-width/control characters and normalize whitespace when copying from history.'),
+            'copy-as-plain-text'
+        );
+        displayBox.append(plainToggle);
+
         appearanceBox.append(displayFrame);
 
         // Menu Styling
@@ -377,6 +378,43 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         );
         styleBox.append(compactToggle);
 
+        // Rendering mode (compatibility)
+        const renderFrame = this._createFrame(_('Compatibility'));
+        const renderBox = new Gtk.Box({ 
+            orientation: Gtk.Orientation.VERTICAL,
+            spacing: 10
+        });
+        renderFrame.set_child(renderBox);
+
+        const renderingModeBox = this._createComboRow(
+            _('Rendering Mode'),
+            _('Auto chooses a safe default for GNOME 43. Classic uses simple PopupMenu rows. Enhanced uses a container with pagination.'),
+            'rendering-mode',
+            [
+                ['auto', _('Auto')],
+                ['classic', _('Classic')],
+                ['enhanced', _('Enhanced')],
+            ]
+        );
+        renderBox.append(renderingModeBox);
+
+        const classicMaxRowsBox = this._createSpinRow(
+            _('Classic Mode: Max Rows'),
+            _('Maximum number of rows to show when using Classic mode (10–200).'),
+            'classic-max-rows',
+            10, 200, 50
+        );
+        renderBox.append(classicMaxRowsBox);
+
+        const disableCssToggle = this._createSwitchRow(
+            _('Disable Extension Stylesheet'),
+            _('Turn off ClipFlow’s CSS for troubleshooting theme conflicts.'),
+            'disable-css'
+        );
+        renderBox.append(disableCssToggle);
+
+        appearanceBox.append(renderFrame);
+
         appearanceBox.append(styleFrame);
 
         // App Exclusions
@@ -394,6 +432,27 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         );
         exclBox.append(exclRow);
         appearanceBox.append(exclFrame);
+
+        // Lock Behavior
+        const lockFrame = this._createFrame(_('Lock Behavior'));
+        const lockBox = new Gtk.Box({ 
+            orientation: Gtk.Orientation.VERTICAL,
+            spacing: 10
+        });
+        lockFrame.set_child(lockBox);
+        const pauseOnLock = this._createSwitchRow(
+            _('Pause on Screen Lock'),
+            _('Stop monitoring while the screen is locked; resume on unlock.'),
+            'pause-on-lock'
+        );
+        const clearOnLock = this._createSwitchRow(
+            _('Clear on Screen Lock'),
+            _('Clear clipboard history when the screen locks.'),
+            'clear-on-lock'
+        );
+        lockBox.append(pauseOnLock);
+        lockBox.append(clearOnLock);
+        appearanceBox.append(lockFrame);
 
         // Panel Icon
         const iconFrame = this._createFrame(_('Panel Icon'));
@@ -463,6 +522,47 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
             '<Super>v'
         );
         shortcutsListBox.append(pasteShortcutBox);
+
+        // Classic filter and toggle shortcuts
+        const filterAllBox = this._createShortcutRow(
+            _('Classic: Filter All'),
+            _('Switch Classic filter to All and open the menu'),
+            'classic-filter-all-shortcut',
+            ''
+        );
+        shortcutsListBox.append(filterAllBox);
+
+        const filterPinnedBox = this._createShortcutRow(
+            _('Classic: Filter Pinned'),
+            _('Switch Classic filter to Pinned and open the menu'),
+            'classic-filter-pinned-shortcut',
+            ''
+        );
+        shortcutsListBox.append(filterPinnedBox);
+
+        const filterStarredBox = this._createShortcutRow(
+            _('Classic: Filter Starred'),
+            _('Switch Classic filter to Starred and open the menu'),
+            'classic-filter-starred-shortcut',
+            ''
+        );
+        shortcutsListBox.append(filterStarredBox);
+
+        const togglePinTopBox = this._createShortcutRow(
+            _('Classic: Toggle Pin (Top)'),
+            _('Toggle pinned on the most recent history item'),
+            'classic-toggle-pin-top-shortcut',
+            ''
+        );
+        shortcutsListBox.append(togglePinTopBox);
+
+        const toggleStarTopBox = this._createShortcutRow(
+            _('Classic: Toggle Star (Top)'),
+            _('Toggle starred on the most recent history item'),
+            'classic-toggle-star-top-shortcut',
+            ''
+        );
+        shortcutsListBox.append(toggleStarTopBox);
 
         shortcutsBox.append(shortcutsFrame);
 
@@ -641,6 +741,33 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         });
 
         aboutBox.append(featuresFrame);
+
+        // Reset to defaults
+        const resetFrame = this._createFrame(_('Maintenance'));
+        const resetBox = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 10 });
+        resetFrame.set_child(resetBox);
+        const resetInfo = new Gtk.Label({
+            label: _('Reset all ClipFlow Pro settings to their defaults.'),
+            wrap: true,
+            wrap_mode: Pango.WrapMode.WORD
+        });
+        resetInfo.set_halign(Gtk.Align.START);
+        const resetButton = new Gtk.Button({ label: _('Reset to Defaults') });
+        resetButton.set_halign(Gtk.Align.START);
+        resetButton.connect('clicked', () => {
+            try {
+                const schema = this._settings.settings_schema;
+                if (schema && typeof schema.list_keys === 'function') {
+                    const keys = schema.list_keys();
+                    keys.forEach(key => {
+                        try { this._settings.reset(key); } catch (_e) {}
+                    });
+                }
+            } catch (_e) {}
+        });
+        resetBox.append(resetInfo);
+        resetBox.append(resetButton);
+        aboutBox.append(resetFrame);
 
         // Add to notebook
         this._notebook.append_page(aboutBox, new Gtk.Label({ label: _('About') }));

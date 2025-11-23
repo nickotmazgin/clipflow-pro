@@ -367,3 +367,14 @@ This project is licensed under the GPL-3.0-or-later License - see the [LICENSE](
 If you find ClipFlow Pro useful, please consider supporting its development:
 
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)
+
+## Branch Layout
+
+- main: GNOME 45–47 (ESM). This is the default development branch.
+- gnome43-44: GNOME 43–44 (legacy GJS). Maintained via a Git worktree at `../clipflow-pro-gnome43` for unified builds.
+
+Packaging for extensions.gnome.org (EGO): two flat zips under one UUID. The build script `tools/build-unified.sh` outputs:
+- `dist/clipflow-pro-gnome45-47.zip` (shell-version [45,46,47])
+- `dist/clipflow-pro-gnome43-44.zip` (shell-version [43,44])
+
+Compliance: no compiled schemas in zips; schema XML included; metadata.json `version` is an integer; `version-name` <= 16 chars and ASCII.

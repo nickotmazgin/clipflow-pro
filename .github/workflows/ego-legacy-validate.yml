@@ -8,15 +8,17 @@ on:
 
 jobs:
   validate:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v5
 
-      - name: Install dependencies (glib tools)
+      - name: Install dependencies (glib tools + zip)
         run: |
           sudo apt-get update
-          sudo apt-get install -y libglib2.0-bin unzip jq
+          sudo apt-get install -y libglib2.0-bin unzip jq zip
 
       - name: Build legacy zip (flat)
         run: |

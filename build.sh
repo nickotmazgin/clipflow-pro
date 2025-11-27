@@ -32,21 +32,12 @@ else
     echo "Warning: icons directory not found; panel icon may be missing." >&2
 fi
 
-echo "Preparing GSettings schemas..."
+echo "Preparing GSettings schemas (XML only, no compiled file for EGO)..."
 if [[ -d "${SCHEMAS_DIR}" ]]; then
     mkdir -p "${BUILD_DIR}/schemas"
     cp "${SCHEMAS_DIR}"/*.xml "${BUILD_DIR}/schemas/"
-
-    if command -v glib-compile-schemas >/dev/null 2>&1; then
-        glib-compile-schemas "${BUILD_DIR}/schemas/"
-    elif [[ -f "${SCHEMAS_DIR}/gschemas.compiled" ]]; then
-        echo "Warning: glib-compile-schemas not found; using precompiled schemas bundle." >&2
-        cp "${SCHEMAS_DIR}/gschemas.compiled" "${BUILD_DIR}/schemas/"
-    else
-        echo "Error: glib-compile-schemas not found and no precompiled schemas available." >&2
-        echo "Install GLib tooling or run 'glib-compile-schemas schemas/' once on a machine that has it, then re-run build.sh." >&2
-        exit 1
-    fi
+    # Do NOT ship gschemas.compiled to EGO
+    rm -f "${BUILD_DIR}/schemas/gschemas.compiled" 2>/dev/null || true
 else
     echo "Warning: schemas directory not found; settings will not work." >&2
 fi

@@ -1,0 +1,277 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist>
+  <schema id="org.gnome.shell.extensions.clipflow-pro" path="/org/gnome/shell/extensions/clipflow-pro/">
+    
+    <!-- General Settings -->
+    <key name="max-entries" type="i">
+      <default>50</default>
+      <range min="10" max="100"/>
+      <summary>Maximum clipboard entries</summary>
+      <description>Maximum number of clipboard entries to keep in history</description>
+    </key>
+    
+    <key name="max-entry-length" type="i">
+      <default>1000</default>
+      <range min="100" max="10000"/>
+      <summary>Maximum entry character length</summary>
+      <description>Maximum length of individual clipboard entries</description>
+    </key>
+
+    <key name="min-entry-length" type="i">
+      <default>1</default>
+      <range min="0" max="100"/>
+      <summary>Minimum entry character length</summary>
+      <description>Ignore entries shorter than this many characters</description>
+    </key>
+
+    <!-- Keyboard Shortcuts -->
+    <key name="enhanced-copy-shortcut" type="as">
+      <default>['&lt;Super&gt;c']</default>
+      <summary>Enhanced copy shortcut</summary>
+      <description>Keyboard shortcut for enhanced copying</description>
+    </key>
+    
+    <key name="enhanced-paste-shortcut" type="as">
+      <default>[]</default>
+      <summary>Enhanced paste shortcut</summary>
+      <description>Keyboard shortcut for enhanced pasting</description>
+    </key>
+    
+    <key name="show-menu-shortcut" type="as">
+      <default>['&lt;Super&gt;&lt;Shift&gt;v']</default>
+      <summary>Show clipboard menu shortcut</summary>
+      <description>Keyboard shortcut to show clipboard history menu</description>
+    </key>
+
+    <key name="classic-filter-all-shortcut" type="as">
+      <default>[]</default>
+      <summary>Classic: Filter All</summary>
+      <description>Keyboard shortcut to switch Classic list filter to All items and open the menu.</description>
+    </key>
+
+    <key name="classic-filter-pinned-shortcut" type="as">
+      <default>[]</default>
+      <summary>Classic: Filter Pinned</summary>
+      <description>Keyboard shortcut to switch Classic list filter to only pinned items and open the menu.</description>
+    </key>
+
+    <key name="classic-filter-starred-shortcut" type="as">
+      <default>[]</default>
+      <summary>Classic: Filter Starred</summary>
+      <description>Keyboard shortcut to switch Classic list filter to only starred items and open the menu.</description>
+    </key>
+
+    <key name="classic-toggle-pin-top-shortcut" type="as">
+      <default>[]</default>
+      <summary>Classic: Toggle pin top</summary>
+      <description>Keyboard shortcut to toggle pinned state on the most recent history item.</description>
+    </key>
+
+    <key name="classic-toggle-star-top-shortcut" type="as">
+      <default>[]</default>
+      <summary>Classic: Toggle star top</summary>
+      <description>Keyboard shortcut to toggle starred state on the most recent history item.</description>
+    </key>
+    
+    <!-- UI Settings -->
+    <key name="show-numbers" type="b">
+      <default>true</default>
+      <summary>Show entry numbers</summary>
+      <description>Display numbers next to clipboard entries</description>
+    </key>
+    
+    <key name="entries-per-page" type="i">
+      <default>10</default>
+      <range min="5" max="50"/>
+      <summary>Entries per page</summary>
+      <description>Number of entries to show per page in the menu</description>
+    </key>
+    
+    <key name="context-menu-items" type="i">
+      <default>5</default>
+      <range min="1" max="20"/>
+      <summary>Recent items in context menu</summary>
+      <description>Number of recent clipboard entries to show in the right-click context menu.</description>
+    </key>
+    
+    <!-- Privacy and Security -->
+    <key name="ignore-passwords" type="b">
+      <default>true</default>
+      <summary>Ignore password fields</summary>
+      <description>Don't save clipboard content from password fields</description>
+    </key>
+    
+    <key name="clear-on-logout" type="b">
+      <default>false</default>
+      <summary>Clear clipboard on logout</summary>
+      <description>Clear clipboard history and remove ~/.config/clipflow-pro/history.json on logout</description>
+    </key>
+    
+    <key name="auto-clear-sensitive" type="b">
+      <default>false</default>
+      <summary>Auto-clear sensitive data</summary>
+      <description>Automatically remove password-like entries after 5 minutes</description>
+    </key>
+
+    <key name="pause-on-lock" type="b">
+      <default>false</default>
+      <summary>Pause on screen lock</summary>
+      <description>Pause clipboard monitoring when the screen is locked and resume on unlock.</description>
+    </key>
+
+    <key name="clear-on-lock" type="b">
+      <default>false</default>
+      <summary>Clear on screen lock</summary>
+      <description>Clear clipboard history when the screen is locked.</description>
+    </key>
+
+    <key name="copy-as-plain-text" type="b">
+      <default>false</default>
+      <summary>Copy as plain text</summary>
+      <description>Sanitize copied text by stripping zero-width and control characters and normalizing whitespace.</description>
+    </key>
+
+    <key name="show-copy-notifications" type="b">
+      <default>true</default>
+      <summary>Show copy notifications</summary>
+      <description>Display a GNOME notification when ClipFlow Pro copies an entry</description>
+    </key>
+
+    <key name="show-copied-preview" type="b">
+      <default>true</default>
+      <summary>Show entry preview in copy toast</summary>
+      <description>Include the first characters of the copied entry in notifications</description>
+    </key>
+
+    <key name="copied-preview-length" type="i">
+      <default>40</default>
+      <range min="5" max="200"/>
+      <summary>Copy toast preview length</summary>
+      <description>Number of characters to show in the copy notification preview</description>
+    </key>
+
+    <!-- Clipboard Behavior -->
+    <key name="capture-primary" type="b">
+      <default>true</default>
+      <summary>Capture PRIMARY selection</summary>
+      <description>Also capture selections from the PRIMARY buffer into history</description>
+    </key>
+
+    <key name="dedupe-mode" type="s">
+      <choices>
+        <choice value="ignore"/>
+        <choice value="promote"/>
+      </choices>
+      <default>'ignore'</default>
+      <summary>Duplicate handling mode</summary>
+      <description>Either ignore duplicate entries or move the latest duplicate to the top</description>
+    </key>
+
+    <!-- Appearance -->
+    <key name="panel-position" type="s">
+      <choices>
+        <choice value="left"/>
+        <choice value="center"/>
+        <choice value="right"/>
+      </choices>
+      <default>'right'</default>
+      <summary>Panel icon position</summary>
+      <description>Position of clipboard icon in the top panel</description>
+    </key>
+
+    <key name="icon-size-override" type="i">
+      <default>0</default>
+      <range min="0" max="64"/>
+      <summary>Panel icon size override</summary>
+      <description>Override icon size in pixels (0 = auto)</description>
+    </key>
+    
+    <key name="show-preview" type="b">
+      <default>true</default>
+      <summary>Show entry preview</summary>
+      <description>Show preview of clipboard entry content in menu</description>
+    </key>
+
+    <key name="use-compact-ui" type="b">
+      <default>false</default>
+      <summary>Use compact UI layout</summary>
+      <description>Toggle to use the slimmer legacy menu styling instead of the modern boxed look.</description>
+    </key>
+
+    <key name="use-legacy-menu-items" type="b">
+      <default>false</default>
+      <summary>Use legacy menu rows</summary>
+      <description>Render clipboard entries using the older popup-oriented layout instead of the Wayland-safe actor rows.</description>
+    </key>
+
+    <key name="rendering-mode" type="s">
+      <choices>
+        <choice value="auto"/>
+        <choice value="classic"/>
+        <choice value="enhanced"/>
+      </choices>
+      <default>'auto'</default>
+      <summary>Rendering mode</summary>
+      <description>Choose how entries are rendered: auto (detect/fallback), classic (PopupMenu rows), or enhanced (container + pagination).</description>
+    </key>
+
+    <key name="classic-max-rows" type="i">
+      <default>50</default>
+      <range min="10" max="200"/>
+      <summary>Classic mode: max rows</summary>
+      <description>Maximum number of rows to show in classic rendering mode.</description>
+    </key>
+
+    <key name="disable-css" type="b">
+      <default>false</default>
+      <summary>Disable extension CSS</summary>
+      <description>Do not apply the ClipFlow Pro stylesheet; useful for theme compatibility troubleshooting.</description>
+    </key>
+
+    <key name="warn-conflicts" type="b">
+      <default>true</default>
+      <summary>Warn about other clipboard managers</summary>
+      <description>Show a one-time notification if likely conflicting clipboard managers are running.</description>
+    </key>
+    
+    <key name="show-timestamps" type="b">
+      <default>true</default>
+      <summary>Show entry timestamps</summary>
+      <description>Display when each clipboard entry was copied</description>
+    </key>
+
+    <key name="ignore-apps" type="s">
+      <default>''</default>
+      <summary>Apps to ignore (comma-separated)</summary>
+      <description>Comma-separated list of app names or IDs to ignore when capturing</description>
+    </key>
+
+    <key name="promote-on-copy" type="b">
+      <default>false</default>
+      <summary>Promote on copy</summary>
+      <description>When clicking an entry to copy, move it to the top and refresh its timestamp</description>
+    </key>
+
+    <key name="migration-complete-43" type="b">
+      <default>false</default>
+      <summary>Migration complete from 43 schema</summary>
+      <description>Internal flag to avoid repeating one-time settings migration from the GNOME 43 schema.</description>
+    </key>
+
+    <!-- Pause Monitoring -->
+    <key name="pause-duration-minutes" type="i">
+      <default>5</default>
+      <range min="1" max="120"/>
+      <summary>Pause duration (minutes)</summary>
+      <description>Default number of minutes to pause clipboard monitoring</description>
+    </key>
+    
+    <!-- Preferences Navigation -->
+    <key name="target-prefs-tab" type="s">
+      <default>'general'</default>
+      <summary>Target preferences tab</summary>
+      <description>Internal key used to focus a specific tab when the preferences window opens.</description>
+    </key>
+    
+  </schema>
+</schemalist>

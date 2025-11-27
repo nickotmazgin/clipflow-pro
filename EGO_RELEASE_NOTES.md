@@ -8,7 +8,15 @@ Modern clipboard manager for GNOME Shell 45–47. ClipFlow Pro records your hist
 
 About
 
-ClipFlow Pro brings a full‑featured clipboard experience to the GNOME Shell panel. Browse and search your recent copies, pin or star favorites, and jump in with Super+Shift+V. Switch between the sleek boxed layout and the compact view, while your history remains private under ~/.config/clipflow-pro. Source, docs, and issues: https://github.com/nickotmazgin/clipflow-pro
+ClipFlow Pro 1.3.2
+
+- Minimal rows: Copy + More (Pin/Star/Clean Copy/Delete in overflow)
+- Duplicate header removed for a cleaner menu
+- Pinned chip strip limited for readability
+- Clipboard probing capped to avoid stalls during screenshots
+- GNOME 43–44 and 45–47 packages available separately
+
+Browse/search clipboard history, pin/star favorites, and open with Super+Shift+V. Compact mode available. History is stored locally in ~/.config/clipflow-pro.
 
 Release Notes (1.3.0)
 

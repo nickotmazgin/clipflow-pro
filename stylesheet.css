@@ -343,6 +343,12 @@
 
 .clipflow-history-actions {
     spacing: 4px;
+    opacity: 0.0;
+    transition: opacity 120ms ease;
+}
+
+.clipflow-history-item:hover .clipflow-history-actions {
+    opacity: 1.0;
 }
 
 .clipflow-action-button {
@@ -351,6 +357,10 @@
     border: none;
     background-color: transparent;
     color: rgba(255, 255, 255, 0.7);
+}
+
+.clipflow-action-button:hover {
+    background-color: rgba(255, 255, 255, 0.10);
 }
 
 .clipflow-action-button.pin {

@@ -378,3 +378,11 @@ Packaging for extensions.gnome.org (EGO): two flat zips under one UUID. The buil
 - `dist/clipflow-pro-gnome43-44.zip` (shell-version [43,44])
 
 Compliance: no compiled schemas in zips; schema XML included; metadata.json `version` is an integer; `version-name` <= 16 chars and ASCII.
+## What’s New in 1.3.3
+
+- Minimal per‑entry actions: Copy + More (Pin/Unpin, Star/Unstar, Copy cleaned, Delete in overflow)
+- Duplicate menu header removed for a cleaner look
+- Pinned chip strip capped (max 6 chips) for readability
+- New appearance toggles: Hide Pinned Section, Hide Starred Section
+- Safer default: Capture PRIMARY is OFF on fresh installs (prevents stalls while taking screenshots)
+- One‑command release script added: `tools/release.sh`

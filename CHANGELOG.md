@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.2] - 2025-11-27
+
+- UI: Simplified history rows to Copy + More overflow menu.
+- UI: Removed duplicate menu title header.
+- UI: Pinned chip strip now capped (max 6 chips).
+- Stability: Capped clipboard MIME fallback probing; added screenshot-app heuristic to avoid stalls during captures.
+- Packaging: Added 43–44 build scripts; kept EGO‑friendly schema handling (no compiled schemas in zips).
+
 _No changes yet._
 
 ---

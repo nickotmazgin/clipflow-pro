@@ -85,6 +85,7 @@
 
 .clipflow-action-container {
     padding-top: 8px;
+    padding-bottom: 6px;
 }
 
 .clipflow-action-container .clipflow-button {
@@ -120,7 +121,8 @@
 }
 
 .clipflow-pagination {
-    padding-top: 4px;
+    padding-top: 6px;
+    padding-bottom: 6px;
     padding-right: 14px;
     text-align: center;
 }

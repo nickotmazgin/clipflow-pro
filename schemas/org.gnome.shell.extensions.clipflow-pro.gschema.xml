@@ -152,7 +152,7 @@
 
     <!-- Clipboard Behavior -->
     <key name="capture-primary" type="b">
-      <default>true</default>
+      <default>false</default>
       <summary>Capture PRIMARY selection</summary>
       <description>Also capture selections from the PRIMARY buffer into history</description>
     </key>
@@ -245,6 +245,18 @@
       <default>true</default>
       <summary>Show entry timestamps</summary>
       <description>Display when each clipboard entry was copied</description>
+    </key>
+
+    <key name="hide-pinned" type="b">
+      <default>false</default>
+      <summary>Hide pinned section</summary>
+      <description>Do not show the pinned chip strip at the top of the menu.</description>
+    </key>
+
+    <key name="hide-starred" type="b">
+      <default>false</default>
+      <summary>Hide starred section</summary>
+      <description>Do not show the dedicated Starred section above the main list.</description>
     </key>
 
     <key name="ignore-apps" type="s">

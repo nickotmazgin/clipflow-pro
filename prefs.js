@@ -351,6 +351,21 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         );
         displayBox.append(showTimestampsBox);
 
+        // Hide pinned / starred sections
+        const hidePinnedBox = this._createSwitchRow(
+            _('Hide Pinned Section'),
+            _('Do not show the pinned chip strip at the top of the menu.'),
+            'hide-pinned'
+        );
+        displayBox.append(hidePinnedBox);
+
+        const hideStarredBox = this._createSwitchRow(
+            _('Hide Starred Section'),
+            _('Do not show the dedicated starred section above the main list.'),
+            'hide-starred'
+        );
+        displayBox.append(hideStarredBox);
+
         appearanceBox.append(displayFrame);
 
         // Menu Styling

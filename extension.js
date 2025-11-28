@@ -2506,8 +2506,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
             this._populateContextMenuRecentEntries();
             return;
         }
-        // Pinned strip at top
-        if (pinned.length > 0) {
+        // Pinned strip at top (respect hide-pinned)
+        const hidePinned = (() => { try { return this._settings.get_boolean('hide-pinned'); } catch (_e) { return false; } })();
+        if (pinned.length > 0 && !hidePinned) {
             const strip = new St.BoxLayout({ vertical: false });
             const label = new St.Label({ text: `${_('Pinned')} (${pinned.length}):`, style_class: 'clipflow-history-meta' });
             strip.add_child(label);
@@ -2522,8 +2523,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
             this._historyContainer.add_child(strip);
             this._historyContainer.add_child(new St.BoxLayout({ vertical: false }));
         }
-        // Starred section
-        if (starred.length > 0) {
+        // Starred section (respect hide-starred)
+        const hideStarred = (() => { try { return this._settings.get_boolean('hide-starred'); } catch (_e) { return false; } })();
+        if (starred.length > 0 && !hideStarred) {
             const header = new St.Label({ text: `${_('Starred')} (${starred.length})`, style_class: 'clipflow-history-meta' });
             this._historyContainer.add_child(header);
             starred.forEach((s, idx) => this._createHistoryItem(s, idx + 1));

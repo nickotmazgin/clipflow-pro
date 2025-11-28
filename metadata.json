@@ -2,13 +2,17 @@
   "name": "ClipFlow Pro",
   "description": "A modern, powerful clipboard manager for GNOME Shell with intelligent organization, beautiful UI, and comprehensive history management.",
   "uuid": "clipflow-pro@nickotmazgin.github.io",
-  "shell-version": ["43","44"],
+  "shell-version": [
+    "43",
+    "44"
+  ],
   "version": 28,
   "version-name": "1.3.3 43.44",
   "url": "https://github.com/nickotmazgin/clipflow-pro",
   "settings-schema": "org.gnome.shell.extensions.clipflow-pro",
   "gettext-domain": "clipflow-pro",
-  "stylesheet": "stylesheet.css"
-  ,
-  "donations": { "paypal": "nickotmazgin" }
+  "stylesheet": "stylesheet.css",
+  "donations": {
+    "paypal": "nickotmazgin"
+  }
 }

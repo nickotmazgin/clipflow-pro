@@ -1066,8 +1066,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 this.menu.addMenuItem(emptyItem);
                 return;
             }
-            // Pinned strip
-            if (pinned.length > 0) {
+            // Pinned strip (respect hide-pinned)
+            const hidePinned = this._safeGetBoolean('hide-pinned', false);
+            if (pinned.length > 0 && !hidePinned) {
                 const pinItem = new PopupMenu.PopupBaseMenuItem({ reactive: false, can_focus: false });
                 const pinBox = new St.BoxLayout({ vertical: false });
                 const pinLabel = new St.Label({ text: `${_('Pinned') } (${pinned.length}):`, style_class: 'clipflow-history-meta' });
@@ -1084,8 +1085,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
             }
 
-            // Starred section
-            if (starred.length > 0) {
+            // Starred section (respect hide-starred)
+            const hideStarred = this._safeGetBoolean('hide-starred', false);
+            if (starred.length > 0 && !hideStarred) {
                 const secHeader = new PopupMenu.PopupMenuItem(`${_('Starred')} (${starred.length})`, { reactive: false, can_focus: false });
                 secHeader.setSensitive(false);
                 this.menu.addMenuItem(secHeader);

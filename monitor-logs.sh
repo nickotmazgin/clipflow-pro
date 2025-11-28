@@ -17,3 +17,4 @@ journalctl --user -f | grep --line-buffered -i "clipflow"
 
 
 
+

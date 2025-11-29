@@ -92,6 +92,21 @@ Developer tooling:
   </tr>
 </table>
 
+### New Screenshots (1.3.3)
+
+![Overview collage (1.3.3)](docs/screenshots/1.3.3/collage-3x3.jpg)
+
+Individual images:
+- docs/screenshots/1.3.3/1.png
+- docs/screenshots/1.3.3/2.png
+- docs/screenshots/1.3.3/3.png
+- docs/screenshots/1.3.3/4.png
+- docs/screenshots/1.3.3/5.png
+- docs/screenshots/1.3.3/6.png
+- docs/screenshots/1.3.3/7.png
+- docs/screenshots/1.3.3/8.png
+- docs/screenshots/1.3.3/9.png
+
 ## 📥 Installation
 
 ClipFlow Pro can be installed through multiple methods. Choose the one that works best for you:

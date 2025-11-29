@@ -1157,12 +1157,20 @@ class ClipFlowIndicator extends PanelMenu.Button {
         const buttonContainer = new St.BoxLayout({ vertical: false, x_expand: true });
         buttonContainer.add_style_class_name('clipflow-action-container');
 
-        const menuButton = new St.Button({
-            label: _('Actions'),
-            style_class: 'clipflow-button'
-        });
+        // Build a compact button with an icon + label for clarity
+        const menuButton = new St.Button({ style_class: 'clipflow-button' });
         menuButton.add_style_class_name('clipflow-button-secondary');
         menuButton.set_accessible_name(_('Open actions menu'));
+        try {
+            const row = new St.BoxLayout({ vertical: false });
+            row.add_child(new St.Icon({ icon_name: 'open-menu-symbolic', icon_size: 12 }));
+            row.add_child(new St.Label({ text: _('Actions') }));
+            if (typeof menuButton.set_child === 'function') menuButton.set_child(row);
+            else menuButton.child = row;
+        } catch (_e) {
+            // Fallback to text label only if icon creation fails
+            if (typeof menuButton.set_label === 'function') menuButton.set_label(_('Actions'));
+        }
         menuButton.connect('clicked', () => this._openMainActionsMenu(menuButton));
 
         buttonContainer.add_child(menuButton);
@@ -2610,7 +2618,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         const hint = new St.Label({
             text: hasSearchFilter
                 ? _('Try a different term or clear the filter to see all items.')
-                : _('Copy something and it will appear here instantly.'),
+                : _('Copy something to see it here. Use “Actions” to open settings, import, or clear.'),
             style_class: 'clipflow-empty-hint'
         });
         hint.clutter_text.set_line_wrap(true);

@@ -386,3 +386,7 @@ Compliance: no compiled schemas in zips; schema XML included; metadata.json `ver
 - New appearance toggles: Hide Pinned Section, Hide Starred Section
 - Safer default: Capture PRIMARY is OFF on fresh installs (prevents stalls while taking screenshots)
 - One‑command release script added: `tools/release.sh`
+
+Refinements (no version bump):
+- Bottom row unified as an “Actions” button that opens a popup (Clear, Settings, Export/Import, Purge, PRIMARY toggle; classic also includes Pin top/Unpin/Use Enhanced)
+- Empty state hint mentions “Use Actions to open settings, import, or clear.”

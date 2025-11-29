@@ -1158,7 +1158,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         buttonContainer.add_style_class_name('clipflow-action-container');
 
         const menuButton = new St.Button({
-            label: _('Menu'),
+            label: _('Actions'),
             style_class: 'clipflow-button'
         });
         menuButton.add_style_class_name('clipflow-button-secondary');

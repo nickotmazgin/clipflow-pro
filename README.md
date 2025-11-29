@@ -53,7 +53,7 @@ Developer tooling:
 
 ## Screenshots (1.3.3)
 
-![Overview collage (1.3.3)](docs/screenshots/1.3.3/collage-3x3.jpg)
+![Overview collage (1.3.3)](https://raw.githubusercontent.com/nickotmazgin/clipflow-pro/main/docs/screenshots/1.3.3/collage-3x3.jpg)
 
 Individual images:
 - docs/screenshots/1.3.3/1.png

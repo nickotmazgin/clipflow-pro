@@ -51,61 +51,54 @@ Developer tooling:
 - **Customizable Shortcuts**: Configure keyboard shortcuts to your preference
 - **Panel Position**: Choose where to place the clipboard icon
 
-## Screenshots
+## Screenshots (1.3.3)
 
-<div align="center">
-  <img src="docs/screenshots/01-panel-main-menu.png" alt="ClipFlow Pro panel indicator with the history menu open showing navigation buttons" width="720">
-  <p><em>Panel indicator with the full clipboard history menu.</em></p>
-</div>
-
-<div align="center">
-  <img src="docs/screenshots/02-quick-menu.png" alt="ClipFlow Pro quick context menu showing five recent entries" width="720">
-  <p><em>Quick context menu with the five most recent entries.</em></p>
-</div>
+![Overview collage (1.3.3)](https://raw.githubusercontent.com/nickotmazgin/clipflow-pro/main/docs/screenshots/1.3.3/collage-3x3.jpg)
 
 <table>
   <tr>
     <td align="center">
-      <img src="docs/screenshots/03-settings-general.png" alt="ClipFlow Pro general settings tab" width="340"><br>
-      <sub><strong>General</strong></sub>
+      <img src="docs/screenshots/1.3.3/1.png" alt="Screenshot 1" width="320"><br>
+      <sub>1</sub>
     </td>
     <td align="center">
-      <img src="docs/screenshots/04-settings-behavior.png" alt="ClipFlow Pro behavior settings tab" width="340"><br>
-      <sub><strong>Behavior</strong></sub>
+      <img src="docs/screenshots/1.3.3/2.png" alt="Screenshot 2" width="320"><br>
+      <sub>2</sub>
+    </td>
+    <td align="center">
+      <img src="docs/screenshots/1.3.3/3.png" alt="Screenshot 3" width="320"><br>
+      <sub>3</sub>
     </td>
   </tr>
   <tr>
     <td align="center">
-      <img src="docs/screenshots/05-settings-appearance.png" alt="ClipFlow Pro appearance settings tab" width="340"><br>
-      <sub><strong>Appearance</strong></sub>
+      <img src="docs/screenshots/1.3.3/4.png" alt="Screenshot 4" width="320"><br>
+      <sub>4</sub>
     </td>
     <td align="center">
-      <img src="docs/screenshots/06-settings-shortcuts.png" alt="ClipFlow Pro shortcuts settings tab" width="340"><br>
-      <sub><strong>Shortcuts</strong></sub>
+      <img src="docs/screenshots/1.3.3/5.png" alt="Screenshot 5" width="320"><br>
+      <sub>5</sub>
+    </td>
+    <td align="center">
+      <img src="docs/screenshots/1.3.3/6.png" alt="Screenshot 6" width="320"><br>
+      <sub>6</sub>
     </td>
   </tr>
   <tr>
-    <td align="center" colspan="2">
-      <img src="docs/screenshots/07-settings-about.png" alt="ClipFlow Pro about tab" width="340"><br>
-      <sub><strong>About</strong></sub>
+    <td align="center">
+      <img src="docs/screenshots/1.3.3/7.png" alt="Screenshot 7" width="320"><br>
+      <sub>7</sub>
+    </td>
+    <td align="center">
+      <img src="docs/screenshots/1.3.3/8.png" alt="Screenshot 8" width="320"><br>
+      <sub>8</sub>
+    </td>
+    <td align="center">
+      <img src="docs/screenshots/1.3.3/9.png" alt="Screenshot 9" width="320"><br>
+      <sub>9</sub>
     </td>
   </tr>
 </table>
-
-### New Screenshots (1.3.3)
-
-![Overview collage (1.3.3)](docs/screenshots/1.3.3/collage-3x3.jpg)
-
-Individual images:
-- docs/screenshots/1.3.3/1.png
-- docs/screenshots/1.3.3/2.png
-- docs/screenshots/1.3.3/3.png
-- docs/screenshots/1.3.3/4.png
-- docs/screenshots/1.3.3/5.png
-- docs/screenshots/1.3.3/6.png
-- docs/screenshots/1.3.3/7.png
-- docs/screenshots/1.3.3/8.png
-- docs/screenshots/1.3.3/9.png
 
 ## 📥 Installation
 

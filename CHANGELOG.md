@@ -15,6 +15,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Stability: Capped clipboard MIME fallback probing; added screenshot-app heuristic to avoid stalls during captures.
 - Packaging: Added 43–44 build scripts; kept EGO‑friendly schema handling (no compiled schemas in zips).
 
+### Refinements (no version bump)
+- Bottom actions consolidated into a single “Actions” button that opens a compact popup (Clear, Settings, Export/Import, Purge, toggle PRIMARY; classic also includes Pin top/Unpin/Use Enhanced)
+- Empty state hint updated: “Use Actions to open settings, import, or clear.”
+
 _No changes yet._
 
 ---

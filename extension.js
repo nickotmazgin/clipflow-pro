@@ -1153,57 +1153,60 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _createActionButtons() {
-        const buttonContainer = new St.BoxLayout({
-            vertical: false,
-            x_expand: true
-        });
+        // Single, spacious button that opens a compact actions menu
+        const buttonContainer = new St.BoxLayout({ vertical: false, x_expand: true });
         buttonContainer.add_style_class_name('clipflow-action-container');
-        
-        // Clear button
-        const clearButton = new St.Button({
-            label: _('Clear All'),
-            style_class: 'clipflow-button',
-            x_expand: true
-        });
-        clearButton.add_style_class_name('clipflow-button-danger');
-        clearButton.set_accessible_name(_('Clear all clipboard history'));
-        clearButton.connect('clicked', () => {
-            this._clearAllHistory();
-        });
-        buttonContainer.add_child(clearButton);
 
-        const spacer = new St.Widget({
-            reactive: false,
-            can_focus: false
+        const menuButton = new St.Button({
+            label: _('Menu'),
+            style_class: 'clipflow-button'
         });
-        if (typeof spacer.set_x_expand === 'function') {
-            spacer.set_x_expand(false);
-        }
-        if (typeof spacer.set_y_expand === 'function') {
-            spacer.set_y_expand(false);
-        }
-        if (typeof spacer.set_width === 'function') {
-            spacer.set_width(16);
-        } else if (typeof spacer.set_style === 'function') {
-            spacer.set_style('min-width: 16px;');
-        }
-        spacer.add_style_class_name('clipflow-action-spacer');
-        buttonContainer.add_child(spacer);
-        
-        // Settings button
-        const settingsButton = new St.Button({
-            label: _('Settings'),
-            style_class: 'clipflow-button',
-            x_expand: true
-        });
-        settingsButton.add_style_class_name('clipflow-button-secondary');
-        settingsButton.set_accessible_name(_('Open ClipFlow Pro settings'));
-        settingsButton.connect('clicked', () => {
-            this._openSettings();
-        });
-        buttonContainer.add_child(settingsButton);
+        menuButton.add_style_class_name('clipflow-button-secondary');
+        menuButton.set_accessible_name(_('Open actions menu'));
+        menuButton.connect('clicked', () => this._openMainActionsMenu(menuButton));
+
+        buttonContainer.add_child(menuButton);
         buttonContainer.set_margin_top(8);
         return buttonContainer;
+    }
+
+    _openMainActionsMenu(anchor) {
+        try {
+            // Close the main list menu to avoid overlap, then open a lightweight actions menu
+            if (this.menu && this.menu.isOpen) this.menu.close();
+
+            const menu = new PopupMenu.PopupMenu(this, 0.5, St.Side.TOP);
+            const menuActor = this._addActorToUiGroup(menu);
+            this._hideActor(menuActor);
+            if (!this._contextMenuManager) this._contextMenuManager = new PopupMenu.PopupMenuManager(this);
+            this._contextMenuManager.addMenu(menu);
+
+            const add = (label, cb) => { const item = menu.addAction(label, cb); this._applyContextMenuItemStyle(item); };
+
+            add(_('Clear All'), () => this._clearAllHistory());
+            add(_('Settings'), () => this._openSettings());
+            menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+            add(_('Export'), () => this._exportHistoryToDesktop?.());
+            add(_('Import'), () => this._importHistoryFromDesktop?.());
+            add(_('Purge Duplicates'), () => this._purgeDuplicates?.());
+
+            const togglePrimaryLabel = this._settings.get_boolean('capture-primary') ? _('Disable Capture PRIMARY') : _('Enable Capture PRIMARY');
+            add(togglePrimaryLabel, () => {
+                const current = this._settings.get_boolean('capture-primary');
+                this._settings.set_boolean('capture-primary', !current);
+            });
+
+            menu.connect('open-state-changed', (_m, open) => {
+                if (!open) {
+                    this._contextMenuManager.removeMenu(menu);
+                    menu.destroy();
+                }
+            });
+            menu.open(true);
+        } catch (_e) {
+            // As a fallback, use the existing panel context menu
+            this._openContextMenu();
+        }
     }
 
     prepareForReposition() {

@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Docs
+- Screenshots: refreshed `docs/screenshots/1.3.3/2.png` and regenerated the 3×3 collage with a blue→purple gradient background; updated README references and GitHub release assets for both GNOME 45–47 and 43–44 releases.
+
 ## [1.3.2] - 2025-11-27
 
 - UI: Simplified history rows to Copy + More overflow menu.

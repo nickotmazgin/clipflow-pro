@@ -10,13 +10,14 @@ ClipFlow Pro is a powerful and intelligent clipboard manager that provides compr
 
 **Available on:** [extensions.gnome.org](https://extensions.gnome.org/extension/8793/clipflow-pro/) | Searchable in GNOME Extensions app | Installable via system extensions manager
 
-Compatibility: GNOME Shell 43–47
+Supported GNOME versions: 43–47 (two builds)
 
-- GNOME 43–44: Classic UI is default (Enhanced available via toggle)
-- GNOME 45–47: Enhanced UI is default (Classic available via toggle)
+- 45–47 (this package): Enhanced UI is default (Classic available via toggle)
+- 43–44 (separate build): Classic UI is default (Enhanced available via toggle)
+- EGO automatically serves the correct build for the user’s GNOME version
 - Auto‑fallback to Classic if Enhanced rendering is blocked by theme/layout
 
-Note: This release uses the GNOME 45+ ES Modules format and libadwaita preferences. Older GNOME versions (≤44) are no longer declared as supported in this package.
+Note: This package targets GNOME 45–47 (ES Modules + libadwaita). The GNOME 43–44 build is provided from the `gnome43-44` branch/release under the same UUID.
 
 Developer tooling:
 - Validate package layout before upload: `make ego-validate`
@@ -290,16 +291,9 @@ If the extension is slow or using too much memory:
 
 ### Recent Versions
 
-- **1.2.17** - Fixed GLib.Bytes handling in _decodeClipboardBytes; Security: Fixed clear-text logging of sensitive information
-- **1.2.16** - Removed buildPrefsWidget() function; Added donations field to metadata.json with PayPal support
-- **1.2.15** - Updated PayPal donations field format
-- **1.2.14** - Removed buildPrefsWidget() function; Added donations support
-- **1.2.13** - Removed all debug/debugging code completely; Removed unnecessary try/catch blocks
-- **1.2.12** - Removed deprecated ByteArray usage; Reduced try/catch wrappers
-- **1.2.11** - Removed remaining unnecessary try/catch wrappers
-- **1.2.10** - Removed compiled schemas from EGO zip (45+); Dropped ExtensionUtils (ESM)
-- **1.2.8** - Hardened ESM runtime; Added `make ego-validate` and CI workflow
-- **1.2.7** - Ported to GNOME 45+ ES Modules; Migrated preferences to `fillPreferencesWindow()`
+- 1.3.3 — UI cleanup: minimal per‑entry actions (Copy + More), duplicate header removed, pinned chip strip capped, new appearance toggles; safer default for PRIMARY on fresh installs; docs/screenshots refreshed (new gradient collage + updated #2)
+- 1.3.2 — Simplified rows; removed duplicate header; capped pinned strip; throttled clipboard probing and screenshot heuristics; packaging tweaks for 43–44 vs 45–47 builds
+- 1.2.17 — Fixed GLib.Bytes handling; security hardening for logs
 
 For complete version history, see [CHANGELOG.md](CHANGELOG.md).
 

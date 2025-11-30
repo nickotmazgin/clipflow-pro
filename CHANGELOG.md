@@ -7,8 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.3] - 2025-11-28
+
+### Changed
+- UI cleanup: minimal per‑entry actions (Copy + More in overflow), removed duplicate menu header, capped pinned chip strip for readability
+- New appearance toggles: Hide Pinned Section, Hide Starred Section
+- Defaults: Capture PRIMARY off on fresh installs to avoid stalls during screenshots
+
 ### Docs
-- Screenshots: refreshed `docs/screenshots/1.3.3/2.png` and regenerated the 3×3 collage with a blue→purple gradient background; updated README references and GitHub release assets for both GNOME 45–47 and 43–44 releases.
+- Screenshots refreshed: updated `docs/screenshots/1.3.3/2.png` and regenerated the 3×3 collage with a blue→purple gradient background; updated README and GitHub release assets for GNOME 45–47 and 43–44 releases
 
 ## [1.3.2] - 2025-11-27
 

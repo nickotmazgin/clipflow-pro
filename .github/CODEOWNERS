@@ -1,1 +1,10 @@
-* @nickotmazgin
+# CODEOWNERS for GNOME 43–44 branch: auto-request reviews on code paths (non-blocking)
+/extension.js             @nickotmazgin
+/prefs.js                 @nickotmazgin
+/stylesheet.css           @nickotmazgin
+/metadata.json            @nickotmazgin
+/schemas/**               @nickotmazgin
+/build.sh                 @nickotmazgin
+/*.sh                     @nickotmazgin
+/.github/workflows/**     @nickotmazgin
+# docs/ not present here by design

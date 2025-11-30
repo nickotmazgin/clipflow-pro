@@ -1,1 +1,16 @@
-* @nickotmazgin
+# CODEOWNERS: auto-request reviews on code changes (non-blocking)
+# Docs-only changes (README.md, docs/**) intentionally have no owners
+
+# Core extension code
+/extension.js             @nickotmazgin
+/prefs.js                 @nickotmazgin
+/stylesheet.css           @nickotmazgin
+/metadata*.json           @nickotmazgin
+/schemas/**               @nickotmazgin
+
+# Build, tooling, packaging, CI
+/build*.sh                @nickotmazgin
+/Makefile                 @nickotmazgin
+/tools/**                 @nickotmazgin
+/.github/workflows/**     @nickotmazgin
+/*.sh                     @nickotmazgin

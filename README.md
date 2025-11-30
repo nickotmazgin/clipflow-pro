@@ -99,7 +99,6 @@ Developer tooling:
     </td>
   </tr>
 </table>
-
 ## 📥 Installation
 
 ClipFlow Pro can be installed through multiple methods. Choose the one that works best for you:

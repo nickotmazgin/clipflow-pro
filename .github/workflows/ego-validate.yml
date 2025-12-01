@@ -2,9 +2,9 @@ name: EGO Validate
 
 on:
   pull_request:
-    branches: [ "main" ]
+    branches: [ "main", "gnome43-44" ]
   push:
-    branches: [ "main" ]
+    branches: [ "main", "gnome43-44" ]
   workflow_dispatch:
     paths:
       - 'metadata.json'

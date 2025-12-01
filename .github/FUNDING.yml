@@ -1,0 +1,9 @@
+# Enable the GitHub "Sponsor" button for this repository.
+# If GitHub Sponsors is not enabled for the account yet, the custom links
+# will still appear under the Sponsor button.
+
+github: [nickotmazgin]
+
+# Third‑party / direct links
+custom:
+  - https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW

@@ -1,5 +1,7 @@
 # ClipFlow Pro (GNOME 43–44)
 
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ff5c93?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/nickotmazgin)
+
 Unified Classic+ build for GNOME 43–44 under the UUID `clipflow-pro@nickotmazgin.github.io`.
 
 ## Compatibility
@@ -52,3 +54,10 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
     <td align="center"><img src="https://raw.githubusercontent.com/nickotmazgin/clipflow-pro/main/docs/screenshots/1.3.3/9.png" alt="ClipFlow Pro screenshot 9" width="300"><br><sub>9</sub></td>
   </tr>
 </table>
+
+## Support
+
+If you find this project useful, you can support development:
+
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ff5c93?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/nickotmazgin)
+[![PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)

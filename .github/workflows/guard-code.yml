@@ -1,0 +1,40 @@
+name: Guard
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, labeled]
+
+permissions:
+  contents: read
+  pull-requests: read
+
+jobs:
+  block-code-changes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Guard non-docs PRs into main
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            const base = pr.base.ref; // target branch
+            const labels = (pr.labels || []).map(l => l.name);
+            const labelOK = labels.includes('code-ok') || labels.includes('safe-to-merge');
+            const {owner, repo} = context.repo;
+            const files = await github.paginate(github.rest.pulls.listFiles, {owner, repo, pull_number: pr.number, per_page: 100});
+            const onlyDocs = files.every(f => f.filename === 'README.md' || f.filename.startsWith('docs/'));
+            // Only enforce on main; skip on gnome43-44
+            if (base !== 'main') {
+              core.info(`Guard skipped: base is ${base}, only enforcing on main`);
+              return;
+            }
+            if (onlyDocs) {
+              core.info('Docs-only changes detected; guard passes');
+              return;
+            }
+            if (labelOK) {
+              core.info('Non-docs changes allowed by label');
+              return;
+            }
+            core.setFailed('Guard: PR to main modifies non-docs files. Add label "code-ok" to proceed, or limit changes to docs/** or README.md.');
+

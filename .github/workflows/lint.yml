@@ -2,21 +2,9 @@ name: Lint
 
 on:
   push:
-    branches: [ "main" ]
-    paths:
-      - 'extension.js'
-      - 'prefs.js'
-      - '.eslintrc.json'
-      - '.eslintignore'
-      - '.github/workflows/lint.yml'
+    branches: [ "main", "gnome43-44" ]
   pull_request:
-    branches: [ "main" ]
-    paths:
-      - 'extension.js'
-      - 'prefs.js'
-      - '.eslintrc.json'
-      - '.eslintignore'
-      - '.github/workflows/lint.yml'
+    branches: [ "main", "gnome43-44" ]
   schedule:
     - cron: '0 4 * * 1'
   workflow_dispatch:
@@ -38,4 +26,3 @@ jobs:
       - name: Run ESLint
         run: |
           npx -y eslint@9.14.0 extension.js prefs.js || true
-

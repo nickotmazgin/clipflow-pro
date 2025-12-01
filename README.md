@@ -1,7 +1,8 @@
 # ClipFlow Pro
 
-![EGO Validate](https://github.com/nickotmazgin/clipflow-pro/actions/workflows/ego-validate.yml/badge.svg)
+[![EGO Validate](https://github.com/nickotmazgin/clipflow-pro/actions/workflows/ego-validate.yml/badge.svg)](https://github.com/nickotmazgin/clipflow-pro/actions/workflows/ego-validate.yml)
 [![CodeQL](https://github.com/nickotmazgin/clipflow-pro/actions/workflows/codeql.yml/badge.svg)](https://github.com/nickotmazgin/clipflow-pro/actions/workflows/codeql.yml)
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ff5c93?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/nickotmazgin)
 [![Get it on extensions.gnome.org](https://img.shields.io/badge/Get%20it%20on-extensions.gnome.org-4A86CF?logo=gnome)](https://extensions.gnome.org/extension/8793/clipflow-pro/)
 
 **Advanced Clipboard Manager for GNOME Shell**
@@ -367,6 +368,7 @@ This project is licensed under the GPL-3.0-or-later License - see the [LICENSE](
 
 If you find ClipFlow Pro useful, please consider supporting its development:
 
+[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ff5c93?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/nickotmazgin)
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)
 
 ## Branch Layout

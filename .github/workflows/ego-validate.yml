@@ -1,0 +1,37 @@
+name: EGO Validate
+
+on:
+  pull_request:
+    branches: [ "main", "gnome43-44" ]
+  push:
+    branches: [ "main", "gnome43-44" ]
+  workflow_dispatch:
+    paths:
+      - 'metadata.json'
+      - 'extension.js'
+      - 'prefs.js'
+      - 'Makefile'
+      - 'tools/ego_validate.sh'
+      - 'schemas/**'
+      - 'icons/**'
+      - 'README.md'
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Install dependencies (glib tools)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libglib2.0-bin unzip
+
+      - name: Build zips
+        run: |
+          make dist
+
+      - name: Validate EGO zip
+        run: |
+          make ego-validate

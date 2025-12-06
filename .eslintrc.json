@@ -1,0 +1,28 @@
+{
+  "root": true,
+  "env": {
+    "es2022": true
+  },
+  "parserOptions": {
+    "ecmaVersion": 2022,
+    "sourceType": "module"
+  },
+  "globals": {
+    "imports": "readonly",
+    "globalThis": "readonly",
+    "St": "readonly",
+    "GObject": "readonly",
+    "GLib": "readonly",
+    "Gio": "readonly",
+    "Clutter": "readonly",
+    "Meta": "readonly",
+    "Shell": "readonly",
+    "Pango": "readonly"
+  },
+  "rules": {
+    "no-undef": "off",
+    "no-unused-vars": "off",
+    "no-console": "off"
+  }
+}
+

@@ -2,7 +2,7 @@
 # Enable ClipFlow Pro GNOME 43 extension after GNOME Shell restart
 
 echo "Enabling ClipFlow Pro (GNOME 43)..."
-gnome-extensions enable clipflow-pro-gnome43@nickotmazgin.github.io
+gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 
 if [ $? -eq 0 ]; then
     echo "✅ Extension enabled successfully!"

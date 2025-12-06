@@ -28,30 +28,44 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 
 ## Packaging (extensions.gnome.org)
 
-- This build’s `metadata.json` declares `shell-version: ["43","44"]`.
-- Upload this zip alongside the GNOME 45–47 ESM zip under the same UUID.
-- EGO will serve the correct build automatically based on the user’s GNOME Shell version.
+- Run `./package.sh` to produce two zips in `dist/`:
+  - 43–44 zip with `shell-version: ["43","44"]` (from build/metadata.json)
+  - 45–47 zip with `shell-version: ["45","46","47"]` (generated in a temp dir)
+- Upload both zips under the same UUID. EGO will serve the correct build automatically.
+
+### Compliance notes (1.3.4)
+
+- Removed `stylesheet` from `metadata.json` (EGO guideline)
+- No Gtk imports in the shell process
+- No spawn-based clipboard fallbacks (xclip/xsel removed)
+- History and import use async reads via `Gio.File.load_contents_async`
+- Verbose logs only when `enable-debug-logs` is enabled
+
+### Sorting & Pagination
+
+- Enhanced UI: pinned → starred → newest-first; paginated by `entries-per-page`
+- Classic UI: same ordering with quick filters and “Show more/less” batching
 
 
-## Screenshots (1.3.3)
+## Screenshots (1.3.4)
 
-![Overview collage (1.3.3)](https://raw.githubusercontent.com/nickotmazgin/clipflow-pro/main/docs/screenshots/1.3.3/collage-3x3.jpg)
+![Overview collage (1.3.4)](docs/screenshots/1.3.4/collage-3x3.jpg)
 
 <table>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/nickotmazgin/clipflow-pro/main/docs/screenshots/1.3.3/1.png" alt="ClipFlow Pro screenshot 1" width="300"><br><sub>1</sub></td>
-    <td align="center"><img src="https://raw.githubusercontent.com/nickotmazgin/clipflow-pro/main/docs/screenshots/1.3.3/2.png" alt="ClipFlow Pro screenshot 2" width="300"><br><sub>2</sub></td>
-    <td align="center"><img src="https://raw.githubusercontent.com/nickotmazgin/clipflow-pro/main/docs/screenshots/1.3.3/3.png" alt="ClipFlow Pro screenshot 3" width="300"><br><sub>3</sub></td>
+    <td align="center"><img src="docs/screenshots/1.3.4/1.png" alt="ClipFlow Pro screenshot 1" width="300"><br><sub>1</sub></td>
+    <td align="center"><img src="docs/screenshots/1.3.4/2.png" alt="ClipFlow Pro screenshot 2" width="300"><br><sub>2</sub></td>
+    <td align="center"><img src="docs/screenshots/1.3.4/3.png" alt="ClipFlow Pro screenshot 3" width="300"><br><sub>3</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/nickotmazgin/clipflow-pro/main/docs/screenshots/1.3.3/4.png" alt="ClipFlow Pro screenshot 4" width="300"><br><sub>4</sub></td>
-    <td align="center"><img src="https://raw.githubusercontent.com/nickotmazgin/clipflow-pro/main/docs/screenshots/1.3.3/5.png" alt="ClipFlow Pro screenshot 5" width="300"><br><sub>5</sub></td>
-    <td align="center"><img src="https://raw.githubusercontent.com/nickotmazgin/clipflow-pro/main/docs/screenshots/1.3.3/6.png" alt="ClipFlow Pro screenshot 6" width="300"><br><sub>6</sub></td>
+    <td align="center"><img src="docs/screenshots/1.3.4/4.png" alt="ClipFlow Pro screenshot 4" width="300"><br><sub>4</sub></td>
+    <td align="center"><img src="docs/screenshots/1.3.4/5.png" alt="ClipFlow Pro screenshot 5" width="300"><br><sub>5</sub></td>
+    <td align="center"><img src="docs/screenshots/1.3.4/6.png" alt="ClipFlow Pro screenshot 6" width="300"><br><sub>6</sub></td>
   </tr>
   <tr>
-    <td align="center"><img src="https://raw.githubusercontent.com/nickotmazgin/clipflow-pro/main/docs/screenshots/1.3.3/7.png" alt="ClipFlow Pro screenshot 7" width="300"><br><sub>7</sub></td>
-    <td align="center"><img src="https://raw.githubusercontent.com/nickotmazgin/clipflow-pro/main/docs/screenshots/1.3.3/8.png" alt="ClipFlow Pro screenshot 8" width="300"><br><sub>8</sub></td>
-    <td align="center"><img src="https://raw.githubusercontent.com/nickotmazgin/clipflow-pro/main/docs/screenshots/1.3.3/9.png" alt="ClipFlow Pro screenshot 9" width="300"><br><sub>9</sub></td>
+    <td align="center"><img src="docs/screenshots/1.3.4/7.png" alt="ClipFlow Pro screenshot 7" width="300"><br><sub>7</sub></td>
+    <td align="center"><img src="docs/screenshots/1.3.4/8.png" alt="ClipFlow Pro screenshot 8" width="300"><br><sub>8</sub></td>
+    <td align="center"><img src="docs/screenshots/1.3.4/9.png" alt="ClipFlow Pro screenshot 9" width="300"><br><sub>9</sub></td>
   </tr>
 </table>
 

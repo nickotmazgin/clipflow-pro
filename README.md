@@ -19,6 +19,12 @@ Clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.githu
   - Export/Import, Purge duplicates, Pin Top 3/5, Unpin All
   - Reset to Defaults in Preferences → About → Maintenance
 
+## Links
+
+- EGO Review Guidelines: https://gjs.guide/extensions/review-guidelines/review-guidelines.html
+- GitHub Releases: https://github.com/nickotmazgin/clipflow-pro/releases
+- Issues & Support: https://github.com/nickotmazgin/clipflow-pro/issues
+
 ## Installation (local dev)
 
 ```
@@ -43,6 +49,8 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 - No spawn-based clipboard fallbacks (xclip/xsel removed)
 - History and import use async reads via `Gio.File.load_contents_async`
 - Verbose logs only when `enable-debug-logs` is enabled
+
+This branch targets GNOME 45–47. For GNOME 43–44, see the `gnome43-44` branch.
 
 ### Sorting & Pagination
 

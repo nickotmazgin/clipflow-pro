@@ -1,6 +1,6 @@
 # ClipFlow Pro
 
-[What’s New in 1.3.4](CHANGELOG.md)
+[What’s New in 1.3.5](CHANGELOG.md)
 
 [![EGO](https://img.shields.io/badge/Extensions.gnome.org-ClipFlow%20Pro-4A86CF?logo=gnome&logoColor=white)](https://extensions.gnome.org/extension/8793/clipflow-pro/)
 [![Release](https://img.shields.io/github/v/release/nickotmazgin/clipflow-pro)](https://github.com/nickotmazgin/clipflow-pro/releases)

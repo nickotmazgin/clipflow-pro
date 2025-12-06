@@ -278,6 +278,13 @@
       <summary>Pause duration (minutes)</summary>
       <description>Default number of minutes to pause clipboard monitoring</description>
     </key>
+
+    <!-- Import/Export Folder -->
+    <key name="io-folder" type="s">
+      <default>''</default>
+      <summary>Import/Export folder</summary>
+      <description>Folder path used for import and export. When empty, Desktop is used if available, otherwise Downloads, then Home.</description>
+    </key>
     
     <!-- Preferences Navigation -->
     <key name="target-prefs-tab" type="s">

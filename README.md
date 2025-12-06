@@ -1,13 +1,14 @@
-# ClipFlow Pro (GNOME 43–44)
+# ClipFlow Pro
 
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ff5c93?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/nickotmazgin)
 
-Unified Classic+ build for GNOME 43–44 under the UUID `clipflow-pro@nickotmazgin.github.io`.
+Clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.github.io`).
 
 ## Compatibility
 
-- GNOME 43–44: Classic UI is the default (Enhanced available via toggle)
-- Classic+ includes:
+- GNOME 43–44: Classic UI by default (Enhanced available via toggle)
+- GNOME 45–47: Enhanced UI with container + pagination (Classic available)
+- Features:
   - Pinned strip, Starred section, Others list
   - Quick filters (All / Pinned / Starred) with active highlighting
   - Per‑row actions: Pin, Star, Copy, Copy Cleaned, Delete

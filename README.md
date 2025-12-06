@@ -1,5 +1,7 @@
 # ClipFlow Pro
 
+[What’s New in 1.3.4](CHANGELOG.md)
+
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ff5c93?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/nickotmazgin)
 
 Clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.github.io`).

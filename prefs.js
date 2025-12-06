@@ -1,32 +1,25 @@
 'use strict';
-import GObject from 'gi://GObject';
-import Gtk from 'gi://Gtk';
-import Gio from 'gi://Gio';
-import GLib from 'gi://GLib';
-import Pango from 'gi://Pango';
-import Gdk from 'gi://Gdk';
 
-import { ExtensionPreferences, gettext as _ } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
+const ExtensionUtils = imports.misc.extensionUtils;
+const {GObject, Gtk, Gio, GLib, Pango, Gdk} = imports.gi;
 
-export default class ClipFlowProPreferences extends ExtensionPreferences {
-    fillPreferencesWindow(window) {
-        const settings = this.getSettings();
+const Me = ExtensionUtils.getCurrentExtension();
+const _ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
 
-        // Translations are provided via the extension's gettext domain.
+function init() {
+    ExtensionUtils.initTranslations();
+}
 
-        const widget = new ClipFlowProPrefsWidget({
-            orientation: Gtk.Orientation.VERTICAL,
-        }, settings, this.metadata);
+function buildPrefsWidget() {
+    const settings = ExtensionUtils.getSettings();
+    const widget = new ClipFlowProPrefsWidget({
+        orientation: Gtk.Orientation.VERTICAL,
+    }, settings, Me.metadata);
 
-        widget.set_hexpand(true);
-        widget.set_vexpand(true);
+    widget.set_hexpand(true);
+    widget.set_vexpand(true);
 
-        window.set_default_size?.(920, 640);
-
-        // Attach our GTK widget as the window content. This keeps the Adw
-        // headerbar (close/minimize) while letting us reuse the existing UI.
-        window.set_child?.(widget) ?? window.add?.(widget);
-    }
+    return widget;
 }
 
 const ClipFlowProPrefsWidget = GObject.registerClass(
@@ -53,9 +46,9 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
     }
 
     _buildUI() {
-        // Helper to access metadata from ExtensionPreferences via a global getter
+        // Helper to access metadata from Me (legacy format)
         this._getMeta = (key) => (
-            this.get_root()?.get_ancestor?.(Gtk.Window)?.application?.metadata?.[key] ?? null
+            Me.metadata?.[key] ?? null
         );
         this.set_orientation(Gtk.Orientation.VERTICAL);
         this.set_spacing(20);
@@ -83,16 +76,23 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
         this.append(this._notebook);
 
+        // Detect GNOME Shell target from metadata to tailor UI
+        const shells = Array.isArray(this._metadata['shell-version']) ? this._metadata['shell-version'] : [];
+        const isGS45Plus = shells.some(v => {
+            const n = parseInt(String(v), 10); return Number.isFinite(n) && n >= 45;
+        });
+
         // Add tabs
-        this._addGeneralTab();
-        this._addBehaviorTab();
-        this._addAppearanceTab();
-        this._addShortcutsTab();
-        this._addAboutTab();
+        this._addGeneralTab({ isGS45Plus });
+        this._addBehaviorTab({ isGS45Plus });
+        this._addAppearanceTab({ isGS45Plus });
+        this._addShortcutsTab({ isGS45Plus });
+        this._addAboutTab({ isGS45Plus });
         this._applyInitialTab();
     }
 
-    _addGeneralTab() {
+    _addGeneralTab(ctx = {}) {
+        const { isGS45Plus = false } = ctx;
         const generalBox = new Gtk.Box({ 
             orientation: Gtk.Orientation.VERTICAL,
             spacing: 15
@@ -138,21 +138,25 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         );
         historyBox.append(minLengthBox);
 
-        // Entries per page
-        const entriesPerPageBox = this._createSpinRow(
-            _('Entries Per Page'),
-            _('Number of entries to show per page in the menu'),
-            'entries-per-page',
-            5, 50, 10
-        );
-        historyBox.append(entriesPerPageBox);
-
-        const legacyRowsSwitch = this._createSwitchRow(
-            _('Use Legacy Menu Rows'),
-            _('Render the clipboard menu using the older popup layout in case the new Wayland-safe view has issues on your Shell version.'),
-            'use-legacy-menu-items'
-        );
-        historyBox.append(legacyRowsSwitch);
+        // Entries per page (Enhanced UI only)
+        if (isGS45Plus) {
+            const entriesPerPageBox = this._createSpinRow(
+                _('Entries Per Page'),
+                _('Number of entries to show per page in the menu'),
+                'entries-per-page',
+                5, 50, 10
+            );
+            historyBox.append(entriesPerPageBox);
+        }
+        // Legacy rows toggle only relevant on 45+ fallback scenarios
+        if (isGS45Plus) {
+            const legacyRowsSwitch = this._createSwitchRow(
+                _('Use Legacy Menu Rows'),
+                _('Render the clipboard menu using the older popup layout in case the new Wayland-safe view has issues on your Shell version.'),
+                'use-legacy-menu-items'
+            );
+            historyBox.append(legacyRowsSwitch);
+        }
 
         // Clear history button
         const clearButton = new Gtk.Button({ label: _('Clear All History') });
@@ -303,12 +307,77 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
         behaviorBox.append(clipFrame);
 
+        // Import/Export
+        const ioFrame = this._createFrame(_('Import / Export'));
+        const ioBox = new Gtk.Box({
+            orientation: Gtk.Orientation.VERTICAL,
+            spacing: 10
+        });
+        ioFrame.set_child(ioBox);
+
+        const ioRow = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL, spacing: 10 });
+        const ioLabels = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 4 });
+        const ioTitle = new Gtk.Label({ label: _('Import/Export Folder'), use_markup: true });
+        ioTitle.set_halign(Gtk.Align.START);
+        const ioDesc = new Gtk.Label({ label: _('Folder used for export and import. Empty uses Desktop, then Downloads, then Home.'), wrap: true });
+        ioDesc.set_halign(Gtk.Align.START);
+        ioLabels.append(ioTitle);
+        ioLabels.append(ioDesc);
+        ioRow.append(ioLabels);
+
+        const ioControls = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL, spacing: 6 });
+        ioControls.set_halign(Gtk.Align.END);
+        const currentLabel = new Gtk.Label({ label: this._settings.get_string('io-folder') || _('(Default)'), xalign: 1 });
+        const chooseBtn = new Gtk.Button({ label: _('Choose…') });
+        const clearBtn = new Gtk.Button({ label: _('Clear') });
+        const openBtn = new Gtk.Button({ label: _('Open') });
+
+        chooseBtn.connect('clicked', () => {
+            try {
+                const dlg = new Gtk.FileDialog();
+                // For GTK4, select_folder(root, cancellable, callback)
+                const root = this.get_root && this.get_root();
+                dlg.select_folder(root, null, (self, res) => {
+                    try {
+                        const gfile = dlg.select_folder_finish(res);
+                        const path = gfile?.get_path?.() || '';
+                        if (path) {
+                            this._settings.set_string('io-folder', path);
+                            currentLabel.set_label(path);
+                        }
+                    } catch (_e) {}
+                });
+            } catch (_e) {}
+        });
+
+        clearBtn.connect('clicked', () => {
+            try { this._settings.set_string('io-folder', ''); currentLabel.set_label(_('(Default)')); } catch (_e) {}
+        });
+        openBtn.connect('clicked', () => {
+            try {
+                const GioNs = Gio;
+                const path = this._settings.get_string('io-folder');
+                const dir = path && path.trim() ? path : (GLib.get_user_special_dir(GLib.UserDirectory.DIRECTORY_DESKTOP) || GLib.get_home_dir());
+                GioNs.AppInfo.launch_default_for_uri(`file://${dir}`, null);
+            } catch (_e) {}
+        });
+
+        ioControls.append(currentLabel);
+        ioControls.append(chooseBtn);
+        ioControls.append(clearBtn);
+        ioControls.append(openBtn);
+        ioRow.append(ioControls);
+        ioBox.append(ioRow);
+
+        behaviorBox.append(ioFrame);
+
         // Add to notebook
         this._notebook.append_page(behaviorBox, new Gtk.Label({ label: _('Behavior') }));
         this._setTabIndex('behavior', this._notebook.get_n_pages() - 1);
     }
 
-    _addAppearanceTab() {
+    _addAppearanceTab(ctx = {}) {
+        const { isGS45Plus = false } = ctx;
         const appearanceBox = new Gtk.Box({ 
             orientation: Gtk.Orientation.VERTICAL,
             spacing: 15
@@ -351,48 +420,102 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         );
         displayBox.append(showTimestampsBox);
 
-        // Hide pinned / starred sections
-        const hidePinnedBox = this._createSwitchRow(
+        // Hide pinned/starred sections
+        const hidePinned = this._createSwitchRow(
             _('Hide Pinned Section'),
-            _('Do not show the pinned chip strip at the top of the menu.'),
+            _('Do not show the pinned section at the top of the list.'),
             'hide-pinned'
         );
-        displayBox.append(hidePinnedBox);
+        displayBox.append(hidePinned);
 
-        const hideStarredBox = this._createSwitchRow(
+        const hideStarred = this._createSwitchRow(
             _('Hide Starred Section'),
-            _('Do not show the dedicated starred section above the main list.'),
+            _('Do not show the dedicated Starred section above the main list.'),
             'hide-starred'
         );
-        displayBox.append(hideStarredBox);
+        displayBox.append(hideStarred);
+
+        // Plain text sanitize toggle
+        const plainToggle = this._createSwitchRow(
+            _('Copy as Plain Text'),
+            _('Strip zero-width/control characters and normalize whitespace when copying from history.'),
+            'copy-as-plain-text'
+        );
+        displayBox.append(plainToggle);
 
         appearanceBox.append(displayFrame);
 
-        // Menu Styling
-        const styleFrame = this._createFrame(_('Menu Styling'));
-        const styleBox = new Gtk.Box({ 
+        // Menu Styling (only relevant when CSS is active, i.e. 45+)
+        if (isGS45Plus) {
+            const styleFrame = this._createFrame(_('Menu Styling'));
+            const styleBox = new Gtk.Box({ 
+                orientation: Gtk.Orientation.VERTICAL,
+                spacing: 10
+            });
+            styleFrame.set_child(styleBox);
+
+            const themeInfo = new Gtk.Label({
+                label: _('ClipFlow Pro automatically adapts to your GNOME theme.\nThe menu will match your system\'s dark/light mode preference.'),
+                wrap: true,
+                wrap_mode: Pango.WrapMode.WORD
+            });
+            themeInfo.set_halign(Gtk.Align.START);
+            styleBox.append(themeInfo);
+
+            const compactToggle = this._createSwitchRow(
+                _('Use Compact UI Layout'),
+                _('Switch back to the slimmer legacy spacing and lighter backgrounds instead of the modern boxed look.'),
+                'use-compact-ui'
+            );
+            styleBox.append(compactToggle);
+            appearanceBox.append(styleFrame);
+        }
+
+        // Rendering mode (compatibility)
+        const renderFrame = this._createFrame(_('Compatibility'));
+        const renderBox = new Gtk.Box({ 
             orientation: Gtk.Orientation.VERTICAL,
             spacing: 10
         });
-        styleFrame.set_child(styleBox);
+        renderFrame.set_child(renderBox);
 
-        // Theme info
-        const themeInfo = new Gtk.Label({
-            label: _('ClipFlow Pro automatically adapts to your GNOME theme.\nThe menu will match your system\'s dark/light mode preference.'),
-            wrap: true,
-            wrap_mode: Pango.WrapMode.WORD
-        });
-        themeInfo.set_halign(Gtk.Align.START);
-        styleBox.append(themeInfo);
+        if (isGS45Plus) {
+            const renderingModeBox = this._createComboRow(
+                _('Rendering Mode'),
+                _('Auto chooses a safe default for your GNOME Shell. Classic uses simple PopupMenu rows. Enhanced uses a container with pagination.'),
+                'rendering-mode',
+                [
+                    ['auto', _('Auto')],
+                    ['classic', _('Classic')],
+                    ['enhanced', _('Enhanced')],
+                ]
+            );
+            renderBox.append(renderingModeBox);
+        }
 
-        const compactToggle = this._createSwitchRow(
-            _('Use Compact UI Layout'),
-            _('Switch back to the slimmer legacy spacing and lighter backgrounds instead of the modern boxed look.'),
-            'use-compact-ui'
+        const classicMaxRowsBox = this._createSpinRow(
+            _('Classic Mode: Max Rows'),
+            isGS45Plus ? _('Maximum number of rows to show in Classic mode (10–200).') : _('Maximum number of rows to show in Classic mode (10–12).'),
+            'classic-max-rows',
+            10,
+            isGS45Plus ? 200 : 12,
+            isGS45Plus ? 50 : 12
         );
-        styleBox.append(compactToggle);
+        renderBox.append(classicMaxRowsBox);
 
-        appearanceBox.append(styleFrame);
+        // Disable CSS toggle only makes sense when stylesheet is in use (45+ build)
+        if (isGS45Plus) {
+            const disableCssToggle = this._createSwitchRow(
+                _('Disable Extension Stylesheet'),
+                _('Turn off ClipFlow’s CSS for troubleshooting theme conflicts.'),
+                'disable-css'
+            );
+            renderBox.append(disableCssToggle);
+        }
+
+        appearanceBox.append(renderFrame);
+
+        // styleFrame appended only for 45+
 
         // App Exclusions
         const exclFrame = this._createFrame(_('App Exclusions'));
@@ -409,6 +532,27 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         );
         exclBox.append(exclRow);
         appearanceBox.append(exclFrame);
+
+        // Lock Behavior
+        const lockFrame = this._createFrame(_('Lock Behavior'));
+        const lockBox = new Gtk.Box({ 
+            orientation: Gtk.Orientation.VERTICAL,
+            spacing: 10
+        });
+        lockFrame.set_child(lockBox);
+        const pauseOnLock = this._createSwitchRow(
+            _('Pause on Screen Lock'),
+            _('Stop monitoring while the screen is locked; resume on unlock.'),
+            'pause-on-lock'
+        );
+        const clearOnLock = this._createSwitchRow(
+            _('Clear on Screen Lock'),
+            _('Clear clipboard history when the screen locks.'),
+            'clear-on-lock'
+        );
+        lockBox.append(pauseOnLock);
+        lockBox.append(clearOnLock);
+        appearanceBox.append(lockFrame);
 
         // Panel Icon
         const iconFrame = this._createFrame(_('Panel Icon'));
@@ -479,7 +623,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         );
         shortcutsListBox.append(pasteShortcutBox);
 
-        // Classic filter shortcuts
+        // Classic filter and toggle shortcuts
         const filterAllBox = this._createShortcutRow(
             _('Classic: Filter All'),
             _('Switch Classic filter to All and open the menu'),
@@ -697,6 +841,33 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         });
 
         aboutBox.append(featuresFrame);
+
+        // Reset to defaults
+        const resetFrame = this._createFrame(_('Maintenance'));
+        const resetBox = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 10 });
+        resetFrame.set_child(resetBox);
+        const resetInfo = new Gtk.Label({
+            label: _('Reset all ClipFlow Pro settings to their defaults.'),
+            wrap: true,
+            wrap_mode: Pango.WrapMode.WORD
+        });
+        resetInfo.set_halign(Gtk.Align.START);
+        const resetButton = new Gtk.Button({ label: _('Reset to Defaults') });
+        resetButton.set_halign(Gtk.Align.START);
+        resetButton.connect('clicked', () => {
+            try {
+                const schema = this._settings.settings_schema;
+                if (schema && typeof schema.list_keys === 'function') {
+                    const keys = schema.list_keys();
+                    keys.forEach(key => {
+                        try { this._settings.reset(key); } catch (_e) {}
+                    });
+                }
+            } catch (_e) {}
+        });
+        resetBox.append(resetInfo);
+        resetBox.append(resetButton);
+        aboutBox.append(resetFrame);
 
         // Add to notebook
         this._notebook.append_page(aboutBox, new Gtk.Label({ label: _('About') }));

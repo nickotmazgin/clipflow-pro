@@ -1,3 +1,10 @@
+## 1.3.5 — 2025-12-06
+
+- Docs: new tricolor gradient collage (1992×1992)
+- README: EGO badge + links; Quick Start section; badges
+- Packaging: script enforces correct shell-version per zip
+- No code changes since 1.3.4 (UI/features unchanged)
+
 ## 1.3.4 — 2025-12-06
 
 - UI: Unified Actions submenu (Sort/Filter inside; toggles for Capture PRIMARY / Pause Monitoring)

@@ -1,3 +1,11 @@
+## 1.3.4 — 2025-12-06
+
+- UI: Unified Actions submenu (Sort/Filter inside; toggles for Capture PRIMARY / Pause Monitoring)
+- Import/Export: folder preference + full-fidelity import (pinned/starred/timestamps)
+- EGO compliance: async file reads in shell process; logs gated by setting; no spawn fallbacks
+- Packaging: added package.sh; dual zips (43–44, 45–47); XML schemas only
+- Screenshots: updated to 1.3.4 with new collage
+
 # Changelog - ClipFlow Pro
 
 All notable changes to this project will be documented in this file.

@@ -2,6 +2,12 @@
 
 [What’s New in 1.3.4](CHANGELOG.md)
 
+[![EGO](https://img.shields.io/badge/Extensions.gnome.org-ClipFlow%20Pro-4A86CF?logo=gnome&logoColor=white)](https://extensions.gnome.org/extension/8793/clipflow-pro/)
+[![Release](https://img.shields.io/github/v/release/nickotmazgin/clipflow-pro)](https://github.com/nickotmazgin/clipflow-pro/releases)
+[![Downloads](https://img.shields.io/github/downloads/nickotmazgin/clipflow-pro/total?label=downloads)](https://github.com/nickotmazgin/clipflow-pro/releases)
+[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
+[![GNOME 43–44](https://img.shields.io/badge/GNOME-43%E2%80%9344-blue?logo=gnome&logoColor=white)](#compatibility)
+[![GNOME 45–47](https://img.shields.io/badge/GNOME-45%E2%80%9347-blue?logo=gnome&logoColor=white)](#compatibility)
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ff5c93?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/nickotmazgin)
 
 Clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.github.io`).
@@ -21,9 +27,10 @@ Clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.githu
 
 ## Links
 
-- EGO Review Guidelines: https://gjs.guide/extensions/review-guidelines/review-guidelines.html
+- Install on extensions.gnome.org: https://extensions.gnome.org/extension/8793/clipflow-pro/
 - GitHub Releases: https://github.com/nickotmazgin/clipflow-pro/releases
 - Issues & Support: https://github.com/nickotmazgin/clipflow-pro/issues
+- EGO Review Guidelines: https://gjs.guide/extensions/review-guidelines/review-guidelines.html
 
 ## Installation (local dev)
 
@@ -51,6 +58,12 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 - Verbose logs only when `enable-debug-logs` is enabled
 
 This branch targets GNOME 45–47. For GNOME 43–44, see the `gnome43-44` branch.
+
+## Quick Start
+
+- Open clipboard menu: Super+Shift+V
+- Click an entry to copy; right‑click for per‑row actions (Pin/Star/Copy/Clean/Delete)
+- Use Actions submenu (bottom): Sort/Filter, Capture PRIMARY, Pause Monitoring, Export/Import, Maintenance
 
 ### Sorting & Pagination
 

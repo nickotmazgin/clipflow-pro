@@ -8,8 +8,8 @@
 
 /* Menu container */
 .clipflow-menu.popup-menu {
-    min-width: 320px;
-    max-width: 440px;
+    min-width: 300px;
+    max-width: 380px;
 }
 
 .clipflow-menu,

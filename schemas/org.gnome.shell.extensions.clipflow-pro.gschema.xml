@@ -107,35 +107,13 @@
       <description>Clear clipboard history and remove ~/.config/clipflow-pro/history.json on logout</description>
     </key>
 
-    <key name="pause-on-lock" type="b">
-      <default>false</default>
-      <summary>Pause on screen lock</summary>
-      <description>Pause clipboard monitoring when the screen is locked and resume on unlock.</description>
-    </key>
-
-    <key name="clear-on-lock" type="b">
-      <default>false</default>
-      <summary>Clear on screen lock</summary>
-      <description>Clear clipboard history when the screen is locked.</description>
-    </key>
-    
     <key name="auto-clear-sensitive" type="b">
       <default>false</default>
       <summary>Auto-clear sensitive data</summary>
       <description>Automatically remove password-like entries after 5 minutes</description>
     </key>
 
-    <key name="pause-on-lock" type="b">
-      <default>false</default>
-      <summary>Pause on screen lock</summary>
-      <description>Pause clipboard monitoring when the screen is locked and resume on unlock.</description>
-    </key>
-
-    <key name="clear-on-lock" type="b">
-      <default>false</default>
-      <summary>Clear on screen lock</summary>
-      <description>Clear clipboard history when the screen is locked.</description>
-    </key>
+    <!-- pause-on-lock and clear-on-lock defined once above; duplicates removed -->
 
     <key name="copy-as-plain-text" type="b">
       <default>false</default>
@@ -155,11 +133,7 @@
       <description>Include the first characters of the copied entry in notifications</description>
     </key>
 
-    <key name="copy-as-plain-text" type="b">
-      <default>true</default>
-      <summary>Copy as plain text</summary>
-      <description>Sanitize copied text by stripping zero-width and control characters and normalizing whitespace.</description>
-    </key>
+    <!-- duplicate copy-as-plain-text removed; default remains false -->
 
     <key name="copied-preview-length" type="i">
       <default>50</default>

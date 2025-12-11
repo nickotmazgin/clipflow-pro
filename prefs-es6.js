@@ -1,25 +1,33 @@
 'use strict';
 
-const ExtensionUtils = imports.misc.extensionUtils;
-const {GObject, Gtk, Gio, GLib, Pango, Gdk} = imports.gi;
+import GObject from 'gi://GObject';
+import Gtk from 'gi://Gtk';
+import Gio from 'gi://Gio';
+import GLib from 'gi://GLib';
+import Pango from 'gi://Pango';
+import Gdk from 'gi://Gdk';
 
-const Me = ExtensionUtils.getCurrentExtension();
-const _ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
+import { ExtensionPreferences, gettext as _ } from 'resource:///org/gnome/Shell/Extensions/js/extensions/prefs.js';
 
-function init() {
-    ExtensionUtils.initTranslations();
-}
+export default class ClipFlowProPreferences extends ExtensionPreferences {
+    fillPreferencesWindow(window) {
+        const settings = this.getSettings();
 
-function buildPrefsWidget() {
-    const settings = ExtensionUtils.getSettings();
-    const widget = new ClipFlowProPrefsWidget({
-        orientation: Gtk.Orientation.VERTICAL,
-    }, settings, Me.metadata);
+        // Translations are provided via the extension's gettext domain.
 
-    widget.set_hexpand(true);
-    widget.set_vexpand(true);
+        const widget = new ClipFlowProPrefsWidget({
+            orientation: Gtk.Orientation.VERTICAL,
+        }, settings, this.metadata);
 
-    return widget;
+        widget.set_hexpand(true);
+        widget.set_vexpand(true);
+
+        window.set_default_size?.(920, 640);
+
+        // Attach our GTK widget as the window content. This keeps the Adw
+        // headerbar (close/minimize) while letting us reuse the existing UI.
+        window.set_child?.(widget) ?? window.add?.(widget);
+    }
 }
 
 const ClipFlowProPrefsWidget = GObject.registerClass(
@@ -46,9 +54,9 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
     }
 
     _buildUI() {
-        // Helper to access metadata (works for both legacy and ES6)
+        // Helper to access metadata
         this._getMeta = (key) => (
-            (this._metadata && this._metadata[key]) ?? (Me?.metadata?.[key]) ?? null
+            this._metadata?.[key] ?? null
         );
         this.set_orientation(Gtk.Orientation.VERTICAL);
         this.set_spacing(20);
@@ -507,7 +515,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         if (isGS45Plus) {
             const disableCssToggle = this._createSwitchRow(
                 _('Disable Extension Stylesheet'),
-                _('Turn off ClipFlow\'s CSS for troubleshooting theme conflicts.'),
+                _('Turn off ClipFlow's CSS for troubleshooting theme conflicts.'),
                 'disable-css'
             );
             renderBox.append(disableCssToggle);

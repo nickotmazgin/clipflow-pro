@@ -11,14 +11,15 @@ const _ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
 
 // Gate verbose logs behind a runtime flag controlled by settings
 globalThis.__CFP_DEBUG = false;
-const __cfpConsoleLog = (typeof console !== 'undefined' && console.log)
-    ? console.log.bind(console)
-    : (typeof print === 'function' ? print : function(){});
+const _console = globalThis.console;
+const console = {
+    log: (...args) => { if (globalThis.__CFP_DEBUG && _console && _console.log) _console.log(...args); },
+    warn: (...args) => { if (globalThis.__CFP_DEBUG && _console && _console.warn) _console.warn(...args); },
+    error: (...args) => { if (globalThis.__CFP_DEBUG && _console && _console.error) _console.error(...args); },
+};
 function cfpLog(...args) {
-    try {
-        if (globalThis.__CFP_DEBUG)
-            __cfpConsoleLog(...args);
-    } catch (_e) {}
+    if (globalThis.__CFP_DEBUG)
+        console.log(...args);
 }
 
 const HISTORY_LIMIT_MIN = 10;
@@ -237,7 +238,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._loadHistoryFromDisk();
         this._menuBuilt = false;
         // Defer menu build and clipboard monitoring to reduce startup risk
-        this._scheduleTimeout(400, () => { try { this._startClipboardMonitoring(); } catch (_e) {} return GLib.SOURCE_REMOVE; });
+        this._scheduleTimeout(400, () => { this._startClipboardMonitoring(); return GLib.SOURCE_REMOVE; });
         this._registerKeybindings();
         this._connectLockSignals();
         
@@ -250,10 +251,11 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 cfpLog(`ClipFlow Pro: Menu open-state-changed (open: ${open}, container exists: ${!!this._historyContainer})`);
                 if (open) {
                     if (!this._menuBuilt) {
-                        try { this._buildMenu(); this._menuBuilt = true; } catch (_e) {}
+                        this._buildMenu();
+                        this._menuBuilt = true;
                     }
                     if (this._forceClassicList) {
-                        try { if (this._searchEntry?.clutter_text?.set_text) this._searchEntry.clutter_text.set_text(''); } catch (_e) {}
+                        this._searchEntry?.clutter_text?.set_text?.('');
                         this._lastSearchText = '';
                         // Rebuild entire menu to reflect latest history
                         this._buildMenu();
@@ -313,9 +315,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         // Remove existing icon if we're rebuilding
         if (this._icon) {
             const parent = this._icon.get_parent();
-            if (parent && typeof parent.remove_child === 'function') {
-                parent.remove_child(this._icon);
-            }
+            parent?.remove_child?.(this._icon);
             this._icon.destroy();
             this._icon = null;
         }
@@ -325,39 +325,24 @@ class ClipFlowIndicator extends PanelMenu.Button {
         const icon = this._addIndicatorIcon();
         this._icon = icon;
 
-        if (typeof this.add_child === 'function') {
-            this.add_child(icon);
-        } else if (this.actor && typeof this.actor.add_child === 'function') {
-            this.actor.add_child(icon);
-        } else if (typeof this.add_actor === 'function') {
-            this.add_actor(icon);
-        }
+        (this.add_child ?? this.actor?.add_child ?? this.add_actor)?.call(this.actor ?? this, icon);
 
         this._updateIconState();
     }
 
     _resolveActor(target) {
-        if (!target || typeof target !== 'object') {
+        if (!target || typeof target !== 'object')
             return null;
-        }
 
-        if (typeof target.add_style_class_name === 'function' ||
-            typeof target.add_child === 'function' ||
-            typeof target.hide === 'function') {
+        if (target.add_style_class_name || target.add_child || target.hide)
             return target;
-        }
 
-        if (target.actor) {
+        if (target.actor)
             return this._resolveActor(target.actor);
-        }
-
-        if (target.box) {
+        if (target.box)
             return this._resolveActor(target.box);
-        }
-
-        if (target._actor) {
+        if (target._actor)
             return this._resolveActor(target._actor);
-        }
 
         return null;
     }
@@ -367,15 +352,15 @@ class ClipFlowIndicator extends PanelMenu.Button {
         const c = this._resolveActor(child) || child;
         if (!p || !c)
             return false;
-        if (typeof p.add_child === 'function') {
+        if (p.add_child) {
             p.add_child(c);
             return true;
         }
-        if (typeof p.add_actor === 'function') {
+        if (p.add_actor) {
             p.add_actor(c);
             return true;
         }
-        if (p.actor && typeof p.actor.add_child === 'function') {
+        if (p.actor?.add_child) {
             p.actor.add_child(c);
             return true;
         }
@@ -383,22 +368,18 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _safeSetSpacing(container, px) {
-        try {
-            if (typeof container.set_spacing === 'function') {
-                container.set_spacing(px);
-                return;
-            }
-            if (typeof container.get_layout_manager === 'function') {
-                const layout = container.get_layout_manager();
-                if (layout && 'spacing' in layout)
-                    layout.spacing = px;
-            }
-        } catch (_e) {}
+        if (container?.set_spacing) {
+            container.set_spacing(px);
+            return;
+        }
+        const layout = container?.get_layout_manager?.();
+        if (layout && 'spacing' in layout)
+            layout.spacing = px;
     }
 
     _addStyleClass(target, className) {
         const actor = this._resolveActor(target);
-        if (actor && typeof actor.add_style_class_name === 'function') {
+        if (actor?.add_style_class_name) {
             actor.add_style_class_name(className);
         }
     }
@@ -409,9 +390,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return null;
         }
 
-        if (Main.uiGroup && typeof Main.uiGroup.add_child === 'function') {
+        if (Main.uiGroup?.add_child) {
             Main.uiGroup.add_child(actor);
-        } else if (Main.uiGroup && typeof Main.uiGroup.add_actor === 'function') {
+        } else if (Main.uiGroup?.add_actor) {
             Main.uiGroup.add_actor(actor);
         }
 
@@ -457,19 +438,15 @@ class ClipFlowIndicator extends PanelMenu.Button {
         }
 
         // GLib.Bytes or similar object with toArray(): decode as UTF‑8
-        try {
-            if (value && typeof value.toArray === 'function') {
-                const u8 = Uint8Array.from(value.toArray());
-                return new TextDecoder('utf-8').decode(u8);
-            }
-        } catch (_e) { /* fall through */ }
+        if (value?.toArray) {
+            const u8 = Uint8Array.from(value.toArray());
+            return new TextDecoder('utf-8').decode(u8);
+        }
 
         // Uint8Array: decode as UTF‑8
-        try {
-            if (value instanceof Uint8Array) {
-                return new TextDecoder('utf-8').decode(value);
-            }
-        } catch (_e) { /* fall through */ }
+        if (value instanceof Uint8Array) {
+            return new TextDecoder('utf-8').decode(value);
+        }
 
         const fallback = String(value ?? '');
         const trimmed = fallback.trim();
@@ -488,7 +465,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         try {
             if (typeof bytes === 'string') {
                 text = bytes;
-            } else if (bytes && typeof bytes.get_data === 'function' && typeof bytes.get_size === 'function') {
+            } else if (bytes?.get_data && bytes?.get_size) {
                 // GLib.Bytes object: use get_data() and get_size()
                 const size = bytes.get_size();
                 if (size > 0) {
@@ -498,7 +475,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                         text = new TextDecoder('utf-8').decode(u8);
                     }
                 }
-            } else if (bytes && typeof bytes.toArray === 'function') {
+            } else if (bytes?.toArray) {
                 const u8 = Uint8Array.from(bytes.toArray());
                 text = new TextDecoder('utf-8').decode(u8);
             } else if (bytes instanceof Uint8Array) {
@@ -576,11 +553,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return;
         }
 
-        if (typeof actor.hide === 'function') {
-            actor.hide();
-        } else {
+        actor.hide?.();
+        if (!actor.hide)
             actor.visible = false;
-        }
     }
     
     _updateIconState() {
@@ -597,25 +572,21 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _computeIconSize() {
-        try {
-            const override = this._settings.get_int('icon-size-override');
-            if (override && override > 0) return override;
-            const panel = Main.panel;
-            if (!panel) return 16;
-            const height = typeof panel.height === 'number' ? panel.height : 24;
-            const scale = (global.display && typeof global.display.get_monitor_scale === 'function')
-                ? global.display.get_monitor_scale(global.display.get_primary_monitor())
-                : 1;
-            const size = Math.max(12, Math.min(24, Math.round(height * 0.8 * scale)));
-            return size;
-        } catch (_e) {
-            return 16;
-        }
+        const override = this._settings.get_int('icon-size-override');
+        if (override && override > 0) return override;
+        const panel = Main.panel;
+        if (!panel) return 16;
+        const height = typeof panel.height === 'number' ? panel.height : 24;
+        const scale = global.display?.get_monitor_scale
+            ? global.display.get_monitor_scale(global.display.get_primary_monitor())
+            : 1;
+        const size = Math.max(12, Math.min(24, Math.round(height * 0.8 * scale)));
+        return size;
     }
 
     _setIconSize(size) {
         if (!this._icon) return;
-        if (typeof this._icon.set_icon_size === 'function') {
+        if (this._icon.set_icon_size) {
             this._icon.set_icon_size(size);
         } else if ('icon_size' in this._icon) {
             this._icon.icon_size = size;
@@ -662,14 +633,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         const id2 = panel.connect('notify::height', onChange);
         if (typeof id2 === 'number' && id2 > 0) this._panelSignalIds.push(id2);
 
-            try {
-                const id = panel.connect('notify::height', onChange);
-                if (typeof id === 'number' && id > 0) {
-                    this._panelSignalIds.push(id);
-                }
-            } catch (_e) {}
-
-            const display = global.display;
+        const display = global.display;
         if (display) {
             try {
                 const id = display.connect('notify::scale-factor', onChange);
@@ -677,9 +641,6 @@ class ClipFlowIndicator extends PanelMenu.Button {
                     this._displaySignalIds.push(id);
                 }
             } catch (_e) {}
-        }
-        } catch (_e) {
-            // no-op
         }
     }
 
@@ -778,7 +739,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                     return GLib.SOURCE_REMOVE;
                 }
                 const t = target();
-                if (t && global && global.stage && typeof global.stage.set_key_focus === 'function')
+                if (t && global?.stage?.set_key_focus)
                     global.stage.set_key_focus(t);
             } catch (_e) {}
             attempts++;
@@ -815,11 +776,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             if (actor._clipflowDestroyed) {
                 return;
             }
-            if (typeof actor.destroy === 'function') {
-                actor.destroy();
-            } else if (actor.actor && typeof actor.actor.destroy === 'function') {
-                actor.actor.destroy();
-            }
+            actor.destroy?.() ?? actor.actor?.destroy?.();
             actor._clipflowDestroyed = true;
         } catch (error) {
             // Actor destroy failed
@@ -827,32 +784,31 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _validateSettings() {
-        try {
-            // Validate max-entries (10-100)
-            const maxEntries = this._settings.get_int('max-entries');
-            const clampedEntries = this._clampHistorySize(maxEntries);
-            if (clampedEntries !== maxEntries) {
-                this._settings.set_int('max-entries', clampedEntries);
-            }
-            this._maxHistory = clampedEntries;
+        // Validate max-entries (10-100)
+        const maxEntries = this._settings.get_int('max-entries');
+        const clampedEntries = this._clampHistorySize(maxEntries);
+        if (clampedEntries !== maxEntries) {
+            this._settings.set_int('max-entries', clampedEntries);
+        }
+        this._maxHistory = clampedEntries;
 
-            // Validate entries-per-page (5-50)
-            const entriesPerPage = this._settings.get_int('entries-per-page');
-            if (entriesPerPage < 5 || entriesPerPage > 50) {
-                const corrected = Math.max(5, Math.min(50, entriesPerPage));
-                this._settings.set_int('entries-per-page', corrected);
-                this._entriesPerPage = corrected;
-            }
+        // Validate entries-per-page (5-50)
+        const entriesPerPage = this._settings.get_int('entries-per-page');
+        if (entriesPerPage < 5 || entriesPerPage > 50) {
+            const corrected = Math.max(5, Math.min(50, entriesPerPage));
+            this._settings.set_int('entries-per-page', corrected);
+            this._entriesPerPage = corrected;
+        }
 
-            // Validate max-entry-length (100-10000)
-            const maxEntryLength = this._settings.get_int('max-entry-length');
-            if (maxEntryLength < 100 || maxEntryLength > 10000) {
-                const corrected = Math.max(100, Math.min(10000, maxEntryLength));
-                this._settings.set_int('max-entry-length', corrected);
-            }
+        // Validate max-entry-length (100-10000)
+        const maxEntryLength = this._settings.get_int('max-entry-length');
+        if (maxEntryLength < 100 || maxEntryLength > 10000) {
+            const corrected = Math.max(100, Math.min(10000, maxEntryLength));
+            this._settings.set_int('max-entry-length', corrected);
+        }
 
-            // Validate min-entry-length (0-100)
-            const minEntryLength = this._settings.get_int('min-entry-length');
+        // Validate min-entry-length (0-100)
+        const minEntryLength = this._settings.get_int('min-entry-length');
             if (minEntryLength < 0 || minEntryLength > 100) {
                 const corrected = Math.max(0, Math.min(100, minEntryLength));
                 this._settings.set_int('min-entry-length', corrected);
@@ -879,14 +835,11 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 this._settings.set_int('copied-preview-length', corrected);
             }
 
-            // Validate pause-duration-minutes (1-120)
-            const pauseMinutes = this._settings.get_int('pause-duration-minutes');
-            if (pauseMinutes < 1 || pauseMinutes > 120) {
-                const corrected = Math.max(1, Math.min(120, pauseMinutes));
-                this._settings.set_int('pause-duration-minutes', corrected);
-            }
-        } catch (error) {
-            console.warn(`ClipFlow Pro: Error validating settings: ${error}`);
+        // Validate pause-duration-minutes (1-120)
+        const pauseMinutes = this._settings.get_int('pause-duration-minutes');
+        if (pauseMinutes < 1 || pauseMinutes > 120) {
+            const corrected = Math.max(1, Math.min(120, pauseMinutes));
+            this._settings.set_int('pause-duration-minutes', corrected);
         }
     }
 
@@ -980,19 +933,13 @@ class ClipFlowIndicator extends PanelMenu.Button {
             x_expand: true,
             y_expand: true
         });
-        if (typeof this._historyScrollView.set_margin_right === 'function') {
-            this._historyScrollView.set_margin_right(10);
-        }
-        if (typeof this._historyScrollView.set_margin_bottom === 'function') {
-            this._historyScrollView.set_margin_bottom(8);
-        }
+        this._historyScrollView.set_margin_right?.(10);
+        this._historyScrollView.set_margin_bottom?.(8);
 
-        if (typeof this._historyScrollView.set_policy === 'function') {
-            if (St.PolicyType) {
-                this._historyScrollView.set_policy(St.PolicyType.NEVER, St.PolicyType.AUTOMATIC);
-            } else if (Clutter.PolicyType) {
-                this._historyScrollView.set_policy(Clutter.PolicyType.NEVER, Clutter.PolicyType.AUTOMATIC);
-            }
+        if (St.PolicyType) {
+            this._historyScrollView.set_policy?.(St.PolicyType.NEVER, St.PolicyType.AUTOMATIC);
+        } else if (Clutter.PolicyType) {
+            this._historyScrollView.set_policy?.(Clutter.PolicyType.NEVER, Clutter.PolicyType.AUTOMATIC);
         }
 
         this._historyContainer = new St.BoxLayout({
@@ -1003,7 +950,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._safeSetSpacing(this._historyContainer, 4);
 
         // Attach history container to scrollview (handles 43/45 variants)
-        if (typeof this._historyScrollView.set_child === 'function')
+        if (this._historyScrollView.set_child)
             this._historyScrollView.set_child(this._historyContainer);
         else
             this._safeAdd(this._historyScrollView, this._historyContainer);
@@ -1035,21 +982,16 @@ class ClipFlowIndicator extends PanelMenu.Button {
         };
 
         // Filter options (applies to both Classic and Enhanced)
-        try {
-            const mark = s => `• ${s}`;
-            add(this._classicFilterMode === 'all' ? mark(_('Filter: All')) : _('Filter: All'), () => this._setClassicFilterMode('all'));
-            add(this._classicFilterMode === 'pinned' ? mark(_('Filter: Pinned')) : _('Filter: Pinned'), () => this._setClassicFilterMode('pinned'));
-            add(this._classicFilterMode === 'starred' ? mark(_('Filter: Starred')) : _('Filter: Starred'), () => this._setClassicFilterMode('starred'));
-            actionsSub.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        } catch (_e) {}
+        const mark = s => `• ${s}`;
+        add(this._classicFilterMode === 'all' ? mark(_('Filter: All')) : _('Filter: All'), () => this._setClassicFilterMode('all'));
+        add(this._classicFilterMode === 'pinned' ? mark(_('Filter: Pinned')) : _('Filter: Pinned'), () => this._setClassicFilterMode('pinned'));
+        add(this._classicFilterMode === 'starred' ? mark(_('Filter: Starred')) : _('Filter: Starred'), () => this._setClassicFilterMode('starred'));
+        actionsSub.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         // Sort options
-        try {
-            const mark = s => `• ${s}`;
-            add(this._sortOrder === 'newest' ? mark(_('Sort: Newest first')) : _('Sort: Newest first'), () => this._setSortOrder('newest'));
-            add(this._sortOrder === 'oldest' ? mark(_('Sort: Oldest first')) : _('Sort: Oldest first'), () => this._setSortOrder('oldest'));
-            actionsSub.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        } catch (_e) {}
+        add(this._sortOrder === 'newest' ? mark(_('Sort: Newest first')) : _('Sort: Newest first'), () => this._setSortOrder('newest'));
+        add(this._sortOrder === 'oldest' ? mark(_('Sort: Oldest first')) : _('Sort: Oldest first'), () => this._setSortOrder('oldest'));
+        actionsSub.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         // Toggles: Capture PRIMARY and Pause Monitoring
         try {
@@ -1057,9 +999,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             const primaryState = !!this._safeGetBoolean('capture-primary', false);
             const primaryToggle = new PopupMenu.PopupSwitchMenuItem(_('Capture PRIMARY Selection'), primaryState);
             primaryToggle.connect('toggled', (_item, state) => {
-                try {
-                    this._settings.set_boolean('capture-primary', !!state);
-                } catch (_e) {}
+                this._settings.set_boolean('capture-primary', !!state);
                 // Rebuild to refresh marks and switch state across menus
                 this._buildMenu();
             });
@@ -1090,10 +1030,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
         } catch (_e) {}
 
         // Open Export Folder shortcut
-        try {
-            add(_('Open Export Folder'), () => this._openExportFolder());
-            actionsSub.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-        } catch (_e) {}
+        add(_('Open Export Folder'), () => this._openExportFolder());
+        actionsSub.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         // Maintenance actions
         add(_('Clear All'), () => this._clearAllHistory());
@@ -1114,7 +1052,6 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _buildClassicListMenu() {
-        try {
             // Render a simple list of items directly as PopupMenu items (no custom container/pagination)
             const showNumbers = this._safeGetBoolean('show-numbers', true);
             const showPreview = this._safeGetBoolean('show-preview', true);
@@ -1188,13 +1125,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
             }
 
             // Consolidated single Actions submenu at the bottom
-            try {
-                this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-                this._addActionsSubmenu();
-            } catch (_e) {}
-        } catch (error) {
-            console.error(`ClipFlow Pro: Error building classic list menu: ${error.message}`);
-        }
+            this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+            this._addActionsSubmenu();
     }
 
     _pinTopN(n) {
@@ -1429,10 +1361,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
                     this._scheduleIdle(() => {
                         try {
                             const target = this._searchEntry.clutter_text || this._searchEntry;
-                            if (typeof this._searchEntry.grab_key_focus === 'function')
-                                this._searchEntry.grab_key_focus();
-                            if (global && global.stage && typeof global.stage.set_key_focus === 'function')
-                                global.stage.set_key_focus(target);
+                            this._searchEntry.grab_key_focus?.();
+                            global?.stage?.set_key_focus?.(target);
                         } catch (_e) {}
                         return GLib.SOURCE_REMOVE;
                     });
@@ -1450,9 +1380,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _syncContextMenuToggles() {
-        if (this._contextMenuNotificationItem && typeof this._contextMenuNotificationItem.setToggleState === 'function') {
-            this._contextMenuNotificationItem.setToggleState(this._settings.get_boolean('show-copy-notifications'));
-        }
+        this._contextMenuNotificationItem?.setToggleState?.(
+            this._settings.get_boolean('show-copy-notifications')
+        );
     }
 
     _populateContextMenuRecentEntries() {
@@ -1460,9 +1390,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return;
         }
 
-        if (typeof this._contextMenuRecentSection.removeAll === 'function') {
+        if (this._contextMenuRecentSection.removeAll) {
             this._contextMenuRecentSection.removeAll();
-        } else if (this._contextMenuRecentSection.actor && typeof this._contextMenuRecentSection.actor.destroy_all_children === 'function') {
+        } else if (this._contextMenuRecentSection.actor?.destroy_all_children) {
             this._contextMenuRecentSection.actor.destroy_all_children();
         }
 
@@ -1584,10 +1514,10 @@ class ClipFlowIndicator extends PanelMenu.Button {
             vertical: false,
             x_expand: true,
         });
-        if (typeof searchContainer.set_spacing === 'function') {
+        if (searchContainer.set_spacing) {
             searchContainer.set_spacing(8);
-        } else if (typeof searchContainer.get_layout_manager === 'function') {
-            const layout = searchContainer.get_layout_manager();
+        } else {
+            const layout = searchContainer.get_layout_manager?.();
             if (layout && 'spacing' in layout)
                 layout.spacing = 8;
         }
@@ -1602,9 +1532,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         
         this._searchEntry.add_style_class_name('clipflow-search');
         this._searchEntry.clutter_text.set_max_length(100);
-        if (typeof this._searchEntry.clutter_text.set_single_line_mode === 'function') {
-            this._searchEntry.clutter_text.set_single_line_mode(true);
-        }
+        this._searchEntry.clutter_text.set_single_line_mode?.(true);
         
         this._searchEntry.clutter_text.connect('text-changed', () => {
             this._searchHadInput = true;
@@ -1624,8 +1552,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
         // Ensure clicking focuses the entry so typing is captured (GNOME 43)
         try {
             this._searchEntry.connect('button-press-event', () => {
-                if (typeof this._searchEntry.grab_key_focus === 'function') this._searchEntry.grab_key_focus();
-                if (global && global.stage && typeof global.stage.set_key_focus === 'function')
+                this._searchEntry.grab_key_focus?.();
+                if (global?.stage?.set_key_focus)
                     global.stage.set_key_focus(this._searchEntry.clutter_text || this._searchEntry);
                 return Clutter.EVENT_STOP;
             });
@@ -1670,11 +1598,10 @@ class ClipFlowIndicator extends PanelMenu.Button {
             const row = new St.BoxLayout({ vertical: false });
             row.add_child(new St.Icon({ icon_name: 'open-menu-symbolic', icon_size: 12 }));
             row.add_child(new St.Label({ text: _('Actions') }));
-            if (typeof menuButton.set_child === 'function') menuButton.set_child(row);
-            else menuButton.child = row;
+            menuButton.set_child?.(row) ?? (menuButton.child = row);
         } catch (_e) {
             // Fallback to text label only if icon creation fails
-            if (typeof menuButton.set_label === 'function') menuButton.set_label(_('Actions'));
+            menuButton.set_label?.(_('Actions'));
         }
         spacer.add_style_class_name('clipflow-action-spacer');
         buttonContainer.add_child(spacer);
@@ -1701,14 +1628,12 @@ class ClipFlowIndicator extends PanelMenu.Button {
         uiButton.add_style_class_name('clipflow-button-secondary');
         uiButton.set_accessible_name(_('Switch UI rendering mode'));
         uiButton.connect('clicked', () => {
-            try {
-                const target = (this._renderingMode === 'classic') ? 'enhanced' : 'classic';
-                this._settings.set_string('rendering-mode', target);
-                this._renderingMode = target;
-                this._forceClassicList = (target === 'classic');
-                this._autoFallbackApplied = false;
-                this._buildMenu();
-            } catch (_e) {}
+            const target = (this._renderingMode === 'classic') ? 'enhanced' : 'classic';
+            this._settings.set_string('rendering-mode', target);
+            this._renderingMode = target;
+            this._forceClassicList = (target === 'classic');
+            this._autoFallbackApplied = false;
+            this._buildMenu();
         });
         buttonContainer.add_child(uiButton);
         buttonContainer.set_margin_top(8);
@@ -1781,7 +1706,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                     if (!ok || !bytes) { Main.notify('ClipFlow Pro', _('Import failed.')); return; }
                     let jsonText = '';
                     if (typeof bytes === 'string') jsonText = bytes;
-                    else if (bytes && typeof bytes.toArray === 'function') jsonText = new TextDecoder('utf-8').decode(Uint8Array.from(bytes.toArray()));
+                    else if (bytes?.toArray) jsonText = new TextDecoder('utf-8').decode(Uint8Array.from(bytes.toArray()));
                     else if (bytes instanceof Uint8Array) jsonText = new TextDecoder('utf-8').decode(bytes);
                     if (!jsonText) { Main.notify('ClipFlow Pro', _('Import failed.')); return; }
                     const parsed = JSON.parse(jsonText);
@@ -1938,10 +1863,10 @@ class ClipFlowIndicator extends PanelMenu.Button {
             style_class: 'clipflow-pagination'
         });
 
-        if (typeof this._paginationBox.set_spacing === 'function') {
+        if (this._paginationBox.set_spacing) {
             this._paginationBox.set_spacing(8);
-        } else if (typeof this._paginationBox.get_layout_manager === 'function') {
-            const layout = this._paginationBox.get_layout_manager();
+        } else {
+            const layout = this._paginationBox.get_layout_manager?.();
             if (layout && 'spacing' in layout)
                 layout.spacing = 8;
         }
@@ -2006,7 +1931,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         const prevEnabled = this._currentPage > 0;
         const nextEnabled = this._currentPage < totalPages - 1;
 
-        if (typeof this._paginationPrevButton.set_sensitive === 'function') {
+        if (this._paginationPrevButton.set_sensitive) {
             this._paginationPrevButton.set_sensitive(prevEnabled);
         } else {
             this._paginationPrevButton.reactive = prevEnabled;
@@ -2014,7 +1939,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             this._paginationPrevButton.opacity = prevEnabled ? 255 : 120;
         }
 
-        if (typeof this._paginationNextButton.set_sensitive === 'function') {
+        if (this._paginationNextButton.set_sensitive) {
             this._paginationNextButton.set_sensitive(nextEnabled);
         } else {
             this._paginationNextButton.reactive = nextEnabled;
@@ -2070,7 +1995,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
                     if (typeof contents === 'string') {
                         raw = contents;
-                    } else if (contents && typeof contents.toArray === 'function') {
+                    } else if (contents?.toArray) {
                         raw = new TextDecoder('utf-8').decode(Uint8Array.from(contents.toArray()));
                     } else if (contents instanceof Uint8Array) {
                         raw = new TextDecoder('utf-8').decode(contents);
@@ -2391,7 +2316,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         // Warm-poll: grab whatever is currently in the clipboard after connections are established
         // This ensures the menu isn't blank on the very first copy after enable/login
         // On Wayland, do this more aggressively since selection monitor is disabled
-        const isWayland = Meta && typeof Meta.is_wayland_compositor === 'function' && Meta.is_wayland_compositor();
+        const isWayland = Meta?.is_wayland_compositor?.();
         const warmStartDelay = isWayland ? 100 : 0;
         
         this._scheduleIdle(() => {
@@ -2422,50 +2347,34 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
     _obtainClipboardInterface() {
         const candidates = [];
-        const isWayland = Meta && typeof Meta.is_wayland_compositor === 'function' && Meta.is_wayland_compositor();
+        const isWayland = Meta?.is_wayland_compositor?.();
 
         // For GNOME 43 Wayland, try multiple methods more aggressively
-        if (St && St.Clipboard && typeof St.Clipboard.get_for_display === 'function' &&
-            typeof global !== 'undefined' && global && global.display) {
+        if (St?.Clipboard?.get_for_display && global?.display) {
             // Try this first on Wayland
             candidates.push(() => St.Clipboard.get_for_display(global.display));
         }
 
-        if (St && St.Clipboard && typeof St.Clipboard.get_default === 'function') {
+        if (St?.Clipboard?.get_default) {
             candidates.push(() => St.Clipboard.get_default());
         }
 
         // Gtk.* is not allowed in Shell process; do not use Gtk.Clipboard fallbacks
 
         // Try direct access via global.display for Wayland compatibility
-        if (typeof global !== 'undefined' && global && global.display && 
-            St && St.Clipboard && typeof St.Clipboard.get_for_display === 'function') {
-            try {
-                const clipboard = St.Clipboard.get_for_display(global.display);
-                if (clipboard) {
-                    // Verify it has the methods we need
-                    if (typeof clipboard.get_text === 'function' || typeof clipboard.get_content === 'function') {
-                        cfpLog('ClipFlow Pro: Obtained clipboard via get_for_display (Wayland)');
-                        return clipboard;
-                    }
-                }
-            } catch (error) {
-                console.warn(`ClipFlow Pro: Failed to get clipboard via get_for_display: ${error.message}`);
+        if (global?.display && St?.Clipboard?.get_for_display) {
+            const clipboard = St.Clipboard.get_for_display(global.display);
+            if (clipboard && (clipboard.get_text || clipboard.get_content)) {
+                cfpLog('ClipFlow Pro: Obtained clipboard via get_for_display (Wayland)');
+                return clipboard;
             }
         }
 
         for (const getClipboard of candidates) {
-            try {
-                const clipboard = getClipboard();
-                if (clipboard) {
-                    // Check for either get_text or get_content
-                    if (typeof clipboard.get_text === 'function' || typeof clipboard.get_content === 'function') {
-                        cfpLog(`ClipFlow Pro: Obtained clipboard interface (Wayland: ${isWayland})`);
-                        return clipboard;
-                    }
-                }
-            } catch (error) {
-                console.warn(`ClipFlow Pro: Clipboard candidate failed: ${error.message}`);
+            const clipboard = getClipboard();
+            if (clipboard && (clipboard.get_text || clipboard.get_content)) {
+                cfpLog(`ClipFlow Pro: Obtained clipboard interface (Wayland: ${isWayland})`);
+                return clipboard;
             }
         }
         
@@ -2541,13 +2450,13 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
     _connectSelectionMonitor() {
         try {
-            if (Meta && typeof Meta.is_wayland_compositor === 'function' && Meta.is_wayland_compositor()) {
+            if (Meta?.is_wayland_compositor?.()) {
                 cfpLog('ClipFlow Pro: Selection monitor skipped (Wayland)');
                 return;
             }
 
             const display = global.display;
-            if (!display || typeof display.get_selection !== 'function') {
+            if (!display?.get_selection) {
                 console.warn('ClipFlow Pro: Display does not support get_selection()');
                 return;
             }
@@ -2672,7 +2581,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
         // On Wayland, use very aggressive polling since selection monitor is disabled
         // GNOME 43 Wayland has unreliable clipboard events, so we poll every 200ms
-        const isWayland = Meta && typeof Meta.is_wayland_compositor === 'function' && Meta.is_wayland_compositor();
+        const isWayland = Meta?.is_wayland_compositor?.();
         const baseInterval = isWayland ? 200 : this._clipboardPollIntervalMs; // 200ms for Wayland, 500ms for X11
         const interval = Math.max(200, baseInterval); // Minimum 200ms
         
@@ -2801,12 +2710,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 let textValue = text;
                 if (text && typeof text !== 'string') {
                     // Try to convert object to string
-                    if (typeof text.toString === 'function') {
-                        textValue = text.toString();
-                        cfpLog(`ClipFlow Pro: Converted object to string via toString(): "${textValue.substring(0, 30)}..."`);
-                    } else if (text.value && typeof text.value === 'string') {
-                        textValue = text.value;
-                        cfpLog(`ClipFlow Pro: Extracted string from object.value: "${textValue.substring(0, 30)}..."`);
+                    textValue = text.toString?.() ?? (text.value && typeof text.value === 'string' ? text.value : String(text));
+                    if (textValue !== text) {
+                        cfpLog(`ClipFlow Pro: Converted object to string: "${textValue.substring(0, 30)}..."`);
                     } else {
                         textValue = String(text);
                         cfpLog(`ClipFlow Pro: Converted object to string via String(): "${textValue.substring(0, 30)}..."`);
@@ -2840,12 +2746,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _copySanitized(text) {
-        try {
-            const cleaned = this._sanitizePlainText(text);
-            this._copyToClipboard(cleaned, true);
-        } catch (_e) {
-            this._copyToClipboard(text, true);
-        }
+        const cleaned = this._sanitizePlainText(text);
+        this._copyToClipboard(cleaned, true);
     }
 
     _fallbackFetchClipboardText(clipboardType, sourceLabel, callback, index = 0) {
@@ -2877,7 +2779,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             this._clipboard.get_content(clipboardType, mimetype, (_clip, bytes) => {
                 try {
                     let decoded = '';
-                    const byteSize = bytes && typeof bytes.get_size === 'function' ? bytes.get_size() : 0;
+                    const byteSize = bytes?.get_size?.() ?? 0;
                     cfpLog(`ClipFlow Pro: get_content returned ${byteSize} bytes for ${mimetype} (${sourceLabel})`);
                     if (bytes && byteSize > 0) {
                         decoded = this._decodeClipboardBytes(bytes, mimetype);
@@ -2900,15 +2802,11 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _isLikelyScreenshotApp() {
-        try {
-            const tracker = Shell.WindowTracker.get_default();
-            const app = tracker && tracker.focus_app ? tracker.focus_app : null;
-            const id = (app && (app.get_id?.() || app.get_name?.() || '')) || '';
-            const nid = id.toLowerCase();
-            return nid.includes('screenshot') || nid.includes('flameshot') || nid.includes('shutter') || nid.includes('ksnip');
-        } catch (_e) {
-            return false;
-        }
+        const tracker = Shell.WindowTracker.get_default();
+        const app = tracker?.focus_app;
+        const id = (app?.get_id?.() || app?.get_name?.() || '') || '';
+        const nid = id.toLowerCase();
+        return nid.includes('screenshot') || nid.includes('flameshot') || nid.includes('shutter') || nid.includes('ksnip');
     }
 
     _handleClipboardText(rawText, source = 'owner-change') {
@@ -3102,7 +3000,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             };
 
             try {
-                if (Main.wm && typeof Main.wm.addKeybinding === 'function') {
+                if (Main.wm?.addKeybinding) {
                     const success = Main.wm.addKeybinding(
                         name,
                         this._settings,
@@ -3151,18 +3049,14 @@ class ClipFlowIndicator extends PanelMenu.Button {
         }
 
         for (const [name, method] of this._keybindingRegistrations.entries()) {
-            try {
-                if (method === 'wm' && Main.wm && typeof Main.wm.removeKeybinding === 'function') {
-                    Main.wm.removeKeybinding(name);
-                } else if (method === 'display' && global.display && typeof global.display.remove_keybinding === 'function') {
-                    global.display.remove_keybinding(name);
-                } else if (Main.wm && typeof Main.wm.removeKeybinding === 'function') {
-                    Main.wm.removeKeybinding(name);
-                } else if (global.display && typeof global.display.remove_keybinding === 'function') {
-                    global.display.remove_keybinding(name);
-                }
-            } catch (error) {
-                console.warn(`ClipFlow Pro: Failed to remove keybinding ${name}: ${error}`);
+            if (method === 'wm' && Main.wm?.removeKeybinding) {
+                Main.wm.removeKeybinding(name);
+            } else if (method === 'display' && global.display?.remove_keybinding) {
+                global.display.remove_keybinding(name);
+            } else if (Main.wm?.removeKeybinding) {
+                Main.wm.removeKeybinding(name);
+            } else if (global.display?.remove_keybinding) {
+                global.display.remove_keybinding(name);
             }
         }
 
@@ -3522,19 +3416,15 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
         const className = 'clipflow-scrollbar-hidden';
         if (hidden) {
-            if (typeof this._historyScrollView.add_style_class_name === 'function') {
-                this._historyScrollView.add_style_class_name(className);
-            }
-        } else if (typeof this._historyScrollView.remove_style_class_name === 'function') {
-            this._historyScrollView.remove_style_class_name(className);
+            this._historyScrollView.add_style_class_name?.(className);
+        } else {
+            this._historyScrollView.remove_style_class_name?.(className);
         }
 
-        if (typeof this._historyScrollView.set_policy === 'function') {
-            const policyEnum = St.PolicyType ?? Clutter.PolicyType;
-            if (policyEnum) {
-                const verticalPolicy = hidden ? policyEnum.NEVER : policyEnum.AUTOMATIC;
-                this._historyScrollView.set_policy(policyEnum.NEVER, verticalPolicy);
-            }
+        const policyEnum = St.PolicyType ?? Clutter.PolicyType;
+        if (policyEnum && this._historyScrollView.set_policy) {
+            const verticalPolicy = hidden ? policyEnum.NEVER : policyEnum.AUTOMATIC;
+            this._historyScrollView.set_policy(policyEnum.NEVER, verticalPolicy);
         }
     }
 
@@ -3574,12 +3464,14 @@ class ClipFlowIndicator extends PanelMenu.Button {
         wrapper.add_child(hint);
 
         // Add Reset UI mode button to quickly switch to Classic
-        try {
-            const resetButton = new St.Button({ label: _('Reset to Classic UI'), style_class: 'clipflow-button' });
-            resetButton.add_style_class_name('clipflow-button-secondary');
-            resetButton.connect('clicked', () => { try { this._settings.set_string('rendering-mode', 'classic'); this._forceClassicList = true; this._buildMenu(); } catch (_e) {} });
-            wrapper.add_child(resetButton);
-        } catch (_e) {}
+        const resetButton = new St.Button({ label: _('Reset to Classic UI'), style_class: 'clipflow-button' });
+        resetButton.add_style_class_name('clipflow-button-secondary');
+        resetButton.connect('clicked', () => {
+            this._settings.set_string('rendering-mode', 'classic');
+            this._forceClassicList = true;
+            this._buildMenu();
+        });
+        wrapper.add_child(resetButton);
 
         this._historyContainer.add_child(wrapper);
     }
@@ -3623,9 +3515,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             }
         });
 
-        if (typeof this._historyContainer.remove_all_children === 'function') {
-            this._historyContainer.remove_all_children();
-        }
+        this._historyContainer.remove_all_children?.();
         
         const childrenAfter = this._historyContainer.get_children ? this._historyContainer.get_children().length : 0;
         cfpLog(`ClipFlow Pro: Container cleared (children after: ${childrenAfter})`);
@@ -3668,8 +3558,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
     _getSearchText() {
         if (!this._searchEntry)
             return '';
-        if (typeof this._searchEntry.get_text === 'function')
-            return this._searchEntry.get_text() || '';
+        return this._searchEntry.get_text?.() || '';
         if (typeof this._searchEntry.text === 'string')
             return this._searchEntry.text || '';
         if (this._searchEntry.clutter_text && typeof this._searchEntry.clutter_text.get_text === 'function')

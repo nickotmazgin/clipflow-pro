@@ -52,6 +52,13 @@ TMP45="$(mktemp -d)"
 trap 'rm -rf "${TMP45}"' EXIT
 cp -a "${BUILD_DIR}/." "${TMP45}/"
 
+# Swap in ES6 prefs for GNOME 45–47
+if [[ -f "${ROOT_DIR}/prefs-es6.js" ]]; then
+  cp "${ROOT_DIR}/prefs-es6.js" "${TMP45}/prefs.js"
+else
+  echo "Warning: prefs-es6.js not found; 45–47 settings may fail to open." >&2
+fi
+
 TMP45_DIR="${TMP45}" python3 - <<'PY'
 import json, os
 from pathlib import Path

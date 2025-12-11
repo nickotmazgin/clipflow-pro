@@ -453,3 +453,10 @@ ClipFlow Pro is licensed under the [GPL-3.0-or-later](LICENSE) license.
 - Stability:
   - Deferred clipboard monitoring start; throttled xclip/xsel fallbacks
   - Lazy menu build on first open
+## 1.3.7 — 2025-12-11
+
+- Fix (45–47): Preferences packaged as ES modules (ESM), resolving prefs SyntaxError
+- Fix (43–44): gjs syntax in panel watcher; removed duplicate schema keys in GSettings
+- Compliance: no Gtk in shell process; no spawn; async file reads; logs gated by setting
+- Packaging: corrected dual zips (43–44, 45–47); metadata stamped per build; added build-modern.sh; improved create-release-zips.sh
+- Docs: README and EGO release notes updated

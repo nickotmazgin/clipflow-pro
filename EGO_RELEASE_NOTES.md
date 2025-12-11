@@ -8,24 +8,22 @@ Modern clipboard manager for GNOME Shell 45–47. ClipFlow Pro records your hist
 
 About
 
-ClipFlow Pro 1.3.2
+ClipFlow Pro 1.3.7
 
-- Minimal rows: Copy + More (Pin/Star/Clean Copy/Delete in overflow)
-- Duplicate header removed for a cleaner menu
-- Pinned chip strip limited for readability
-- Clipboard probing capped to avoid stalls during screenshots
-- GNOME 43–44 and 45–47 packages available separately
+- Dual packages for 43–44 and 45–47 (same UUID)
+- 45–47: Preferences shipped as ES modules (fixes prefs SyntaxError)
+- 43–44: Fixed gjs syntax in panel watcher; removed duplicate schema keys
+- Compliance: no Gtk in shell process, no spawn, async file reads, logs gated by `enable-debug-logs`
 
 Browse/search clipboard history, pin/star favorites, and open with Super+Shift+V. Compact mode available. History is stored locally in ~/.config/clipflow-pro.
 
-Release Notes (1.3.0)
+Release Notes
 
-Classic+ + Enhanced, GNOME 43–47 (one UUID)
+Classic + Enhanced, GNOME 43–47 (one UUID)
 
 - One UUID (clipflow-pro@nickotmazgin.github.io), two uploads:
-  - GNOME 43–44 (legacy GJS): Classic+ default
+  - GNOME 43–44 (legacy GJS): Classic default
   - GNOME 45–47 (ESM): Enhanced default
-- Classic+ (both builds): pinned strip, starred section, quick filters, per‑row actions, show more/less, shortcuts, export/import, purge dups, pin top 3/5, unpin all, reset defaults
+- Classic (both builds): pinned strip, starred section, quick filters, per‑row actions, show more/less, shortcuts, export/import, purge dups, pin top 3/5, unpin all, reset defaults
 - Enhanced (45+): per‑row Copy & Clean Copy, auto‑fallback to Classic when needed
-- Stability & compliance: deferred enable, throttled xclip/xsel, lazy menu build, local‑only; flat zip per EGO
-- One‑time settings migration from legacy 43 schema when present
+- Packaging: flat EGO zips with XML schemas only

@@ -1,6 +1,6 @@
 # ClipFlow Pro
 
-[What’s New in 1.3.5](CHANGELOG.md)
+[What’s New in 1.3.7](CHANGELOG.md)
 
 [![EGO](https://img.shields.io/badge/Extensions.gnome.org-ClipFlow%20Pro-4A86CF?logo=gnome&logoColor=white)](https://extensions.gnome.org/extension/8793/clipflow-pro/)
 [![Release](https://img.shields.io/github/v/release/nickotmazgin/clipflow-pro)](https://github.com/nickotmazgin/clipflow-pro/releases)
@@ -49,13 +49,15 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
   - 45–47 zip with `shell-version: ["45","46","47"]` (generated in a temp dir)
 - Upload both zips under the same UUID. EGO will serve the correct build automatically.
 
-### Compliance notes (1.3.4)
+### Compliance notes (1.3.7)
 
-- Removed `stylesheet` from `metadata.json` (EGO guideline)
-- No Gtk imports in the shell process
-- No spawn-based clipboard fallbacks (xclip/xsel removed)
-- History and import use async reads via `Gio.File.load_contents_async`
-- Verbose logs only when `enable-debug-logs` is enabled
+- No Gtk imports in the shell process (extension.js)
+- No spawn usage; GNOME Shell APIs only for clipboard
+- Async file reads via `Gio.File.load_contents_async`
+- Logs gated by `enable-debug-logs` (globalThis.__CFP_DEBUG)
+- 45–47: preferences shipped as ES modules (ESM)
+- 43–44: fixed panel watcher syntax and removed duplicate schema keys
+- No `stylesheet` field in `metadata.json`
 
 This branch targets GNOME 45–47. For GNOME 43–44, see the `gnome43-44` branch.
 

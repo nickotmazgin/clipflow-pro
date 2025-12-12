@@ -1,6 +1,6 @@
 ## 1.3.4 — 2025-12-05
 
-- EGO compliance fixes:
+- Compliance fixes:
   - Removed `stylesheet` from metadata.json (43–44 build)
   - Removed Gtk usage in shell process
   - Removed all spawn-based clipboard fallbacks (xclip/xsel)

@@ -32,7 +32,7 @@ else
     echo "Warning: icons directory not found; panel icon may be missing." >&2
 fi
 
-echo "Preparing GSettings schemas (XML only, no compiled file for EGO)..."
+echo "Preparing GSettings schemas (XML only) ..."
 if [[ -d "${SCHEMAS_DIR}" ]]; then
     mkdir -p "${BUILD_DIR}/schemas"
     cp "${SCHEMAS_DIR}"/*.xml "${BUILD_DIR}/schemas/"

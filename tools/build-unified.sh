@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Unified build script to produce two EGO-ready zips under one UUID:
+# Unified build script to produce two distribution zips under one UUID:
 #  - clipflow-pro (ESM) for GNOME 45–47 from this repo
 #  - clipflow-pro (legacy) for GNOME 43–44 from ../clipflow-pro-gnome43
 
@@ -28,4 +28,3 @@ popd >/dev/null
 
 echo "[3/3] Done. Zips in ${DIST_DIR}:"
 ls -lh "${DIST_DIR}"/*.zip || true
-

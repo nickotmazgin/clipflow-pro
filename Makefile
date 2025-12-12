@@ -54,9 +54,9 @@ uninstall:
 
 # Create distribution package
 dist: build
-	@echo "Creating distribution packages (EGO flat zip + source)..."
+    @echo "Creating distribution packages (flat zip + source)..."
 	mkdir -p $(DIST_DIR)
-	# EGO flat zip (top-level files) - exclude compiled schemas per GNOME 45+ guidance
+    # Flat zip (top-level files) - exclude compiled schemas
 	rm -f $(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip
 	cd $(BUILD_DIR) && zip -r ../$(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip . -x "schemas/gschemas.compiled"
 	# Source zip
@@ -68,7 +68,7 @@ dist: build
 
 # Pack using GNOME Extensions tool
 pack: build
-	@echo "Packing flat zip for extensions.gnome.org..."
+    @echo "Packing flat zip..."
 	mkdir -p $(DIST_DIR)
 	rm -f $(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip
 	cd $(BUILD_DIR) && zip -r ../$(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip .

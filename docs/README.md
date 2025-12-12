@@ -9,7 +9,7 @@ It is not required for end users of the extension but provides useful history fo
 
 ## Packaging & Validation (GNOME 45+)
 
-- Build artifacts: `make dist` → creates flat EGO zip + source zip in `dist/`
+- Build artifacts: `make dist` → creates flat zip + source zip in `dist/`
 - Validate before upload: `make ego-validate` → checks flat layout, required files, metadata/schema sanity, and ESM constructor `super(metadata)`
 - CI: see `.github/workflows/ego-validate.yml` (runs on PRs and `main`)
 

@@ -33,7 +33,7 @@ git push origin :refs/tags/v1.2.6
 
 ## Packaging
 
-- EGO flat zip: `make pack` or `make dist` → `dist/clipflow-pro@nickotmazgin.github.io.shell-extension.zip`
+- Flat zip: `make pack` or `make dist` → `dist/clipflow-pro@nickotmazgin.github.io.shell-extension.zip`
 - Source zip: `dist/clipflow-pro-source.zip`
 
 ## GNOME Extensions upload

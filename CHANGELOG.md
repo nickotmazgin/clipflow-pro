@@ -1,3 +1,10 @@
+## 1.3.8 — 2025-12-12
+
+- Docs cleanup: removed external marketplace references; updated README
+- Version bump: 1.3.8; packaging scripts updated
+- Code quality: reduced optional chaining on GObject.connect/remove_child; simplified clipboard interface to St.Clipboard.get_default()
+- 43–44: legacy build script restored (build-legacy.sh)
+
 ## 1.3.5 — 2025-12-06
 
 - Docs: new tricolor gradient collage (1992×1992)

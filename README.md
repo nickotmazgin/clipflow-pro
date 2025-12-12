@@ -1,8 +1,7 @@
 # ClipFlow Pro
 
-[What’s New in 1.3.7](CHANGELOG.md)
+[What’s New in 1.3.8](CHANGELOG.md)
 
-[![EGO](https://img.shields.io/badge/Extensions.gnome.org-ClipFlow%20Pro-4A86CF?logo=gnome&logoColor=white)](https://extensions.gnome.org/extension/8793/clipflow-pro/)
 [![Release](https://img.shields.io/github/v/release/nickotmazgin/clipflow-pro)](https://github.com/nickotmazgin/clipflow-pro/releases)
 [![Downloads](https://img.shields.io/github/downloads/nickotmazgin/clipflow-pro/total?label=downloads)](https://github.com/nickotmazgin/clipflow-pro/releases)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
@@ -27,10 +26,8 @@ Clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.githu
 
 ## Links
 
-- Install on extensions.gnome.org: https://extensions.gnome.org/extension/8793/clipflow-pro/
 - GitHub Releases: https://github.com/nickotmazgin/clipflow-pro/releases
 - Issues & Support: https://github.com/nickotmazgin/clipflow-pro/issues
-- EGO Review Guidelines: https://gjs.guide/extensions/review-guidelines/review-guidelines.html
 
 ## Installation (local dev)
 
@@ -42,12 +39,13 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 # Restart GNOME Shell: Alt+F2 → r → Enter
 ```
 
-## Packaging (extensions.gnome.org)
+## Packaging
 
-- Run `./package.sh` to produce two zips in `dist/`:
-  - 43–44 zip with `shell-version: ["43","44"]` (from build/metadata.json)
-  - 45–47 zip with `shell-version: ["45","46","47"]` (generated in a temp dir)
-- Upload both zips under the same UUID. EGO will serve the correct build automatically.
+- Run `./build-legacy.sh` to prepare a 43–44 build in `build-43-44/`.
+- Run `./create-release-zips.sh` to produce two zips in `dist/`:
+  - 43–44 zip with `shell-version: ["43","44"]`
+  - 45–47 zip with `shell-version: ["45","46","47"]`
+  - Publish the zips on the GitHub Releases page.
 
 ### Compliance notes (1.3.7)
 

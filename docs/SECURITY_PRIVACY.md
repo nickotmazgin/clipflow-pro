@@ -1,6 +1,6 @@
 # ClipFlow Pro - Security & Privacy Compliance
 
-This document outlines ClipFlow Pro's security and privacy practices for extensions.gnome.org review.
+This document outlines ClipFlow Pro's security and privacy practices.
 
 ## 🔒 Privacy Commitment
 
@@ -65,7 +65,7 @@ Ownership: User's uid/gid
 - ✅ No crash reporting
 - ✅ No external API calls
 - ✅ No cloud synchronization
-- ✅ No update checks (handled by extensions.gnome.org)
+- ✅ No update checks
 
 #### Verification
 ```bash
@@ -124,7 +124,7 @@ _filterEmpty entries
 - [x] No telemetry
 - [x] No analytics
 - [x] No external APIs
-- [x] No update mechanisms (delegated to extensions.gnome.org)
+- [x] No update mechanisms
 
 ### Code Security
 - [x] Input validation
@@ -227,7 +227,7 @@ grep -r "maxEntryLength" extension.js  # Should find validation
 **Response Time**: Within 48 hours
 **Disclosure Policy**: Responsible disclosure preferred
 
-## 🎯 Reviewer Notes for extensions.gnome.org
+## 🎯 Reviewer Notes
 
 ### Key Points
 1. **Zero Network Activity**: Verified via code review and testing
@@ -249,4 +249,4 @@ grep -r "maxEntryLength" extension.js  # Should find validation
 - ✅ Clear consent model
 - ✅ Easy data deletion
 
-This extension is designed with privacy and security as core principles, suitable for production use and extensions.gnome.org approval.
+This extension is designed with privacy and security as core principles, suitable for production use.

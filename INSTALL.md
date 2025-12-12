@@ -4,9 +4,7 @@ This guide provides detailed installation instructions for ClipFlow Pro on vario
 
 ## Quick Install
 
-### Method 1: From GNOME Extensions / extensions.gnome.org (Recommended)
-
-ClipFlow Pro is available on [extensions.gnome.org](https://extensions.gnome.org/extension/8793/clipflow-pro/) and can be installed through multiple ways:
+### Method 1: From GitHub Releases
 
 **Via GNOME Extensions App (System Extensions Manager):**
 1. Open **GNOME Extensions** app (search for "Extensions" in your application menu or Activities overview)
@@ -16,7 +14,7 @@ ClipFlow Pro is available on [extensions.gnome.org](https://extensions.gnome.org
 5. The extension will be automatically installed and enabled
 
 **Via Web Browser:**
-1. Visit [extensions.gnome.org/extension/8793/clipflow-pro/](https://extensions.gnome.org/extension/8793/clipflow-pro/)
+1. Visit the Releases page: https://github.com/nickotmazgin/clipflow-pro/releases
 2. Click the "Install" button
 3. Follow the on-screen instructions
 4. Enable the extension in GNOME Extensions app
@@ -85,14 +83,14 @@ The repository ships with a precompiled `schemas/gschemas.compiled` file. During
 
 > The commands below that start with `sudo` are only for installing missing build dependencies via your distro's package manager. The actual `make build`, `make install`, and `install.sh` steps never require elevated privileges—feel free to skip the dependency install commands if you already have the tools available or you are working inside a rootless development container.
 
-### Create a package for extensions.gnome.org
+### Create a package for distribution
 ```bash
 make dist   # Creates dist/clipflow-pro@nickotmazgin.github.io.zip
 # Or pack with the official tool from build/
 make pack
 ```
 
-Note: GNOME Shell extensions are not distributed as Flatpaks. Distribute via extensions.gnome.org or distro package repos.
+Note: GNOME Shell extensions are not distributed as Flatpaks.
 ### Ubuntu/Debian
 ```bash
 # Install dependencies
@@ -156,7 +154,7 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 **Note:** The extension is searchable and manageable through:
 - GNOME Extensions app (system extensions manager)
 - Command line tools (`gnome-extensions`)
-- extensions.gnome.org website
+ 
 
 ### Restart GNOME Shell
 - **Wayland**: Log out and back in

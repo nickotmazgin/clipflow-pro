@@ -255,7 +255,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
                         this._menuBuilt = true;
                     }
                     if (this._forceClassicList) {
-                        this._searchEntry?.clutter_text?.set_text?.('');
+                        if (this._searchEntry && this._searchEntry.clutter_text && this._searchEntry.clutter_text.set_text)
+                            this._searchEntry.clutter_text.set_text('');
                         this._lastSearchText = '';
                         // Rebuild entire menu to reflect latest history
                         this._buildMenu();
@@ -372,14 +373,14 @@ class ClipFlowIndicator extends PanelMenu.Button {
             container.set_spacing(px);
             return;
         }
-        const layout = container?.get_layout_manager?.();
+        const layout = container && container.get_layout_manager ? container.get_layout_manager() : null;
         if (layout && 'spacing' in layout)
             layout.spacing = px;
     }
 
     _addStyleClass(target, className) {
         const actor = this._resolveActor(target);
-        if (actor?.add_style_class_name) {
+        if (actor && actor.add_style_class_name) {
             actor.add_style_class_name(className);
         }
     }
@@ -390,9 +391,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return null;
         }
 
-        if (Main.uiGroup?.add_child) {
+        if (Main.uiGroup && Main.uiGroup.add_child) {
             Main.uiGroup.add_child(actor);
-        } else if (Main.uiGroup?.add_actor) {
+        } else if (Main.uiGroup && Main.uiGroup.add_actor) {
             Main.uiGroup.add_actor(actor);
         }
 
@@ -553,7 +554,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return;
         }
 
-        actor.hide?.();
+        if (actor && actor.hide) actor.hide();
         if (!actor.hide)
             actor.visible = false;
     }
@@ -739,7 +740,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                     return GLib.SOURCE_REMOVE;
                 }
                 const t = target();
-                if (t && global?.stage?.set_key_focus)
+                if (t && global && global.stage && global.stage.set_key_focus)
                     global.stage.set_key_focus(t);
             } catch (_e) {}
             attempts++;
@@ -776,7 +777,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
             if (actor._clipflowDestroyed) {
                 return;
             }
-            actor.destroy?.() ?? actor.actor?.destroy?.();
+            if (actor && actor.destroy) actor.destroy();
+            else if (actor && actor.actor && actor.actor.destroy) actor.actor.destroy();
             actor._clipflowDestroyed = true;
         } catch (error) {
             // Actor destroy failed
@@ -933,13 +935,13 @@ class ClipFlowIndicator extends PanelMenu.Button {
             x_expand: true,
             y_expand: true
         });
-        this._historyScrollView.set_margin_right?.(10);
-        this._historyScrollView.set_margin_bottom?.(8);
+        if (this._historyScrollView.set_margin_right) this._historyScrollView.set_margin_right(10);
+        if (this._historyScrollView.set_margin_bottom) this._historyScrollView.set_margin_bottom(8);
 
         if (St.PolicyType) {
-            this._historyScrollView.set_policy?.(St.PolicyType.NEVER, St.PolicyType.AUTOMATIC);
+            if (this._historyScrollView.set_policy) this._historyScrollView.set_policy(St.PolicyType.NEVER, St.PolicyType.AUTOMATIC);
         } else if (Clutter.PolicyType) {
-            this._historyScrollView.set_policy?.(Clutter.PolicyType.NEVER, Clutter.PolicyType.AUTOMATIC);
+            if (this._historyScrollView.set_policy) this._historyScrollView.set_policy(Clutter.PolicyType.NEVER, Clutter.PolicyType.AUTOMATIC);
         }
 
         this._historyContainer = new St.BoxLayout({
@@ -1190,7 +1192,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             this.menu.addMenuItem(mi);
             try {
                 const actor = mi.actor || mi;
-                actor.connect?.('button-release-event', (_a, ev) => {
+                if (actor && actor.connect) actor.connect('button-release-event', (_a, ev) => {
                     const button = ev.get_button ? ev.get_button() : 0;
                     if (button === 3) {
                         this._openHistoryItemContextMenu(item, actor);
@@ -1532,7 +1534,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
         
         this._searchEntry.add_style_class_name('clipflow-search');
         this._searchEntry.clutter_text.set_max_length(100);
-        this._searchEntry.clutter_text.set_single_line_mode?.(true);
+        if (this._searchEntry && this._searchEntry.clutter_text && this._searchEntry.clutter_text.set_single_line_mode)
+            this._searchEntry.clutter_text.set_single_line_mode(true);
         
         this._searchEntry.clutter_text.connect('text-changed', () => {
             this._searchHadInput = true;
@@ -1552,8 +1555,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
         // Ensure clicking focuses the entry so typing is captured (GNOME 43)
         try {
             this._searchEntry.connect('button-press-event', () => {
-                this._searchEntry.grab_key_focus?.();
-                if (global?.stage?.set_key_focus)
+                if (this._searchEntry && this._searchEntry.grab_key_focus) this._searchEntry.grab_key_focus();
+                if (global && global.stage && global.stage.set_key_focus)
                     global.stage.set_key_focus(this._searchEntry.clutter_text || this._searchEntry);
                 return Clutter.EVENT_STOP;
             });
@@ -1598,10 +1601,10 @@ class ClipFlowIndicator extends PanelMenu.Button {
             const row = new St.BoxLayout({ vertical: false });
             row.add_child(new St.Icon({ icon_name: 'open-menu-symbolic', icon_size: 12 }));
             row.add_child(new St.Label({ text: _('Actions') }));
-            menuButton.set_child?.(row) ?? (menuButton.child = row);
+            if (menuButton.set_child) menuButton.set_child(row); else menuButton.child = row;
         } catch (_e) {
             // Fallback to text label only if icon creation fails
-            menuButton.set_label?.(_('Actions'));
+            if (menuButton.set_label) menuButton.set_label(_('Actions'));
         }
         spacer.add_style_class_name('clipflow-action-spacer');
         buttonContainer.add_child(spacer);
@@ -1819,9 +1822,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
             add(_('Clear All'), () => this._clearAllHistory());
             add(_('Settings'), () => this._openSettings());
             menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-            add(_('Export'), () => this._exportHistoryToDesktop?.());
-            add(_('Import'), () => this._importHistoryFromDesktop?.());
-            add(_('Purge Duplicates'), () => this._purgeDuplicates?.());
+            add(_('Export'), () => this._exportHistoryToDesktop());
+            add(_('Import'), () => this._importHistoryFromDesktop());
+            add(_('Purge Duplicates'), () => this._purgeDuplicates());
 
             const togglePrimaryLabel = this._settings.get_boolean('capture-primary') ? _('Disable Capture PRIMARY') : _('Enable Capture PRIMARY');
             add(togglePrimaryLabel, () => {
@@ -1866,7 +1869,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         if (this._paginationBox.set_spacing) {
             this._paginationBox.set_spacing(8);
         } else {
-            const layout = this._paginationBox.get_layout_manager?.();
+            const layout = this._paginationBox && this._paginationBox.get_layout_manager ? this._paginationBox.get_layout_manager() : null;
             if (layout && 'spacing' in layout)
                 layout.spacing = 8;
         }
@@ -2456,7 +2459,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             }
 
             const display = global.display;
-            if (!display?.get_selection) {
+            if (!(display && display.get_selection)) {
                 console.warn('ClipFlow Pro: Display does not support get_selection()');
                 return;
             }
@@ -2655,7 +2658,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             }
         } catch (e) {
             // Only log error type, not message which might contain sensitive data
-            const errorType = e?.name || e?.constructor?.name || 'Error';
+        const errorType = (e && (e.name || (e.constructor && e.constructor.name))) || 'Error';
             console.error(`ClipFlow Pro: Error checking clipboard (${source}): ${errorType} - ${e.message}`);
             this._logThrottled('clipboard-check-error', `ClipFlow Pro: Error checking clipboard: ${errorType}`);
             this._scheduleClipboardRetry('clipboard-check-error');
@@ -2732,7 +2735,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             });
         } catch (error) {
             // Only log error type, not message which might contain sensitive data
-            const errorType = error?.name || error?.constructor?.name || 'Error';
+            const errorType = (error && (error.name || (error.constructor && error.constructor.name))) || 'Error';
             console.error(`ClipFlow Pro: get_text exception for ${sourceLabel}: ${errorType} - ${error.message}`);
             this._logThrottled(`clipboard-get-text-${sourceLabel}`, `ClipFlow Pro: get_text error for ${sourceLabel}: ${errorType}`);
             this._fallbackFetchClipboardText(clipboardType, sourceLabel, handleResult);
@@ -2779,7 +2782,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             this._clipboard.get_content(clipboardType, mimetype, (_clip, bytes) => {
                 try {
                     let decoded = '';
-                    const byteSize = bytes?.get_size?.() ?? 0;
+                    const byteSize = (bytes && bytes.get_size ? bytes.get_size() : 0);
                     cfpLog(`ClipFlow Pro: get_content returned ${byteSize} bytes for ${mimetype} (${sourceLabel})`);
                     if (bytes && byteSize > 0) {
                         decoded = this._decodeClipboardBytes(bytes, mimetype);
@@ -2803,8 +2806,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
     _isLikelyScreenshotApp() {
         const tracker = Shell.WindowTracker.get_default();
-        const app = tracker?.focus_app;
-        const id = (app?.get_id?.() || app?.get_name?.() || '') || '';
+        const app = tracker ? tracker.focus_app : null;
+        const id = app ? ((app.get_id && app.get_id()) || (app.get_name && app.get_name()) || '') : '';
         const nid = id.toLowerCase();
         return nid.includes('screenshot') || nid.includes('flameshot') || nid.includes('shutter') || nid.includes('ksnip');
     }
@@ -2879,7 +2882,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         try {
             const tracker = Shell.WindowTracker.get_default();
             const app = tracker && tracker.focus_app ? tracker.focus_app : null;
-            const appName = app ? (app.get_name?.() || app.get_id?.() || '') : '';
+            const appName = app ? ((app.get_name && app.get_name()) || (app.get_id && app.get_id()) || '') : '';
             const ignoreRaw = this._safeGetString('ignore-apps', '');
             if (ignoreRaw && appName) {
                 const list = ignoreRaw.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
@@ -3000,7 +3003,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             };
 
             try {
-                if (Main.wm?.addKeybinding) {
+                if (Main.wm && Main.wm.addKeybinding) {
                     const success = Main.wm.addKeybinding(
                         name,
                         this._settings,
@@ -3049,13 +3052,13 @@ class ClipFlowIndicator extends PanelMenu.Button {
         }
 
         for (const [name, method] of this._keybindingRegistrations.entries()) {
-            if (method === 'wm' && Main.wm?.removeKeybinding) {
+            if (method === 'wm' && Main.wm && Main.wm.removeKeybinding) {
                 Main.wm.removeKeybinding(name);
-            } else if (method === 'display' && global.display?.remove_keybinding) {
+            } else if (method === 'display' && global.display && global.display.remove_keybinding) {
                 global.display.remove_keybinding(name);
-            } else if (Main.wm?.removeKeybinding) {
+            } else if (Main.wm && Main.wm.removeKeybinding) {
                 Main.wm.removeKeybinding(name);
-            } else if (global.display?.remove_keybinding) {
+            } else if (global.display && global.display.remove_keybinding) {
                 global.display.remove_keybinding(name);
             }
         }
@@ -3374,10 +3377,10 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 const checkId = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 120, () => {
                     try {
                         if (this._forceClassicList || this._autoFallbackApplied) return GLib.SOURCE_REMOVE;
-                        const kids = this._historyContainer?.get_children?.() || [];
+                        const kids = (this._historyContainer && this._historyContainer.get_children ? this._historyContainer.get_children() : []) || [];
                         if (kids.length > 0) {
                             const first = kids[0];
-                            const box = first.get_allocation_box?.();
+                            const box = first && first.get_allocation_box ? first.get_allocation_box() : null;
                             const h = box ? Math.max(0, (box.y2 - box.y1)) : (first.height ?? 0);
                             if (h <= 2) {
                                 this._autoFallbackApplied = true;
@@ -3389,7 +3392,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                     } catch (_e) {}
                     return GLib.SOURCE_REMOVE;
                 });
-                this._deferredSourceIds?.add?.(checkId);
+                if (this._deferredSourceIds && this._deferredSourceIds.add) this._deferredSourceIds.add(checkId);
             }
         } catch (_e) {}
 
@@ -3416,9 +3419,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
         const className = 'clipflow-scrollbar-hidden';
         if (hidden) {
-            this._historyScrollView.add_style_class_name?.(className);
+            if (this._historyScrollView && this._historyScrollView.add_style_class_name) this._historyScrollView.add_style_class_name(className);
         } else {
-            this._historyScrollView.remove_style_class_name?.(className);
+            if (this._historyScrollView && this._historyScrollView.remove_style_class_name) this._historyScrollView.remove_style_class_name(className);
         }
 
         const policyEnum = St.PolicyType ?? Clutter.PolicyType;
@@ -3515,7 +3518,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             }
         });
 
-        this._historyContainer.remove_all_children?.();
+        if (this._historyContainer && this._historyContainer.remove_all_children) this._historyContainer.remove_all_children();
         
         const childrenAfter = this._historyContainer.get_children ? this._historyContainer.get_children().length : 0;
         cfpLog(`ClipFlow Pro: Container cleared (children after: ${childrenAfter})`);
@@ -3558,7 +3561,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
     _getSearchText() {
         if (!this._searchEntry)
             return '';
-        return this._searchEntry.get_text?.() || '';
+        return (this._searchEntry && this._searchEntry.get_text ? this._searchEntry.get_text() : '') || '';
         if (typeof this._searchEntry.text === 'string')
             return this._searchEntry.text || '';
         if (this._searchEntry.clutter_text && typeof this._searchEntry.clutter_text.get_text === 'function')
@@ -3809,7 +3812,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         const mi = new PopupMenu.PopupMenuItem(labelText);
         mi.connect('activate', () => this._activateHistoryItem(item));
         // Context menu on right click
-        mi.actor.connect?.('button-release-event', (_actor, event) => {
+        if (mi && mi.actor && mi.actor.connect) mi.actor.connect('button-release-event', (_actor, event) => {
             const button = event.get_button ? event.get_button() : 0;
             if (button === 3) {
                 this._openHistoryItemContextMenu(item, mi.actor);
@@ -3958,8 +3961,10 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 style_class: 'clipflow-history-text',
                 x_expand: true
             });
-            textLabel.clutter_text?.set_line_wrap(true);
-            textLabel.clutter_text?.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
+            if (textLabel.clutter_text) {
+                textLabel.clutter_text.set_line_wrap(true);
+                textLabel.clutter_text.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
+            }
             contentBox.add_child(textLabel);
         }
 
@@ -3976,8 +3981,10 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 style_class: 'clipflow-history-text',
                 x_expand: true
             });
-            fallbackLabel.clutter_text?.set_line_wrap(true);
-            fallbackLabel.clutter_text?.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
+            if (fallbackLabel.clutter_text) {
+                fallbackLabel.clutter_text.set_line_wrap(true);
+                fallbackLabel.clutter_text.set_line_wrap_mode(Pango.WrapMode.WORD_CHAR);
+            }
             contentBox.add_child(fallbackLabel);
         }
 
@@ -4083,8 +4090,10 @@ class ClipFlowIndicator extends PanelMenu.Button {
             x_expand: false,
             y_expand: false
         });
-        label.clutter_text?.set_single_line_mode(true);
-        label.clutter_text?.set_ellipsize(Pango.EllipsizeMode.END);
+        if (label.clutter_text) {
+            label.clutter_text.set_single_line_mode(true);
+            label.clutter_text.set_ellipsize(Pango.EllipsizeMode.END);
+        }
         return label;
     }
 
@@ -4264,7 +4273,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
     _openPreferencesTab(target = 'general') {
         try {
             this._setPrefsTarget(target);
-            Main.extensionManager?.openExtensionPrefs?.(UUID, '', null);
+            if (Main.extensionManager && Main.extensionManager.openExtensionPrefs)
+                Main.extensionManager.openExtensionPrefs(UUID, '', null);
         } catch (e) {
             Main.notify('ClipFlow Pro', _('Settings not available'));
         }
@@ -4559,7 +4569,7 @@ function _attachIndicatorWithFallback(preferred) {
                         if (!indicator) {
                             return GLib.SOURCE_REMOVE;
                         }
-                        const hasParent = Boolean(indicator.get_parent?.() || indicator.actor?.get_parent?.());
+                        const hasParent = Boolean((indicator.get_parent && indicator.get_parent()) || (indicator.actor && indicator.actor.get_parent && indicator.actor.get_parent()));
                         if (!hasParent && indicator._createIcon) {
                             indicator._createIcon();
                         }

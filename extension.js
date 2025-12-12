@@ -315,7 +315,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
         // Remove existing icon if we're rebuilding
         if (this._icon) {
             const parent = this._icon.get_parent();
-            parent?.remove_child?.(this._icon);
+            if (parent && parent.remove_child)
+                parent.remove_child(this._icon);
             this._icon.destroy();
             this._icon = null;
         }
@@ -325,7 +326,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
         const icon = this._addIndicatorIcon();
         this._icon = icon;
 
-        (this.add_child ?? this.actor?.add_child ?? this.add_actor)?.call(this.actor ?? this, icon);
+        if (this.add_child) this.add_child(icon);
+        else if (this.actor && this.actor.add_child) this.actor.add_child(icon);
+        else if (this.add_actor) this.add_actor(icon);
 
         this._updateIconState();
     }
@@ -1190,7 +1193,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             this.menu.addMenuItem(mi);
             try {
                 const actor = mi.actor || mi;
-                actor.connect?.('button-release-event', (_a, ev) => {
+                if (actor && actor.connect) actor.connect('button-release-event', (_a, ev) => {
                     const button = ev.get_button ? ev.get_button() : 0;
                     if (button === 3) {
                         this._openHistoryItemContextMenu(item, actor);
@@ -1215,8 +1218,10 @@ class ClipFlowIndicator extends PanelMenu.Button {
             row.add_child(num);
         }
         const textLabel = new St.Label({ text, style_class: 'clipflow-history-text', x_expand: true });
-        textLabel.clutter_text?.set_single_line_mode(true);
-        textLabel.clutter_text?.set_ellipsize(Pango.EllipsizeMode.END);
+        if (textLabel.clutter_text) {
+            textLabel.clutter_text.set_single_line_mode(true);
+            textLabel.clutter_text.set_ellipsize(Pango.EllipsizeMode.END);
+        }
         row.add_child(textLabel);
         if (showTimestamps) {
             const ts = this._createTimestampLabel(item);
@@ -1234,13 +1239,14 @@ class ClipFlowIndicator extends PanelMenu.Button {
         actions.add_child(mkIconBtn('edit-copy-symbolic', () => this._copyToClipboard(item.text)));
         actions.add_child(mkIconBtn('open-menu-symbolic', () => this._openHistoryItemContextMenu(item, rowItem.actor || rowItem)));
         row.add_child(actions);
-        (rowItem.actor || rowItem).connect?.('button-release-event', (_a, ev) => {
+        const rowActor = rowItem.actor || rowItem;
+        if (rowActor && rowActor.connect) rowActor.connect('button-release-event', (_a, ev) => {
             const button = ev.get_button ? ev.get_button() : 0;
             if (button === 1) { this._activateHistoryItem(item); return Clutter.EVENT_STOP; }
             if (button === 3) { this._openHistoryItemContextMenu(item, rowItem.actor || rowItem); return Clutter.EVENT_STOP; }
             return Clutter.EVENT_PROPAGATE;
         });
-        if (rowItem.actor?.add_child) rowItem.actor.add_child(row); else rowItem.add_child?.(row);
+        if (rowItem.actor && rowItem.actor.add_child) rowItem.actor.add_child(row); else if (rowItem.add_child) rowItem.add_child(row);
         this.menu.addMenuItem(rowItem);
         cfpLog('ClipFlow Pro: Classic row added (with actions)');
     }
@@ -2346,43 +2352,12 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _obtainClipboardInterface() {
-        const candidates = [];
-        const isWayland = Meta?.is_wayland_compositor?.();
-
-        // For GNOME 43 Wayland, try multiple methods more aggressively
-        if (St?.Clipboard?.get_for_display && global?.display) {
-            // Try this first on Wayland
-            candidates.push(() => St.Clipboard.get_for_display(global.display));
+        // Simplified per reviewer feedback: use default St.Clipboard
+        try {
+            return St.Clipboard.get_default();
+        } catch (_e) {
+            return null;
         }
-
-        if (St?.Clipboard?.get_default) {
-            candidates.push(() => St.Clipboard.get_default());
-        }
-
-        // Gtk.* is not allowed in Shell process; do not use Gtk.Clipboard fallbacks
-
-        // Try direct access via global.display for Wayland compatibility
-        if (global?.display && St?.Clipboard?.get_for_display) {
-            const clipboard = St.Clipboard.get_for_display(global.display);
-            if (clipboard && (clipboard.get_text || clipboard.get_content)) {
-                cfpLog('ClipFlow Pro: Obtained clipboard via get_for_display (Wayland)');
-                return clipboard;
-            }
-        }
-
-        for (const getClipboard of candidates) {
-            const clipboard = getClipboard();
-            if (clipboard && (clipboard.get_text || clipboard.get_content)) {
-                cfpLog(`ClipFlow Pro: Obtained clipboard interface (Wayland: ${isWayland})`);
-                return clipboard;
-            }
-        }
-        
-        console.error(`ClipFlow Pro: Failed to obtain clipboard interface (Wayland: ${isWayland})`);
-        if (isWayland) {
-            console.error('ClipFlow Pro: GNOME 43 Wayland has known clipboard API limitations. Consider using X11 session.');
-        }
-        return null;
     }
 
     _scheduleClipboardRetry(reason = 'unknown') {
@@ -3809,7 +3784,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         const mi = new PopupMenu.PopupMenuItem(labelText);
         mi.connect('activate', () => this._activateHistoryItem(item));
         // Context menu on right click
-        mi.actor.connect?.('button-release-event', (_actor, event) => {
+        if (mi && mi.actor && mi.actor.connect) mi.actor.connect('button-release-event', (_actor, event) => {
             const button = event.get_button ? event.get_button() : 0;
             if (button === 3) {
                 this._openHistoryItemContextMenu(item, mi.actor);

@@ -26,16 +26,16 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 # Restart GNOME Shell: Alt+F2 → r → Enter
 ```
 
-## Packaging (extensions.gnome.org)
+## Packaging
 
-- Run `./package.sh` to produce two zips in `dist/`:
-  - 43–44 zip with `shell-version: ["43","44"]` (from build/metadata.json)
-  - 45–47 zip with `shell-version: ["45","46","47"]` (generated in a temp dir)
-- Upload both zips under the same UUID. EGO will serve the correct build automatically.
+- Run `./build-legacy.sh` to prepare a 43–44 build in `build-43-44/`.
+- Run `./create-release-zips.sh` to produce two zips in `dist/`:
+  - 43–44 zip with `shell-version: ["43","44"]`
+  - 45–47 zip with `shell-version: ["45","46","47"]`
+  - Publish the zips on the GitHub Releases page.
 
-### Compliance notes (1.3.4)
+### Notes
 
-- Removed `stylesheet` from `metadata.json` (EGO guideline)
 - No Gtk imports in the shell process
 - No spawn-based clipboard fallbacks (xclip/xsel removed)
 - History and import use async reads via `Gio.File.load_contents_async`

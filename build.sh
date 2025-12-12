@@ -36,7 +36,7 @@ echo "Preparing GSettings schemas (XML only) ..."
 if [[ -d "${SCHEMAS_DIR}" ]]; then
     mkdir -p "${BUILD_DIR}/schemas"
     cp "${SCHEMAS_DIR}"/*.xml "${BUILD_DIR}/schemas/"
-    # Do NOT ship gschemas.compiled to EGO
+    # Do NOT ship gschemas.compiled
     rm -f "${BUILD_DIR}/schemas/gschemas.compiled" 2>/dev/null || true
 else
     echo "Warning: schemas directory not found; settings will not work." >&2

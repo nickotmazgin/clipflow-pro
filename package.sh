@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ClipFlow Pro - Package script
-# Produces EGO-compliant zips for GNOME 43–44 and 45–47 without bumping version.
+# Produces zips for GNOME 43–44 and 45–47 without bumping version.
 
 set -euo pipefail
 

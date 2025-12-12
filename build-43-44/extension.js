@@ -316,7 +316,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         // Remove existing icon if we're rebuilding
         if (this._icon) {
             const parent = this._icon.get_parent();
-            if (parent && parent.remove_child) parent.remove_child(this._icon);
+            parent?.remove_child?.(this._icon);
             this._icon.destroy();
             this._icon = null;
         }
@@ -326,9 +326,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         const icon = this._addIndicatorIcon();
         this._icon = icon;
 
-        if (this.add_child) this.add_child(icon);
-        else if (this.actor && this.actor.add_child) this.actor.add_child(icon);
-        else if (this.add_actor) this.add_actor(icon);
+        (this.add_child ?? this.actor?.add_child ?? this.add_actor)?.call(this.actor ?? this, icon);
 
         this._updateIconState();
     }
@@ -363,7 +361,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             p.add_actor(c);
             return true;
         }
-        if (p.actor && p.actor.add_child) {
+        if (p.actor?.add_child) {
             p.actor.add_child(c);
             return true;
         }
@@ -371,7 +369,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _safeSetSpacing(container, px) {
-        if (container && container.set_spacing) {
+        if (container?.set_spacing) {
             container.set_spacing(px);
             return;
         }
@@ -441,7 +439,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         }
 
         // GLib.Bytes or similar object with toArray(): decode as UTF‑8
-        if (value && value.toArray) {
+        if (value?.toArray) {
             const u8 = Uint8Array.from(value.toArray());
             return new TextDecoder('utf-8').decode(u8);
         }
@@ -468,7 +466,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         try {
             if (typeof bytes === 'string') {
                 text = bytes;
-            } else if (bytes && bytes.get_data && bytes.get_size) {
+            } else if (bytes?.get_data && bytes?.get_size) {
                 // GLib.Bytes object: use get_data() and get_size()
                 const size = bytes.get_size();
                 if (size > 0) {
@@ -478,7 +476,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                         text = new TextDecoder('utf-8').decode(u8);
                     }
                 }
-            } else if (bytes && bytes.toArray) {
+            } else if (bytes?.toArray) {
                 const u8 = Uint8Array.from(bytes.toArray());
                 text = new TextDecoder('utf-8').decode(u8);
             } else if (bytes instanceof Uint8Array) {
@@ -580,7 +578,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         const panel = Main.panel;
         if (!panel) return 16;
         const height = typeof panel.height === 'number' ? panel.height : 24;
-        const scale = (global.display && global.display.get_monitor_scale)
+        const scale = global.display?.get_monitor_scale
             ? global.display.get_monitor_scale(global.display.get_primary_monitor())
             : 1;
         const size = Math.max(12, Math.min(24, Math.round(height * 0.8 * scale)));
@@ -1173,7 +1171,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
     _addClassicRowWithActions(item, displayIndex, opts) {
         // Simplify Classic rows on GNOME 43: rely on native PopupMenu items only
         try {
-            const showNumbers = !!(opts && opts.showNumbers);
+            const showNumbers = !!opts?.showNumbers;
             const baseText = this._safeHistoryText(item) || item.preview || _('(Empty entry)');
             const text = this._truncateText(baseText, 60);
             // Append concise timestamp to label when available
@@ -1207,9 +1205,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return;
         } catch (_e) {}
 
-        const showNumbers = !!(opts && opts.showNumbers);
-        const showPreview = !!(opts && opts.showPreview);
-        const showTimestamps = !!(opts && opts.showTimestamps);
+        const showNumbers = !!opts?.showNumbers;
+        const showPreview = !!opts?.showPreview;
+        const showTimestamps = !!opts?.showTimestamps;
         const base = showPreview ? (this._safeHistoryText(item) || _('(Empty entry)')) : (item.preview || this._safeHistoryText(item) || _('(Empty entry)'));
         const text = this._truncateText(base, 200);
         const rowItem = new PopupMenu.PopupBaseMenuItem({ reactive: true, can_focus: true });
@@ -1219,10 +1217,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
             row.add_child(num);
         }
         const textLabel = new St.Label({ text, style_class: 'clipflow-history-text', x_expand: true });
-        if (textLabel.clutter_text) {
-            textLabel.clutter_text.set_single_line_mode(true);
-            textLabel.clutter_text.set_ellipsize(Pango.EllipsizeMode.END);
-        }
+        textLabel.clutter_text?.set_single_line_mode(true);
+        textLabel.clutter_text?.set_ellipsize(Pango.EllipsizeMode.END);
         row.add_child(textLabel);
         if (showTimestamps) {
             const ts = this._createTimestampLabel(item);
@@ -1240,14 +1236,13 @@ class ClipFlowIndicator extends PanelMenu.Button {
         actions.add_child(mkIconBtn('edit-copy-symbolic', () => this._copyToClipboard(item.text)));
         actions.add_child(mkIconBtn('open-menu-symbolic', () => this._openHistoryItemContextMenu(item, rowItem.actor || rowItem)));
         row.add_child(actions);
-        const rowActor2 = (rowItem.actor || rowItem);
-        if (rowActor2 && rowActor2.connect) rowActor2.connect('button-release-event', (_a, ev) => {
+        (rowItem.actor || rowItem).connect?.('button-release-event', (_a, ev) => {
             const button = ev.get_button ? ev.get_button() : 0;
             if (button === 1) { this._activateHistoryItem(item); return Clutter.EVENT_STOP; }
             if (button === 3) { this._openHistoryItemContextMenu(item, rowItem.actor || rowItem); return Clutter.EVENT_STOP; }
             return Clutter.EVENT_PROPAGATE;
         });
-        if (rowItem.actor && rowItem.actor.add_child) rowItem.actor.add_child(row); else if (rowItem.add_child) rowItem.add_child(row);
+        if (rowItem.actor?.add_child) rowItem.actor.add_child(row); else rowItem.add_child?.(row);
         this.menu.addMenuItem(rowItem);
         cfpLog('ClipFlow Pro: Classic row added (with actions)');
     }
@@ -1368,8 +1363,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
                     this._scheduleIdle(() => {
                         try {
                             const target = this._searchEntry.clutter_text || this._searchEntry;
-                            if (this._searchEntry && this._searchEntry.grab_key_focus) this._searchEntry.grab_key_focus();
-                            if (global && global.stage && global.stage.set_key_focus) global.stage.set_key_focus(target);
+                            this._searchEntry.grab_key_focus?.();
+                            global?.stage?.set_key_focus?.(target);
                         } catch (_e) {}
                         return GLib.SOURCE_REMOVE;
                     });
@@ -1387,10 +1382,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _syncContextMenuToggles() {
-        if (this._contextMenuNotificationItem && this._contextMenuNotificationItem.setToggleState)
-            this._contextMenuNotificationItem.setToggleState(
-                this._settings.get_boolean('show-copy-notifications')
-            );
+        this._contextMenuNotificationItem?.setToggleState?.(
+            this._settings.get_boolean('show-copy-notifications')
+        );
     }
 
     _populateContextMenuRecentEntries() {
@@ -1400,7 +1394,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
         if (this._contextMenuRecentSection.removeAll) {
             this._contextMenuRecentSection.removeAll();
-        } else if (this._contextMenuRecentSection.actor && this._contextMenuRecentSection.actor.destroy_all_children) {
+        } else if (this._contextMenuRecentSection.actor?.destroy_all_children) {
             this._contextMenuRecentSection.actor.destroy_all_children();
         }
 
@@ -1452,8 +1446,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
     _applyContextMenuItemStyle(menuItem) {
         if (!menuItem)
             return;
-        if (menuItem.add_style_class_name) menuItem.add_style_class_name('clipflow-context-item');
-        if (menuItem.actor && menuItem.actor.add_style_class_name) menuItem.actor.add_style_class_name('clipflow-context-item');
+        menuItem.add_style_class_name?.('clipflow-context-item');
+        menuItem.actor?.add_style_class_name?.('clipflow-context-item');
     }
 
     _openContextMenu() {
@@ -1525,7 +1519,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         if (searchContainer.set_spacing) {
             searchContainer.set_spacing(8);
         } else {
-            const layout = searchContainer && searchContainer.get_layout_manager ? searchContainer.get_layout_manager() : null;
+            const layout = searchContainer.get_layout_manager?.();
             if (layout && 'spacing' in layout)
                 layout.spacing = 8;
         }
@@ -1715,7 +1709,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                     if (!ok || !bytes) { Main.notify('ClipFlow Pro', _('Import failed.')); return; }
                     let jsonText = '';
                     if (typeof bytes === 'string') jsonText = bytes;
-                    else if (bytes && bytes.toArray) jsonText = new TextDecoder('utf-8').decode(Uint8Array.from(bytes.toArray()));
+                    else if (bytes?.toArray) jsonText = new TextDecoder('utf-8').decode(Uint8Array.from(bytes.toArray()));
                     else if (bytes instanceof Uint8Array) jsonText = new TextDecoder('utf-8').decode(bytes);
                     if (!jsonText) { Main.notify('ClipFlow Pro', _('Import failed.')); return; }
                     const parsed = JSON.parse(jsonText);
@@ -2004,7 +1998,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
                     if (typeof contents === 'string') {
                         raw = contents;
-                    } else if (contents && contents.toArray) {
+                    } else if (contents?.toArray) {
                         raw = new TextDecoder('utf-8').decode(Uint8Array.from(contents.toArray()));
                     } else if (contents instanceof Uint8Array) {
                         raw = new TextDecoder('utf-8').decode(contents);

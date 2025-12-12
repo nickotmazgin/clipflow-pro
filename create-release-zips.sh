@@ -44,6 +44,8 @@ trap "rm -rf '${TMP45}'" EXIT
 cp "${ROOT_DIR}/stylesheet.css" "${ROOT_DIR}/LICENSE" "${TMP45}/"
 cp "${ROOT_DIR}/extension-esm.js" "${TMP45}/extension.js"
 cp "${ROOT_DIR}/extension.js" "${TMP45}/legacy.js"
+# Make legacy runtime an ES module by exporting hooks
+printf '\nexport { enable, disable };\n' >> "${TMP45}/legacy.js"
 cp "${ROOT_DIR}/prefs-es6.js" "${TMP45}/prefs.js"
 cp -r "${ROOT_DIR}/icons" "${ROOT_DIR}/schemas" "${TMP45}/" 2>/dev/null || true
 cp "${ROOT_DIR}/metadata.json" "${TMP45}/metadata.json"

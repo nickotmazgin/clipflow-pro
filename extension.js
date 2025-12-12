@@ -10,17 +10,17 @@ const Me = ExtensionUtils.getCurrentExtension();
 const _ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
 
 // Gate verbose logs behind a runtime flag controlled by settings
+// For security and to satisfy static analysis, do not emit console logs.
 globalThis.__CFP_DEBUG = false;
-const _console = globalThis.console;
-const console = {
-    log: (...args) => { if (globalThis.__CFP_DEBUG && _console && _console.log) _console.log(...args); },
-    warn: (...args) => { if (globalThis.__CFP_DEBUG && _console && _console.warn) _console.warn(...args); },
-    error: (...args) => { if (globalThis.__CFP_DEBUG && _console && _console.error) _console.error(...args); },
+const cfpLogger = {
+    log: (..._args) => {},
+    warn: (..._args) => {},
+    error: (..._args) => {},
 };
-function cfpLog(...args) {
-    if (globalThis.__CFP_DEBUG)
-        console.log(...args);
-}
+// Keep legacy helper as a no-op
+function cfpLog(..._args) {}
+// Alias to preserve existing calls without producing output
+const console = cfpLogger;
 
 const HISTORY_LIMIT_MIN = 10;
 const HISTORY_LIMIT_MAX = 100;

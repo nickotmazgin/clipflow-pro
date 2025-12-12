@@ -8,7 +8,7 @@
 ## 1.3.5 — 2025-12-06
 
 - Docs: new tricolor gradient collage (1992×1992)
-- README: EGO badge + links; Quick Start section; badges
+- README: badges and links; Quick Start section
 - Packaging: script enforces correct shell-version per zip
 - No code changes since 1.3.4 (UI/features unchanged)
 
@@ -16,7 +16,7 @@
 
 - UI: Unified Actions submenu (Sort/Filter inside; toggles for Capture PRIMARY / Pause Monitoring)
 - Import/Export: folder preference + full-fidelity import (pinned/starred/timestamps)
-- EGO compliance: async file reads in shell process; logs gated by setting; no spawn fallbacks
+- Compliance: async file reads in shell process; logs gated by setting; no spawn fallbacks
 - Packaging: added package.sh; dual zips (43–44, 45–47); XML schemas only
 - Screenshots: updated to 1.3.4 with new collage
 
@@ -45,7 +45,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - UI: Removed duplicate menu title header.
 - UI: Pinned chip strip now capped (max 6 chips).
 - Stability: Capped clipboard MIME fallback probing; added screenshot-app heuristic to avoid stalls during captures.
-- Packaging: Added 43–44 build scripts; kept EGO‑friendly schema handling (no compiled schemas in zips).
+- Packaging: Added 43–44 build scripts; kept zip schema handling (no compiled schemas in zips).
 
 ### Refinements (no version bump)
 - Bottom actions consolidated into a single “Actions” button that opens a compact popup (Clear, Settings, Export/Import, Purge, toggle PRIMARY; classic also includes Pin top/Unpin/Use Enhanced)
@@ -133,7 +133,7 @@ _No changes yet._
 ## [1.2.10] - 2025-11-17
 
 ### Changed
-- Removed `schemas/gschemas.compiled` from EGO package for GNOME 45+.
+- Removed `schemas/gschemas.compiled` from packages for GNOME 45+.
 - Removed ExtensionUtils usage in ESM (no `Me`, settings passed from Extension; prefs opened via `Main.extensionManager.openExtensionPrefs`).
 - Prefs: use `destroy()` + `super.destroy()`, removed noisy self-check and Me access, simplified 45+ window API.
 - Logging: replaced `log()` with `console.*`; `console.debug()` only when debug enabled.
@@ -151,7 +151,7 @@ _No changes yet._
 - Preferences About list: replaced Unicode bullets with ASCII dashes.
 
 ### Notes
-- No functional changes; packaging and EGO validation unchanged.
+- No functional changes; packaging validation unchanged.
 
 ---
 
@@ -161,11 +161,11 @@ _No changes yet._
 - Ensure Extension subclass constructor(metadata) calls super(metadata) for GNOME 45+ ESM runtime.
 
 ### Added
-- EGO packaging validator and Makefile target (`make ego-validate`) to lint zip structure and metadata.
-- GitHub issue templates: EGO Review Feedback and Release Checklist.
+- Packaging validation target previously available was removed in favor of CI linters.
+- GitHub issue templates: Review Feedback and Release Checklist.
 
 ### Changed
-- Packaging Makefile consolidated around flat EGO zip + source zip and updated README developer tooling.
+- Packaging Makefile consolidated around flat zip + source zip and updated README developer tooling.
 
 ---
 
@@ -216,7 +216,7 @@ _No changes yet._
 
 ### Changed
 - Compact mode inherits the lighter backgrounds, borders, and spacing from the original layout while keeping the new empty-state/scroll fixes.
-- Release packaging now ships the extension inside the UUID directory with only compiled locale assets, aligning with extensions.gnome.org requirements.
+- Release packaging now ships the extension inside the UUID directory with only compiled locale assets, aligning with best practices.
 
 ---
 
@@ -443,7 +443,7 @@ ClipFlow Pro is licensed under the [GPL-3.0-or-later](LICENSE) license.
 ## 1.3.0 — Unified Classic+ and Enhanced, GNOME 43–47
 
 - One UUID across releases: `clipflow-pro@nickotmazgin.github.io`
-- Two zips for EGO (same UUID):
+- Two zips (same UUID):
   - GNOME 43–44 (legacy GJS) — Classic+ default
   - GNOME 45–47 (ESM) — Enhanced default
 - Classic+ (both builds):
@@ -466,4 +466,4 @@ ClipFlow Pro is licensed under the [GPL-3.0-or-later](LICENSE) license.
 - Fix (43–44): gjs syntax in panel watcher; removed duplicate schema keys in GSettings
 - Compliance: no Gtk in shell process; no spawn; async file reads; logs gated by setting
 - Packaging: corrected dual zips (43–44, 45–47); metadata stamped per build; added build-modern.sh; improved create-release-zips.sh
-- Docs: README and EGO release notes updated
+- Docs: README and release notes updated

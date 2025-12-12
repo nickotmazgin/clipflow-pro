@@ -36,7 +36,7 @@ git push origin :refs/tags/v1.2.6
 - Flat zip: `make pack` or `make dist` → `dist/clipflow-pro@nickotmazgin.github.io.shell-extension.zip`
 - Source zip: `dist/clipflow-pro-source.zip`
 
-## GNOME Extensions upload
+## Distribution
 
-- Upload the flat zip (`*.shell-extension.zip`).
-- Release notes should include tested shell versions and ESM migration.
+- Publish zips on the GitHub Releases page.
+- Include tested shell versions in release notes.

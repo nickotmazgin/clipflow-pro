@@ -47,7 +47,7 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
   - 45–47 zip with `shell-version: ["45","46","47"]`
   - Publish the zips on the GitHub Releases page.
 
-### Compliance notes (1.3.7)
+### Compliance notes (1.3.8)
 
 - No Gtk imports in the shell process (extension.js)
 - No spawn usage; GNOME Shell APIs only for clipboard

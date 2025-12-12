@@ -467,3 +467,9 @@ ClipFlow Pro is licensed under the [GPL-3.0-or-later](LICENSE) license.
 - Compliance: no Gtk in shell process; no spawn; async file reads; logs gated by setting
 - Packaging: corrected dual zips (43–44, 45–47); metadata stamped per build; added build-modern.sh; improved create-release-zips.sh
 - Docs: README and release notes updated
+## 1.3.9 — 2025-12-12
+
+- 45–47: ES Module entry (Extension) with packaged ESM runtime wrapper (no external marketplaces referenced)
+- Code quality: further pruning of optional chaining on stable GNOME APIs; simplified clipboard access via St.Clipboard.get_default()
+- Packaging: 45–47 zip ships ESM `extension.js` + `prefs.js`; 43–44 zip unchanged
+- Docs: README/INSTALL/MAINTENANCE updated; neutral distribution language

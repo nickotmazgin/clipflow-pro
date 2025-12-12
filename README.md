@@ -1,6 +1,6 @@
 # ClipFlow Pro
 
-[What’s New in 1.3.8](CHANGELOG.md)
+[What’s New in 1.3.9](CHANGELOG.md)
 
 [![Release](https://img.shields.io/github/v/release/nickotmazgin/clipflow-pro)](https://github.com/nickotmazgin/clipflow-pro/releases)
 [![Downloads](https://img.shields.io/github/downloads/nickotmazgin/clipflow-pro/total?label=downloads)](https://github.com/nickotmazgin/clipflow-pro/releases)
@@ -47,7 +47,7 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
   - 45–47 zip with `shell-version: ["45","46","47"]`
   - Publish the zips on the GitHub Releases page.
 
-### Compliance notes (1.3.8)
+### Compliance notes (1.3.9)
 
 - No Gtk imports in the shell process (extension.js)
 - No spawn usage; GNOME Shell APIs only for clipboard

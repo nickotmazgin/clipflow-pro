@@ -4,21 +4,18 @@
 
 import { Extension } from 'resource:///org/gnome/Shell/Extensions/js/extensions/extension.js';
 import { enable as legacyEnable, disable as legacyDisable } from './legacy.js';
+const _noerr = () => {};
 
 export default class ClipFlowProExtension extends Extension {
   enable() {
     try {
       legacyEnable();
-    } catch (e) {
-      console?.error?.('ClipFlow Pro (ESM) enable failed:', e);
-    }
+    } catch (e) { _noerr(); }
   }
 
   disable() {
     try {
       legacyDisable();
-    } catch (e) {
-      console?.error?.('ClipFlow Pro (ESM) disable failed:', e);
-    }
+    } catch (e) { _noerr(); }
   }
 }

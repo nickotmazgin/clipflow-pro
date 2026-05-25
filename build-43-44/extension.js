@@ -17,7 +17,9 @@ const cfpLogger = {
     warn: (..._args) => {},
     error: (..._args) => {},
 };
+// Keep legacy helper as a no-op
 function cfpLog(..._args) {}
+// Alias to preserve existing calls without producing output
 const console = cfpLogger;
 
 const HISTORY_LIMIT_MIN = 10;
@@ -3672,9 +3674,23 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 if (layout && 'spacing' in layout)
                     layout.spacing = 10;
             }
+            const supportsClickGesture = typeof row.add_action === 'function' &&
+                Clutter && typeof Clutter.ClickGesture === 'function';
             const supportsClickAction = typeof row.add_action === 'function' &&
                 Clutter && typeof Clutter.ClickAction === 'function';
-            if (supportsClickAction) {
+            if (supportsClickGesture) {
+                const clickGesture = new Clutter.ClickGesture();
+                if (typeof clickGesture.set_n_clicks_required === 'function') {
+                    clickGesture.set_n_clicks_required(1);
+                }
+                if (typeof clickGesture.set_required_button === 'function') {
+                    clickGesture.set_required_button(1);
+                }
+                clickGesture.connect('recognize', () => {
+                    this._activateHistoryItem(item);
+                });
+                row.add_action(clickGesture);
+            } else if (supportsClickAction) {
                 const clickAction = new Clutter.ClickAction();
                 clickAction.connect('clicked', () => {
                     this._activateHistoryItem(item);

@@ -2,6 +2,9 @@
 # Advanced Clipboard Manager for GNOME Shell
 # Created by Nick Otmazgin
 
+SHELL := bash
+PYTHON ?= python3
+
 EXTENSION_UUID = clipflow-pro@nickotmazgin.github.io
 EXTENSION_NAME = ClipFlow Pro
 
@@ -17,7 +20,9 @@ INSTALL_PATH = ~/.local/share/gnome-shell/extensions/$(EXTENSION_UUID)
 # Files to include in distribution
 EXTENSION_FILES = \
 	extension.js \
+	extension-esm.js \
 	prefs.js \
+	prefs-es6.js \
 	metadata.json \
 	stylesheet.css \
 	schemas/org.gnome.shell.extensions.clipflow-pro.gschema.xml \
@@ -54,25 +59,28 @@ uninstall:
 
 # Create distribution package
 dist: build
-    @echo "Creating distribution packages (flat zip + source)..."
+	@echo "Creating distribution packages (flat zip + source)..."
 	mkdir -p $(DIST_DIR)
-    # Flat zip (top-level files) - exclude compiled schemas
 	rm -f $(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip
-	cd $(BUILD_DIR) && zip -r ../$(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip . -x "schemas/gschemas.compiled"
-	# Source zip
+	$(PYTHON) tools/zip_dir.py $(BUILD_DIR) $(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip . --exclude "schemas/gschemas.compiled"
 	rm -f $(DIST_DIR)/clipflow-pro-source.zip
-	zip -r $(DIST_DIR)/clipflow-pro-source.zip \
+	$(PYTHON) tools/zip_dir.py . $(DIST_DIR)/clipflow-pro-source.zip \
 		$(EXTENSION_FILES) $(EXTRA_FILES) Makefile \
-		$(SCHEMAS_DIR) $(LOCALE_DIR) 2>/dev/null || true
+		build.sh build-modern.sh build-legacy.sh create-release-zips.sh package.sh \
+		install.sh install-legacy.sh safe-reload.sh verify_clipflow.sh \
+		$(SCHEMAS_DIR) $(LOCALE_DIR) tools --exclude "schemas/gschemas.compiled"
 	@echo "Distribution packages created in $(DIST_DIR)/"
 
 # Pack using GNOME Extensions tool
 pack: build
-    @echo "Packing flat zip..."
+	@echo "Packing flat zip..."
 	mkdir -p $(DIST_DIR)
 	rm -f $(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip
-	cd $(BUILD_DIR) && zip -r ../$(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip .
+	$(PYTHON) tools/zip_dir.py $(BUILD_DIR) $(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip .
 	@echo "Packed: $(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip"
+
+ego-validate: dist
+	./tools/ego_validate.sh
 
 # (Validation target removed) Use your editor tooling or CI linters.
 
@@ -99,7 +107,7 @@ validate:
 	done
 	
 	# Validate metadata.json
-	@if ! python3 -m json.tool metadata.json > /dev/null 2>&1; then \
+	@if ! $(PYTHON) -m json.tool metadata.json > /dev/null 2>&1; then \
 		echo "ERROR: metadata.json is not valid JSON"; \
 		exit 1; \
 	fi
@@ -152,9 +160,9 @@ help:
 
 # Version management
 version:
-	@python3 tools/version.py show
+	@$(PYTHON) tools/version.py show
 
 bump-version:
-	@python3 tools/version.py bump
+	@$(PYTHON) tools/version.py bump
 
-.PHONY: all build install uninstall dist dev validate test package clean help version bump-version
+.PHONY: all build install uninstall dist pack ego-validate dev validate test package clean help version bump-version

@@ -1,17 +1,25 @@
 #!/bin/bash
 
 # ClipFlow Pro - Package script
-# Produces zips for GNOME 43–44 and 45–47 without bumping version.
+# Produces zips for GNOME 43-44 and 45-50 without bumping version.
 
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 DIST_DIR="${ROOT_DIR}/dist"
 BUILD_DIR="${ROOT_DIR}/build"
+LEGACY_BUILD_DIR="${ROOT_DIR}/build-43-44"
+PYTHON="${PYTHON:-python3}"
+if ! "${PYTHON}" --version >/dev/null 2>&1; then
+  PYTHON="python"
+fi
 
 mkdir -p "${DIST_DIR}"
 
-echo "[1/4] Running build.sh"
+echo "[1/4] Running build-legacy.sh"
+"${ROOT_DIR}/build-legacy.sh"
+
+echo "[2/4] Running build.sh"
 "${ROOT_DIR}/build.sh"
 
 if [[ ! -f "${BUILD_DIR}/metadata.json" ]]; then
@@ -20,17 +28,21 @@ if [[ ! -f "${BUILD_DIR}/metadata.json" ]]; then
 fi
 
 # Read metadata to obtain uuid and version-name base
-UUID=$(python3 - <<'PY'
+UUID=$(BUILD_DIR="${BUILD_DIR}" "${PYTHON}" - <<'PY'
 import json,sys
-with open('build/metadata.json','r',encoding='utf-8') as f:
+import os
+from pathlib import Path
+with (Path(os.environ['BUILD_DIR']) / 'metadata.json').open('r',encoding='utf-8') as f:
     m=json.load(f)
 print(m.get('uuid','clipflow-pro@nickotmazgin.github.io'))
 PY
 )
 
-BASE_VER=$(python3 - <<'PY'
+BASE_VER=$(BUILD_DIR="${BUILD_DIR}" "${PYTHON}" - <<'PY'
 import json,sys
-with open('build/metadata.json','r',encoding='utf-8') as f:
+import os
+from pathlib import Path
+with (Path(os.environ['BUILD_DIR']) / 'metadata.json').open('r',encoding='utf-8') as f:
     m=json.load(f)
 vn=m.get('version-name','').strip()
 print((vn.split()[0] if vn else '1.3.4'))
@@ -38,47 +50,14 @@ PY
 )
 
 ZIP_4344="${DIST_DIR}/${UUID}-${BASE_VER}-gs43-44.zip"
-ZIP_4547="${DIST_DIR}/${UUID}-${BASE_VER}-gs45-47.zip"
+ZIP_4550="${DIST_DIR}/${UUID}-${BASE_VER}-gs45-50.zip"
 
-echo "[2/4] Creating GNOME 43–44 zip: ${ZIP_4344}"
-(
-  cd "${BUILD_DIR}"
-  rm -f "${ZIP_4344}"
-  zip -qry "${ZIP_4344}" .
-)
+echo "[3/4] Creating GNOME 43-44 zip: ${ZIP_4344}"
+"${PYTHON}" "${ROOT_DIR}/tools/zip_dir.py" "${LEGACY_BUILD_DIR}" "${ZIP_4344}" . --exclude "schemas/gschemas.compiled"
 
-echo "[3/4] Preparing GNOME 45–47 temp build"
-TMP45="$(mktemp -d)"
-trap 'rm -rf "${TMP45}"' EXIT
-cp -a "${BUILD_DIR}/." "${TMP45}/"
-
-# Swap in ES6 prefs for GNOME 45–47
-if [[ -f "${ROOT_DIR}/prefs-es6.js" ]]; then
-  cp "${ROOT_DIR}/prefs-es6.js" "${TMP45}/prefs.js"
-else
-  echo "Warning: prefs-es6.js not found; 45–47 settings may fail to open." >&2
-fi
-
-TMP45_DIR="${TMP45}" python3 - <<'PY'
-import json, os
-from pathlib import Path
-mf=Path(os.environ['TMP45_DIR'])/"metadata.json"
-with mf.open('r',encoding='utf-8') as f:
-    m=json.load(f)
-base=(m.get('version-name','').split()[0] if m.get('version-name') else '1.3.4')
-m['shell-version']=["45","46","47"]
-m['version-name']=f"{base} 45.47"
-with mf.open('w',encoding='utf-8') as f:
-    json.dump(m,f,ensure_ascii=False,indent=2)
-PY
-
-echo "[4/4] Creating GNOME 45–47 zip: ${ZIP_4547}"
-(
-  cd "${TMP45}"
-  rm -f "${ZIP_4547}"
-  zip -qry "${ZIP_4547}" .
-)
+echo "[4/4] Creating GNOME 45-50 zip: ${ZIP_4550}"
+"${PYTHON}" "${ROOT_DIR}/tools/zip_dir.py" "${BUILD_DIR}" "${ZIP_4550}" . --exclude "schemas/gschemas.compiled"
 
 echo "Done. Artifacts:"
 echo "  - ${ZIP_4344}"
-echo "  - ${ZIP_4547}"
+echo "  - ${ZIP_4550}"

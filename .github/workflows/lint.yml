@@ -21,8 +21,8 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '20'
+          node-version: '24'
 
       - name: Run ESLint
         run: |
-          npx -y eslint@9.14.0 extension.js prefs.js || true
+          npx -y eslint@9 extension.js extension-esm.js prefs.js prefs-es6.js eslint.config.cjs

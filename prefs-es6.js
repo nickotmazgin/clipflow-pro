@@ -515,7 +515,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         if (isGS45Plus) {
             const disableCssToggle = this._createSwitchRow(
                 _('Disable Extension Stylesheet'),
-                _('Turn off ClipFlow's CSS for troubleshooting theme conflicts.'),
+                _('Turn off ClipFlow\'s CSS for troubleshooting theme conflicts.'),
                 'disable-css'
             );
             renderBox.append(disableCssToggle);

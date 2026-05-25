@@ -13,6 +13,9 @@ Brief description of changes
 - [ ] Tested on GNOME Shell 45
 - [ ] Tested on GNOME Shell 46
 - [ ] Tested on GNOME Shell 47
+- [ ] Tested on GNOME Shell 48
+- [ ] Tested on GNOME Shell 49
+- [ ] Tested on GNOME Shell 50
 - [ ] No breaking changes
 
 ## Screenshots (if applicable)

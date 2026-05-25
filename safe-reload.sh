@@ -2,26 +2,31 @@
 # Safe ClipFlow Pro reload script - monitors for crashes
 # Usage: bash safe-reload.sh
 
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+EXTENSION_DIR="$HOME/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io"
+
 echo "=== ClipFlow Pro Safe Reload ===" && echo
 
 # Check if extension files are installed
-if [ ! -f ~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io/extension.js ]; then
-    echo "[ERROR] Extension not installed. Run: rsync -av ~/dev/clipflow-pro/ ~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io/"
-    exit 1
+if [ ! -f "${EXTENSION_DIR}/extension.js" ]; then
+    echo "[INFO] Extension not installed yet. Running install.sh first..."
+    "${SCRIPT_DIR}/install.sh"
 fi
 
 # Check if schema is compiled
-if [ ! -f ~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io/schemas/gschemas.compiled ]; then
+if [ ! -f "${EXTENSION_DIR}/schemas/gschemas.compiled" ]; then
     echo "[ERROR] Schema not compiled. Preparing schema bundle..."
     if command -v glib-compile-schemas >/dev/null 2>&1; then
-        (cd ~/dev/clipflow-pro && glib-compile-schemas schemas/)
-    elif [ -f ~/dev/clipflow-pro/schemas/gschemas.compiled ]; then
+        glib-compile-schemas "${EXTENSION_DIR}/schemas/"
+    elif [ -f "${SCRIPT_DIR}/schemas/gschemas.compiled" ]; then
         echo "   Using repository's precompiled schemas (glib-compile-schemas not available)."
+        cp "${SCRIPT_DIR}/schemas/gschemas.compiled" "${EXTENSION_DIR}/schemas/"
     else
         echo "   Neither glib-compile-schemas nor a precompiled schema bundle is available. Aborting." >&2
         exit 1
     fi
-    rsync -av ~/dev/clipflow-pro/schemas/ ~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io/schemas/
 fi
 
 echo "[OK] Extension files ready"

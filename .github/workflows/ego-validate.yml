@@ -3,18 +3,33 @@ name: EGO Validate
 on:
   pull_request:
     branches: [ "main", "gnome43-44" ]
-  push:
-    branches: [ "main", "gnome43-44" ]
-  workflow_dispatch:
     paths:
       - 'metadata.json'
       - 'extension.js'
+      - 'extension-esm.js'
       - 'prefs.js'
+      - 'prefs-es6.js'
       - 'Makefile'
-      - 'tools/ego_validate.sh'
+      - 'tools/**'
       - 'schemas/**'
       - 'icons/**'
+      - '*.sh'
       - 'README.md'
+  push:
+    branches: [ "main", "gnome43-44" ]
+    paths:
+      - 'metadata.json'
+      - 'extension.js'
+      - 'extension-esm.js'
+      - 'prefs.js'
+      - 'prefs-es6.js'
+      - 'Makefile'
+      - 'tools/**'
+      - 'schemas/**'
+      - 'icons/**'
+      - '*.sh'
+      - 'README.md'
+  workflow_dispatch:
 
 jobs:
   validate:

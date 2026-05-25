@@ -6,7 +6,7 @@
 [![Downloads](https://img.shields.io/github/downloads/nickotmazgin/clipflow-pro/total?label=downloads)](https://github.com/nickotmazgin/clipflow-pro/releases)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
 [![GNOME 43–44](https://img.shields.io/badge/GNOME-43%E2%80%9344-blue?logo=gnome&logoColor=white)](#compatibility)
-[![GNOME 45–47](https://img.shields.io/badge/GNOME-45%E2%80%9347-blue?logo=gnome&logoColor=white)](#compatibility)
+[![GNOME 45–50](https://img.shields.io/badge/GNOME-45%E2%80%9350-blue?logo=gnome&logoColor=white)](#compatibility)
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ff5c93?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/nickotmazgin)
 
 Clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.github.io`).
@@ -14,7 +14,7 @@ Clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.githu
 ## Compatibility
 
 - GNOME 43–44: Classic UI by default (Enhanced available via toggle)
-- GNOME 45–47: Enhanced UI with container + pagination (Classic available)
+- GNOME 45–50: Enhanced UI with container + pagination (Classic available)
 - Features:
   - Pinned strip, Starred section, Others list
   - Quick filters (All / Pinned / Starred) with active highlighting
@@ -44,7 +44,7 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 - Run `./build-legacy.sh` to prepare a 43–44 build in `build-43-44/`.
 - Run `./create-release-zips.sh` to produce two zips in `dist/`:
   - 43–44 zip with `shell-version: ["43","44"]`
-  - 45–47 zip with `shell-version: ["45","46","47"]`
+  - 45–50 zip with `shell-version: ["45","46","47","48","49","50"]`
   - Publish the zips on the GitHub Releases page.
 
 ### Compliance notes (1.3.9)
@@ -53,11 +53,11 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 - No spawn usage; GNOME Shell APIs only for clipboard
 - Async file reads via `Gio.File.load_contents_async`
 - Logs gated by `enable-debug-logs` (globalThis.__CFP_DEBUG)
-- 45–47: preferences shipped as ES modules (ESM)
+- 45–50: extension and preferences shipped as ES modules (ESM)
 - 43–44: fixed panel watcher syntax and removed duplicate schema keys
 - No `stylesheet` field in `metadata.json`
 
-This branch targets GNOME 45–47. For GNOME 43–44, see the `gnome43-44` branch.
+This branch targets GNOME 45–50. For GNOME 43–44, use the legacy release zip or the `gnome43-44` branch.
 
 ## Quick Start
 

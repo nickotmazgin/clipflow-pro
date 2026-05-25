@@ -8,6 +8,10 @@ REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCHEMAS_DIR="${REPO_DIR}/schemas"
 EXTENSIONS_DIR="${XDG_DATA_HOME:-$HOME/.local/share}/gnome-shell/extensions"
 INSTALL_PATH="${EXTENSIONS_DIR}/${UUID}"
+PYTHON="${PYTHON:-python3}"
+if ! "${PYTHON}" --version >/dev/null 2>&1; then
+    PYTHON="python"
+fi
 
 info() {
     printf '[INFO] %s\n' "$*"
@@ -26,11 +30,11 @@ read_metadata_value() {
     local key="$2"
 
     [[ -f "$file" ]] || return 1
-    command -v python3 >/dev/null 2>&1 || return 1
+    "${PYTHON}" --version >/dev/null 2>&1 || return 1
 
     local result
     if result=$(
-        METADATA_FILE="$file" METADATA_KEY="$key" python3 - <<'PY'
+        METADATA_FILE="$file" METADATA_KEY="$key" "${PYTHON}" - <<'PY'
 import json
 import os
 import sys

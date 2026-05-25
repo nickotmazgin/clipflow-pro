@@ -6,6 +6,11 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "${SCRIPT_DIR}"
+PYTHON="${PYTHON:-python3}"
+if ! "${PYTHON}" --version >/dev/null 2>&1; then
+  PYTHON="python"
+fi
 BUILD_DIR="${SCRIPT_DIR}/build-43-44"
 SCHEMAS_DIR="${SCRIPT_DIR}/schemas"
 ICON_DIR="${SCRIPT_DIR}/icons"
@@ -20,7 +25,7 @@ cp "${SCRIPT_DIR}/prefs.js" "${BUILD_DIR}/"
 cp "${SCRIPT_DIR}/stylesheet.css" "${BUILD_DIR}/" 2>/dev/null || true
 
 echo "Writing 43–44 metadata..."
-python3 - <<'PY'
+"${PYTHON}" - <<'PY'
 import json
 from pathlib import Path
 root = json.loads(Path('metadata.json').read_text(encoding='utf-8'))

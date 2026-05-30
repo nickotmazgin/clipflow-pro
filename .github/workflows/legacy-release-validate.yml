@@ -1,0 +1,38 @@
+name: Legacy Release Validate
+
+on:
+  push:
+    branches: [ "gnome43-44" ]
+  pull_request:
+    branches: [ "gnome43-44" ]
+  workflow_dispatch:
+
+jobs:
+  validate:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Install dependencies (glib tools + zip)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libglib2.0-bin unzip jq zip
+
+      - name: Build legacy zip (flat)
+        run: |
+          bash ./build.sh
+          cd build
+          zip -r9 ../clipflow-pro@nickotmazgin.github.io.shell-extension.zip .
+          cd ..
+
+      - name: Validate release package
+        run: bash ./tools/validate_legacy_release_zip.sh
+
+      - name: Upload validation artifact (zip)
+        uses: actions/upload-artifact@v4
+        with:
+          name: legacy-release-zip
+          path: clipflow-pro@nickotmazgin.github.io.shell-extension.zip

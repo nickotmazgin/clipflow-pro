@@ -1,9 +1,13 @@
+## Unreleased
+
+- Housekeeping: removed legacy portal references from CI, issue templates, Makefile, and release checklist; GitHub-only distribution.
+
 ## 1.3.9 — 2026-05-25
 
 - GNOME 48-50: added supported shell versions for the modern package.
 - GNOME 48-50: modern builds now emit `Clutter.Orientation` for St widgets and use `Clutter.ClickGesture` when available.
 - Packaging: default build now generates a real GNOME 45+ ES module `extension.js`; release zips no longer depend on the system `zip` binary.
-- CI: fixed `make dist`/`make ego-validate`, moved invalid workflow path filters, updated `actions/github-script` to v9, and restored ESLint 9 enforcement with flat config.
+- CI: fixed `make dist`/`make release-validate`, moved invalid workflow path filters, updated `actions/github-script` to v9, and restored ESLint 9 enforcement with flat config.
 
 ## 1.3.8 — 2025-12-12
 

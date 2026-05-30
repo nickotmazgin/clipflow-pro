@@ -79,8 +79,8 @@ pack: build
 	$(PYTHON) tools/zip_dir.py $(BUILD_DIR) $(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip .
 	@echo "Packed: $(DIST_DIR)/$(EXTENSION_UUID).shell-extension.zip"
 
-ego-validate: dist
-	./tools/ego_validate.sh
+release-validate: dist
+	./tools/validate_release_zip.sh
 
 # (Validation target removed) Use your editor tooling or CI linters.
 
@@ -165,4 +165,4 @@ version:
 bump-version:
 	@$(PYTHON) tools/version.py bump
 
-.PHONY: all build install uninstall dist pack ego-validate dev validate test package clean help version bump-version
+.PHONY: all build install uninstall dist pack release-validate dev validate test package clean help version bump-version

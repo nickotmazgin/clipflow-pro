@@ -1,4 +1,4 @@
-name: EGO Validate
+name: Release Validate
 
 on:
   pull_request:
@@ -47,6 +47,6 @@ jobs:
         run: |
           make dist
 
-      - name: Validate EGO zip
+      - name: Validate release zip
         run: |
-          make ego-validate
+          make release-validate

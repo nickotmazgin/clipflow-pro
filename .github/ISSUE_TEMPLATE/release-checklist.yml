@@ -1,5 +1,5 @@
 name: "Release Checklist"
-description: "Checklist to prepare a new release for GitHub and EGO"
+description: "Checklist to prepare a new GitHub release"
 title: "Release: v<version>"
 labels:
   - "release"
@@ -8,7 +8,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Use this checklist to prepare a clean release that passes EGO review.
+        Use this checklist to prepare a clean GitHub release.
   - type: input
     id: version
     attributes:
@@ -32,8 +32,8 @@ body:
     attributes:
       label: Package
       options:
-        - label: "make dist (flat EGO zip + source zip)"
-        - label: "make ego-validate passes"
+        - label: "make dist (flat extension zip + source zip)"
+        - label: "make release-validate passes"
         - label: "Local install test (make install; journalctl clean)"
   - type: checkboxes
     id: publish
@@ -41,6 +41,4 @@ body:
       label: Publish
       options:
         - label: "Create GitHub tag and release with zips"
-        - label: "Upload flat zip to EGO"
-        - label: "Respond to EGO review feedback if needed"
-
+        - label: "Attach tested shell versions in release notes"

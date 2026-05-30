@@ -1,4 +1,4 @@
-name: Legacy EGO Validate
+name: Legacy Release Validate
 
 on:
   push:
@@ -28,7 +28,7 @@ jobs:
           zip -r9 ../clipflow-pro@nickotmazgin.github.io.shell-extension.zip .
           cd ..
 
-      - name: Validate EGO package
+      - name: Validate release package
         run: |
           set -euo pipefail
           Z=clipflow-pro@nickotmazgin.github.io.shell-extension.zip
@@ -88,5 +88,5 @@ PY
       - name: Upload validation artifact (zip)
         uses: actions/upload-artifact@v4
         with:
-          name: legacy-ego-zip
+          name: legacy-release-zip
           path: clipflow-pro@nickotmazgin.github.io.shell-extension.zip

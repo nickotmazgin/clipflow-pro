@@ -1,6 +1,6 @@
 ## Unreleased
 
-- Housekeeping: removed legacy portal references from CI, issue templates, Makefile, and release checklist; GitHub-only distribution.
+- Housekeeping: removed obsolete third-party distribution naming from CI, issue templates, Makefile, and release checklist; GitHub-only distribution.
 
 ## 1.3.9 — 2026-05-25
 
@@ -11,7 +11,7 @@
 
 ## 1.3.8 — 2025-12-12
 
-- Docs cleanup: removed external marketplace references; updated README
+- Docs cleanup: removed third-party distribution site references; updated README
 - Version bump: 1.3.8; packaging scripts updated
 - Code quality: reduced optional chaining on GObject.connect/remove_child; simplified clipboard interface to St.Clipboard.get_default()
 - 43–44: legacy build script restored (build-legacy.sh)
@@ -480,7 +480,7 @@ ClipFlow Pro is licensed under the [GPL-3.0-or-later](LICENSE) license.
 - Docs: README and release notes updated
 ## 1.3.9 — 2025-12-12
 
-- 45–47: ES Module entry (Extension) with packaged ESM runtime wrapper (no external marketplaces referenced)
+- 45–47: ES Module entry (Extension) with packaged ESM runtime wrapper (GitHub-only distribution)
 - Code quality: further pruning of optional chaining on stable GNOME APIs; simplified clipboard access via St.Clipboard.get_default()
 - Packaging: 45–47 zip ships ESM `extension.js` + `prefs.js`; 43–44 zip unchanged
 - Docs: README/INSTALL/MAINTENANCE updated; neutral distribution language

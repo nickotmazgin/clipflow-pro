@@ -11,6 +11,8 @@
 
 Clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.github.io`).
 
+> **Keywords:** GNOME clipboard manager · Linux clipboard history · Wayland clipboard · copy paste · productivity · privacy · open source
+
 ## Compatibility
 
 - GNOME 43–44: Classic UI by default (Enhanced available via toggle)
@@ -92,6 +94,14 @@ This branch targets GNOME 45–50. For GNOME 43–44, use the legacy release zip
     <td align="center"><img src="docs/screenshots/1.3.5/9.png" alt="ClipFlow Pro screenshot 9" width="300"><br><sub>9</sub></td>
   </tr>
 </table>
+
+## Find this project
+
+**GitHub topics:** `gnome-shell-extension` · `clipboard` · `clipboard-manager` · `copy-paste` · `wayland` · `linux` · `productivity` · `privacy` · `open-source`
+
+**Search for:** GNOME Shell clipboard manager, Linux clipboard history extension, Wayland clipboard tool, ClipFlow Pro
+
+---
 
 ## Support
 

@@ -1,3 +1,7 @@
+## 1.3.10 — 2026-05-30
+
+- Fix: restore `pause-on-lock` and `clear-on-lock` GSettings schema keys (preferences window no longer crashes on open).
+
 ## Unreleased
 
 - Housekeeping: removed obsolete third-party distribution naming from CI, issue templates, Makefile, and release checklist; GitHub-only distribution.

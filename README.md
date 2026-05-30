@@ -101,6 +101,11 @@ This branch targets GNOME 45–50. For GNOME 43–44, use the legacy release zip
 
 **Search for:** GNOME Shell clipboard manager, Linux clipboard history extension, Wayland clipboard tool, ClipFlow Pro
 
+## More GNOME extensions by Nick Otmazgin
+
+- [Numeric Clock](https://github.com/nickotmazgin/Linux-Numeric-Date-And-Clock) — DD/MM/YYYY 24-hour top-bar clock with seconds
+- [Comfort Control (EaseHub)](https://github.com/nickotmazgin/comfort-control-easehub) — panel menu for power, screenshots, updates & utilities
+
 ---
 
 ## Support

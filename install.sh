@@ -69,8 +69,8 @@ fi
 
 echo ""
 echo "ClipFlow Pro ready to use:"
-echo "  • Panel indicator shows clipboard history."
-echo "  • Shortcut Super+Shift+V opens the history menu."
+echo "  • Left-click panel icon: history window. Right-click: recent clips menu."
+echo "  • Super+Shift+V: panel menu | Super+Shift+H: full history window (needs gjs)."
 echo "Settings are available from the GNOME Extensions app."
 
 echo ""

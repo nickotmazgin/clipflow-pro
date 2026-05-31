@@ -43,6 +43,28 @@
       <description>Keyboard shortcut to show clipboard history menu</description>
     </key>
 
+    <key name="show-history-window-shortcut" type="as">
+      <default>['&lt;Super&gt;&lt;Shift&gt;h']</default>
+      <summary>Open history window shortcut</summary>
+      <description>Keyboard shortcut to open the full ClipFlow history window (CopyQ-style browser)</description>
+    </key>
+
+    <key name="panel-left-click-action" type="s">
+      <choices>
+        <choice value="panel-menu"/>
+        <choice value="history-window"/>
+      </choices>
+      <default>'history-window'</default>
+      <summary>Panel icon left-click action</summary>
+      <description>Left-click opens the full history window by default. Right-click always shows the recent-clips menu. You can switch left-click back to the quick panel menu here.</description>
+    </key>
+
+    <key name="open-history-window-on-login" type="b">
+      <default>false</default>
+      <summary>Open history window at login</summary>
+      <description>Automatically open the ClipFlow history window when you sign in (panel menu remains available).</description>
+    </key>
+
     <key name="classic-filter-all-shortcut" type="as">
       <default>[]</default>
       <summary>Classic: Filter All</summary>
@@ -91,7 +113,7 @@
       <default>7</default>
       <range min="1" max="20"/>
       <summary>Recent items in context menu</summary>
-      <description>Number of recent clipboard entries to show in the right-click context menu.</description>
+      <description>Number of recent clipboard entries per page in the right-click menu (use Show more / Show less; left-click opens the full history window).</description>
     </key>
     
     <!-- Privacy and Security -->
@@ -219,9 +241,9 @@
         <choice value="classic"/>
         <choice value="enhanced"/>
       </choices>
-      <default>'classic'</default>
+      <default>'auto'</default>
       <summary>Rendering mode</summary>
-      <description>Choose how entries are rendered: auto (detect/fallback), classic (PopupMenu rows), or enhanced (container + pagination).</description>
+      <description>Choose how entries are rendered: auto (scrollable list on GNOME 45+), classic (PopupMenu rows with show more/less), or enhanced (scrollable container + page buttons).</description>
     </key>
 
     <key name="classic-max-rows" type="i">

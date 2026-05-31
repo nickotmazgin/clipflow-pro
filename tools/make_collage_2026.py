@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Lossless PNG collages — native-res tiles, no JPEG (UI text stays sharp)."""
+"""Lossless PNG collages + HD social exports for GitHub and social networks."""
 from __future__ import annotations
 
 import argparse
 import re
+import shutil
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
@@ -20,11 +21,35 @@ TILE_PAD = 12
 TILE_BG = (16, 18, 28)
 RADIUS = 12
 
+SOCIAL_SIZES = {
+    "1920x1080": (1920, 1080),   # X / Twitter, Facebook, LinkedIn landscape
+    "1080x1080": (1080, 1080),   # Instagram square
+    "1280x640": (1280, 640),     # GitHub OG / link previews
+}
+
 FONT_CANDIDATES = [
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
     "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
     "/usr/share/fonts/truetype/ubuntu/Ubuntu-B.ttf",
 ]
+
+PRODUCT = {
+    "clipflow": {
+        "slug": "clipflow-pro",
+        "title": "ClipFlow Pro",
+        "subtitle": "GNOME Clipboard History · History Window · Panel Menu · 2026",
+    },
+    "numeric": {
+        "slug": "numeric-clock",
+        "title": "Numeric Clock",
+        "subtitle": "DD/MM/YYYY 24-Hour Top Bar Clock · Settings · About · 2026",
+    },
+    "easehub": {
+        "slug": "comfort-control-easehub",
+        "title": "Comfort Control (EaseHub)",
+        "subtitle": "Panel Menu · Power · Screenshots · Updates · Preferences · 2026",
+    },
+}
 
 
 def font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
@@ -66,6 +91,10 @@ def horizontal_gradient(w: int, h: int) -> Image.Image:
     return img
 
 
+def sharpen(img: Image.Image) -> Image.Image:
+    return img.filter(ImageFilter.UnsharpMask(radius=1.0, percent=110, threshold=1))
+
+
 def fit_sharp(img: Image.Image, max_w: int, max_h: int, allow_upscale: bool = False) -> Image.Image:
     w, h = img.size
     scale = min(max_w / w, max_h / h)
@@ -74,8 +103,7 @@ def fit_sharp(img: Image.Image, max_w: int, max_h: int, allow_upscale: bool = Fa
     nw, nh = max(1, round(w * scale)), max(1, round(h * scale))
     if nw == w and nh == h:
         return img.copy()
-    out = img.resize((nw, nh), Image.Resampling.LANCZOS)
-    return out.filter(ImageFilter.UnsharpMask(radius=1.2, percent=80, threshold=2))
+    return sharpen(img.resize((nw, nh), Image.Resampling.LANCZOS))
 
 
 def tile(img: Image.Image, cw: int, ch: int, allow_upscale: bool = False) -> Image.Image:
@@ -83,14 +111,15 @@ def tile(img: Image.Image, cw: int, ch: int, allow_upscale: bool = False) -> Ima
     fitted = fit_sharp(img, inner_w, inner_h, allow_upscale=allow_upscale)
     canvas = Image.new("RGBA", (cw, ch), TILE_BG + (255,))
     canvas.paste(fitted, ((cw - fitted.width) // 2, (ch - fitted.height) // 2), fitted)
+    # subtle border for tile definition
+    draw = ImageDraw.Draw(canvas)
+    draw.rounded_rectangle((1, 1, cw - 2, ch - 2), radius=RADIUS, outline=(255, 255, 255, 40), width=1)
     return canvas
 
 
 def tile_native(img: Image.Image, allow_upscale: bool = False) -> Image.Image:
-    """Tile sized to image — never downscale below native unless wider than max."""
     w, h = img.size
-    cw, ch = w + TILE_PAD * 2, h + TILE_PAD * 2
-    return tile(img, cw, ch, allow_upscale=allow_upscale)
+    return tile(img, w + TILE_PAD * 2, h + TILE_PAD * 2, allow_upscale=allow_upscale)
 
 
 def rounded(im: Image.Image, radius: int = RADIUS) -> Image.Image:
@@ -105,10 +134,12 @@ def rounded(im: Image.Image, radius: int = RADIUS) -> Image.Image:
 def draw_title(canvas: Image.Image, title: str, subtitle: str) -> None:
     draw = ImageDraw.Draw(canvas)
     tw = canvas.width
-    overlay = Image.new("RGBA", (tw, TITLE_H), (0, 0, 0, 110))
+    overlay = Image.new("RGBA", (tw, TITLE_H), (0, 0, 0, 120))
     canvas.paste(overlay, (0, 0), overlay)
-    draw.text((tw // 2, 42), title, fill=(255, 255, 255), font=font(56), anchor="mm")
-    draw.text((tw // 2, 98), subtitle, fill=(240, 240, 248), font=font(28), anchor="mm")
+    draw.text((tw // 2, 42), title, fill=(255, 255, 255), font=font(56), anchor="mm",
+              stroke_width=2, stroke_fill=(0, 0, 0, 180))
+    draw.text((tw // 2, 98), subtitle, fill=(245, 245, 250), font=font(28), anchor="mm",
+              stroke_width=1, stroke_fill=(0, 0, 0, 140))
 
 
 def compose_grid(rows: list[list[Image.Image]], title: str, subtitle: str) -> Image.Image:
@@ -132,36 +163,25 @@ def compose_grid(rows: list[list[Image.Image]], title: str, subtitle: str) -> Im
 
 def build_clipflow(src: Path) -> Image.Image:
     imgs = load_numbered_images(src)
-    # Native resolution tiles (~923×991) — 5×2 grid, no downscale
     tiles = [tile_native(im) for im in imgs]
-    return compose_grid(
-        [tiles[0:5], tiles[5:10]],
-        "ClipFlow Pro",
-        "GNOME Clipboard History · History Window · Panel Menu · 2026",
-    )
+    meta = PRODUCT["clipflow"]
+    return compose_grid([tiles[0:5], tiles[5:10]], meta["title"], meta["subtitle"])
 
 
 def build_numeric(src: Path) -> Image.Image:
     imgs = load_numbered_images(src)
     banner = tile(imgs[0], 2000, 120, allow_upscale=True)
-    left = tile_native(imgs[1])
-    right = tile_native(imgs[2])
-    return compose_grid(
-        [[banner], [left, right]],
-        "Numeric Clock",
-        "DD/MM/YYYY 24-Hour Top Bar Clock · Settings · About · 2026",
-    )
+    meta = PRODUCT["numeric"]
+    return compose_grid([[banner], [tile_native(imgs[1]), tile_native(imgs[2])]],
+                        meta["title"], meta["subtitle"])
 
 
 def build_easehub(src: Path) -> Image.Image:
     imgs = load_numbered_images(src)
     top = [tile_native(imgs[0]), tile_native(imgs[1])]
     bottom = [tile_native(imgs[2]), tile_native(imgs[3]), tile_native(imgs[4])]
-    return compose_grid(
-        [top, bottom],
-        "Comfort Control (EaseHub)",
-        "Panel Menu · Power · Screenshots · Updates · Preferences · 2026",
-    )
+    meta = PRODUCT["easehub"]
+    return compose_grid([top, bottom], meta["title"], meta["subtitle"])
 
 
 BUILDERS = {"clipflow": build_clipflow, "numeric": build_numeric, "easehub": build_easehub}
@@ -169,34 +189,53 @@ BUILDERS = {"clipflow": build_clipflow, "numeric": build_numeric, "easehub": bui
 
 def save_png(img: Image.Image, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    img.convert("RGB").save(path, "PNG", compress_level=3, optimize=False)
+    img.convert("RGB").save(path, "PNG", compress_level=2, optimize=False)
 
 
-def social_from_collage(collage_path: Path, out_path: Path) -> None:
-    src = Image.open(collage_path).convert("RGB")
-    tw, th = 1280, 640
+def export_social(collage: Image.Image, tw: int, th: int) -> Image.Image:
+    """Fit collage inside canvas with gradient letterbox + post-resize sharpen."""
+    src = collage.convert("RGB")
+    margin = 56
     canvas = horizontal_gradient(tw, th)
-    scale = min((tw - 48) / src.width, (th - 48) / src.height)
+    scale = min((tw - margin * 2) / src.width, (th - margin * 2) / src.height)
     nw, nh = round(src.width * scale), round(src.height * scale)
-    fitted = src.resize((nw, nh), Image.Resampling.LANCZOS)
+    fitted = sharpen(src.resize((nw, nh), Image.Resampling.LANCZOS))
     canvas.paste(fitted, ((tw - nw) // 2, (th - nh) // 2))
-    save_png(canvas, out_path)
+    return canvas
+
+
+def export_all_socials(collage: Image.Image, out_dir: Path, slug: str) -> None:
+    out_dir.mkdir(parents=True, exist_ok=True)
+    hd = out_dir / f"{slug}-collage-hd.png"
+    save_png(collage, hd)
+    for label, (tw, th) in SOCIAL_SIZES.items():
+        path = out_dir / f"{slug}-social-{label}.png"
+        save_png(export_social(collage, tw, th), path)
+        print(f"  social {label}: {path.name} ({tw}x{th})")
 
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("kind", choices=BUILDERS)
     p.add_argument("src_dir")
-    p.add_argument("out_file")
-    p.add_argument("--social", help="Optional social preview PNG path")
+    p.add_argument("out_file", help="Repo collage path (screenshots/collage-2026.png)")
+    p.add_argument("--social-dir", dest="social_dir", help="Export HD + all social sizes to this folder")
+    p.add_argument("--github-social", dest="github_social", help="Copy 1280x640 to this path")
     args = p.parse_args()
-    collage = BUILDERS[args.kind](Path(args.src_dir))
+
+    kind = args.kind
+    slug = PRODUCT[kind]["slug"]
+    collage = BUILDERS[kind](Path(args.src_dir))
     out = Path(args.out_file)
     save_png(collage, out)
-    print(f"Wrote {out} ({collage.width}x{collage.height}) PNG lossless")
-    if args.social:
-        social_from_collage(out, Path(args.social))
-        print(f"Wrote {args.social}")
+    print(f"Wrote {out} ({collage.width}x{collage.height})")
+
+    if args.social_dir:
+        export_all_socials(collage, Path(args.social_dir), slug)
+
+    if args.github_social:
+        save_png(export_social(collage, 1280, 640), Path(args.github_social))
+        print(f"Wrote {args.github_social}")
 
 
 if __name__ == "__main__":

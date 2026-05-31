@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import re
-import shutil
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
@@ -92,7 +91,7 @@ def horizontal_gradient(w: int, h: int) -> Image.Image:
 
 
 def sharpen(img: Image.Image) -> Image.Image:
-    return img.filter(ImageFilter.UnsharpMask(radius=1.0, percent=110, threshold=1))
+    return img.filter(ImageFilter.UnsharpMask(radius=1.2, percent=120, threshold=1))
 
 
 def fit_sharp(img: Image.Image, max_w: int, max_h: int, allow_upscale: bool = False) -> Image.Image:
@@ -131,6 +130,22 @@ def rounded(im: Image.Image, radius: int = RADIUS) -> Image.Image:
     return out
 
 
+def drop_shadow(im: Image.Image, offset: tuple[int, int] = (0, 6), blur: int = 14) -> Image.Image:
+    """RGBA layer: soft shadow sized for im, ready to paste under im at same origin."""
+    w, h = im.size
+    pad = blur * 2 + abs(offset[0]) + abs(offset[1])
+    layer = Image.new("RGBA", (w + pad, h + pad), (0, 0, 0, 0))
+    shadow = Image.new("RGBA", im.size, (0, 0, 0, 90))
+    shadow.putalpha(im.split()[3] if im.mode == "RGBA" else Image.new("L", im.size, 255))
+    sx, sy = blur + max(offset[0], 0), blur + max(offset[1], 0)
+    layer.paste(shadow, (sx + offset[0], sy + offset[1]))
+    return layer.filter(ImageFilter.GaussianBlur(blur))
+
+
+def paste_layer(base: Image.Image, layer: Image.Image, xy: tuple[int, int]) -> None:
+    base.paste(layer, xy, layer if layer.mode == "RGBA" else None)
+
+
 def draw_title(canvas: Image.Image, title: str, subtitle: str) -> None:
     draw = ImageDraw.Draw(canvas)
     tw = canvas.width
@@ -155,7 +170,10 @@ def compose_grid(rows: list[list[Image.Image]], title: str, subtitle: str) -> Im
         x = PAD + (grid_w - row_w) // 2
         for t in row:
             rt = rounded(t.convert("RGBA"))
-            canvas.paste(rt, (x, y0 + (rh - t.height) // 2), rt)
+            ty = y0 + (rh - t.height) // 2
+            sh = drop_shadow(rt)
+            paste_layer(canvas, sh, (x - (sh.width - rt.width) // 2, ty - (sh.height - rt.height) // 2))
+            paste_layer(canvas, rt, (x, ty))
             x += t.width + TILE_GAP
         y0 += rh + TILE_GAP
     return canvas
@@ -189,18 +207,20 @@ BUILDERS = {"clipflow": build_clipflow, "numeric": build_numeric, "easehub": bui
 
 def save_png(img: Image.Image, path: Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
-    img.convert("RGB").save(path, "PNG", compress_level=2, optimize=False)
+    img.convert("RGB").save(path, "PNG", compress_level=1, optimize=False)
 
 
 def export_social(collage: Image.Image, tw: int, th: int) -> Image.Image:
-    """Fit collage inside canvas with gradient letterbox + post-resize sharpen."""
-    src = collage.convert("RGB")
-    margin = 56
+    """Fit collage inside canvas with gradient letterbox, rounded corners, and shadow."""
+    margin = 48
     canvas = horizontal_gradient(tw, th)
-    scale = min((tw - margin * 2) / src.width, (th - margin * 2) / src.height)
-    nw, nh = round(src.width * scale), round(src.height * scale)
-    fitted = sharpen(src.resize((nw, nh), Image.Resampling.LANCZOS))
-    canvas.paste(fitted, ((tw - nw) // 2, (th - nh) // 2))
+    scale = min((tw - margin * 2) / collage.width, (th - margin * 2) / collage.height)
+    nw, nh = round(collage.width * scale), round(collage.height * scale)
+    fitted = rounded(sharpen(collage.resize((nw, nh), Image.Resampling.LANCZOS)).convert("RGBA"), RADIUS + 4)
+    x, y = (tw - nw) // 2, (th - nh) // 2
+    sh = drop_shadow(fitted, offset=(0, 8), blur=16)
+    paste_layer(canvas, sh, (x - (sh.width - nw) // 2, y - (sh.height - nh) // 2))
+    paste_layer(canvas, fitted, (x, y))
     return canvas
 
 

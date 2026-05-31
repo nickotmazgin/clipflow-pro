@@ -2,6 +2,7 @@
 
 import GObject from 'gi://GObject';
 import Gtk from 'gi://Gtk';
+import Adw from 'gi://Adw';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import Pango from 'gi://Pango';
@@ -13,8 +14,6 @@ export default class ClipFlowProPreferences extends ExtensionPreferences {
     fillPreferencesWindow(window) {
         const settings = this.getSettings();
 
-        // Translations are provided via the extension's gettext domain.
-
         const widget = new ClipFlowProPrefsWidget({
             orientation: Gtk.Orientation.VERTICAL,
         }, settings, this.metadata);
@@ -22,11 +21,60 @@ export default class ClipFlowProPreferences extends ExtensionPreferences {
         widget.set_hexpand(true);
         widget.set_vexpand(true);
 
-        window.set_default_size?.(920, 640);
+        if (typeof window.set_default_size === 'function')
+            window.set_default_size(920, 640);
+        else {
+            window.default_width = 920;
+            window.default_height = 640;
+        }
 
-        // Attach our GTK widget as the window content. This keeps the Adw
-        // headerbar (close/minimize) while letting us reuse the existing UI.
-        window.set_child?.(widget) ?? window.add?.(widget);
+        if (typeof window.set_decorated === 'function')
+            window.set_decorated(true);
+
+        const scrolled = new Gtk.ScrolledWindow({
+            hscrollbar_policy: Gtk.PolicyType.NEVER,
+            vscrollbar_policy: Gtk.PolicyType.AUTOMATIC,
+            vexpand: true,
+            hexpand: true,
+        });
+        scrolled.set_child(widget);
+
+        // GNOME 46 / Zorin: explicit close button (theme sometimes omits the X glyph).
+        const toolbar = new Adw.ToolbarView();
+        const header = new Adw.HeaderBar({
+            show_end_title_buttons: false,
+            title_widget: new Adw.WindowTitle({
+                title: _('ClipFlow Pro'),
+                subtitle: _('Settings'),
+            }),
+        });
+        const closeBtn = new Gtk.Button({
+            icon_name: 'window-close-symbolic',
+            tooltip_text: _('Close'),
+            css_classes: ['titlebutton', 'close'],
+        });
+        closeBtn.connect('clicked', () => {
+            if (typeof window.close === 'function')
+                window.close();
+            else
+                window.destroy();
+        });
+        header.pack_end(closeBtn);
+        toolbar.add_top_bar(header);
+        toolbar.set_content(scrolled);
+
+        if (typeof window.set_content === 'function') {
+            window.set_content(toolbar);
+            return;
+        }
+
+        const page = new Adw.PreferencesPage({
+            title: _('ClipFlow Pro'),
+            icon_name: 'edit-paste-symbolic',
+        });
+        if (typeof page.set_content === 'function')
+            page.set_content(toolbar);
+        window.add(page);
     }
 }
 
@@ -84,11 +132,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
         this.append(this._notebook);
 
-        // Detect GNOME Shell target from metadata to tailor UI
-        const shells = Array.isArray(this._metadata['shell-version']) ? this._metadata['shell-version'] : [];
-        const isGS45Plus = shells.some(v => {
-            const n = parseInt(String(v), 10); return Number.isFinite(n) && n >= 45;
-        });
+        const isGS45Plus = this._isGS45PlusBuild();
 
         // Add tabs
         this._addGeneralTab({ isGS45Plus });
@@ -97,6 +141,21 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         this._addShortcutsTab({ isGS45Plus });
         this._addAboutTab({ isGS45Plus });
         this._applyInitialTab();
+    }
+
+    _isGS45PlusBuild() {
+        const shells = Array.isArray(this._metadata?.['shell-version'])
+            ? this._metadata['shell-version']
+            : [];
+        if (shells.some(v => {
+            const n = parseInt(String(v), 10);
+            return Number.isFinite(n) && n >= 45;
+        }))
+            return true;
+        // GNOME Extensions prefs often omit shell-version in metadata — this package is 45–50 only.
+        if (shells.length === 0)
+            return true;
+        return false;
     }
 
     _addGeneralTab(ctx = {}) {
@@ -110,6 +169,73 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         // Header
         const header = this._createSectionHeader(_('General Settings'));
         generalBox.append(header);
+
+        if (isGS45Plus) {
+            const menuFrame = this._createFrame(_('Menu & Rendering'));
+            const menuBox = new Gtk.Box({
+                orientation: Gtk.Orientation.VERTICAL,
+                spacing: 10,
+            });
+            menuFrame.set_child(menuBox);
+
+            const menuHint = new Gtk.Label({
+                label: _('Left-click opens the history window. Right-click shows recent clips (Show more/less). Super+Shift+V opens the quick panel menu.'),
+                wrap: true,
+                wrap_mode: Pango.WrapMode.WORD,
+                xalign: 0,
+            });
+            menuHint.get_style_context().add_class('dim-label');
+            menuBox.append(menuHint);
+
+            menuBox.append(this._createComboRow(
+                _('Rendering Mode'),
+                _('Auto: scrollable quick menu with Prev/Next. Classic: simple list with Show more/less (for Super+Shift+V menu only).'),
+                'rendering-mode',
+                [
+                    ['auto', _('Auto (recommended)')],
+                    ['classic', _('Classic (show more/less)')],
+                ]
+            ));
+
+            menuBox.append(this._createSpinRow(
+                _('Classic Mode: Max Rows'),
+                _('Only when Rendering Mode is Classic — max rows before Show more.'),
+                'classic-max-rows',
+                10, 200, 50
+            ));
+
+            menuBox.append(this._createSpinRow(
+                _('Entries Per Page (Quick Panel Menu)'),
+                _('For Super+Shift+V popup menu — not the history window.'),
+                'entries-per-page',
+                5, 50, 10
+            ));
+
+            menuBox.append(this._createComboRow(
+                _('Panel Icon Left-Click'),
+                _('History window (default) or quick panel popup menu.'),
+                'panel-left-click-action',
+                [
+                    ['history-window', _('History window (default)')],
+                    ['panel-menu', _('Quick panel menu')],
+                ]
+            ));
+
+            menuBox.append(this._createSpinRow(
+                _('Recent Items per Page (Right-Click)'),
+                _('Right-click menu page size; use Show more / Show less for the rest.'),
+                'context-menu-items',
+                1, 20, 7
+            ));
+
+            menuBox.append(this._createSwitchRow(
+                _('Open History Window at Login'),
+                _('Open the full history browser when you sign in.'),
+                'open-history-window-on-login'
+            ));
+
+            generalBox.append(menuFrame);
+        }
 
         // History Management
         const historyFrame = this._createFrame(_('History Management'));
@@ -146,27 +272,6 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         );
         historyBox.append(minLengthBox);
 
-        // Entries per page (Enhanced UI only)
-        if (isGS45Plus) {
-            const entriesPerPageBox = this._createSpinRow(
-                _('Entries Per Page'),
-                _('Number of entries to show per page in the menu'),
-                'entries-per-page',
-                5, 50, 10
-            );
-            historyBox.append(entriesPerPageBox);
-        }
-        // Legacy rows toggle only relevant on 45+ fallback scenarios
-        if (isGS45Plus) {
-            const legacyRowsSwitch = this._createSwitchRow(
-                _('Use Legacy Menu Rows'),
-                _('Render the clipboard menu using the older popup layout in case the new Wayland-safe view has issues on your Shell version.'),
-                'use-legacy-menu-items'
-            );
-            historyBox.append(legacyRowsSwitch);
-        }
-
-        // Clear history button
         const clearButton = new Gtk.Button({ label: _('Clear All History') });
         clearButton.set_halign(Gtk.Align.START);
         clearButton.add_css_class('destructive-action');
@@ -267,7 +372,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
         const panelPositionBox = this._createComboRow(
             _('Panel Icon Position'),
-            _('Position of clipboard icon in the top panel'),
+            _('Along the GNOME top bar only (left, center, or right). The icon stays on the Shell panel — not on a bottom or side dock.'),
             'panel-position',
             [
                 ['left', _('Left')],
@@ -479,51 +584,23 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
             appearanceBox.append(styleFrame);
         }
 
-        // Rendering mode (compatibility)
-        const renderFrame = this._createFrame(_('Compatibility'));
-        const renderBox = new Gtk.Box({ 
-            orientation: Gtk.Orientation.VERTICAL,
-            spacing: 10
-        });
-        renderFrame.set_child(renderBox);
-
+        // Advanced troubleshooting (rendering mode lives under General → Menu & Rendering)
         if (isGS45Plus) {
-            const renderingModeBox = this._createComboRow(
-                _('Rendering Mode'),
-                _('Auto chooses a safe default for your GNOME Shell. Classic uses simple PopupMenu rows. Enhanced uses a container with pagination.'),
-                'rendering-mode',
-                [
-                    ['auto', _('Auto')],
-                    ['classic', _('Classic')],
-                    ['enhanced', _('Enhanced')],
-                ]
-            );
-            renderBox.append(renderingModeBox);
-        }
+            const advFrame = this._createFrame(_('Advanced'));
+            const advBox = new Gtk.Box({
+                orientation: Gtk.Orientation.VERTICAL,
+                spacing: 10,
+            });
+            advFrame.set_child(advBox);
 
-        const classicMaxRowsBox = this._createSpinRow(
-            _('Classic Mode: Max Rows'),
-            isGS45Plus ? _('Maximum number of rows to show in Classic mode (10–200).') : _('Maximum number of rows to show in Classic mode (10–12).'),
-            'classic-max-rows',
-            10,
-            isGS45Plus ? 200 : 12,
-            isGS45Plus ? 50 : 12
-        );
-        renderBox.append(classicMaxRowsBox);
-
-        // Disable CSS toggle only makes sense when stylesheet is in use (45+ build)
-        if (isGS45Plus) {
             const disableCssToggle = this._createSwitchRow(
                 _('Disable Extension Stylesheet'),
-                _('Turn off ClipFlow\'s CSS for troubleshooting theme conflicts.'),
+                _('Turn off ClipFlow CSS if the quick menu looks wrong with your theme.'),
                 'disable-css'
             );
-            renderBox.append(disableCssToggle);
+            advBox.append(disableCssToggle);
+            appearanceBox.append(advFrame);
         }
-
-        appearanceBox.append(renderFrame);
-
-        // styleFrame appended only for 45+
 
         // App Exclusions
         const exclFrame = this._createFrame(_('App Exclusions'));
@@ -613,6 +690,14 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         );
         shortcutsListBox.append(showMenuBox);
 
+        const showWindowBox = this._createShortcutRow(
+            _('Open History Window'),
+            _('Open the full history browser window'),
+            'show-history-window-shortcut',
+            '<Super><Shift>h'
+        );
+        shortcutsListBox.append(showWindowBox);
+
         // Enhanced copy shortcut
         const copyShortcutBox = this._createShortcutRow(
             _('Enhanced Copy'),
@@ -630,47 +715,6 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
             '<Super>v'
         );
         shortcutsListBox.append(pasteShortcutBox);
-
-        // Classic filter and toggle shortcuts
-        const filterAllBox = this._createShortcutRow(
-            _('Classic: Filter All'),
-            _('Switch Classic filter to All and open the menu'),
-            'classic-filter-all-shortcut',
-            ''
-        );
-        shortcutsListBox.append(filterAllBox);
-
-        const filterPinnedBox = this._createShortcutRow(
-            _('Classic: Filter Pinned'),
-            _('Switch Classic filter to Pinned and open the menu'),
-            'classic-filter-pinned-shortcut',
-            ''
-        );
-        shortcutsListBox.append(filterPinnedBox);
-
-        const filterStarredBox = this._createShortcutRow(
-            _('Classic: Filter Starred'),
-            _('Switch Classic filter to Starred and open the menu'),
-            'classic-filter-starred-shortcut',
-            ''
-        );
-        shortcutsListBox.append(filterStarredBox);
-
-        const togglePinTopBox = this._createShortcutRow(
-            _('Classic: Toggle Pin (Top)'),
-            _('Toggle pinned on the most recent history item'),
-            'classic-toggle-pin-top-shortcut',
-            ''
-        );
-        shortcutsListBox.append(togglePinTopBox);
-
-        const toggleStarTopBox = this._createShortcutRow(
-            _('Classic: Toggle Star (Top)'),
-            _('Toggle starred on the most recent history item'),
-            'classic-toggle-star-top-shortcut',
-            ''
-        );
-        shortcutsListBox.append(toggleStarTopBox);
 
         shortcutsBox.append(shortcutsFrame);
 

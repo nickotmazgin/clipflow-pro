@@ -1,7 +1,5 @@
 # ClipFlow Pro
 
-[What’s New in 1.3.9](CHANGELOG.md)
-
 [![Release](https://img.shields.io/github/v/release/nickotmazgin/clipflow-pro)](https://github.com/nickotmazgin/clipflow-pro/releases)
 [![Downloads](https://img.shields.io/github/downloads/nickotmazgin/clipflow-pro/total?label=downloads)](https://github.com/nickotmazgin/clipflow-pro/releases)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
@@ -9,97 +7,105 @@
 [![GNOME 45–50](https://img.shields.io/badge/GNOME-45%E2%80%9350-blue?logo=gnome&logoColor=white)](#compatibility)
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ff5c93?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/nickotmazgin)
 
-Clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.github.io`).
+**ClipFlow Pro** is a clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.github.io`).
 
-> **Keywords:** GNOME clipboard manager · Linux clipboard history · Wayland clipboard · copy paste · productivity · privacy · open source
+> **Latest: v1.4.0** — introduces the **History Window**, a full desktop browser for your clipboard (CopyQ-style). **Previous releases are superseded**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
+
+> **Keywords:** GNOME clipboard manager · Linux clipboard history · Wayland clipboard · history window · copy paste · productivity · privacy · open source
+
+---
+
+## What's new in v1.4.0 (important)
+
+### History Window (new — not in any earlier release)
+
+A dedicated **desktop window** for browsing, searching, and managing clipboard history:
+
+- **Left-click** the panel icon → opens the History Window (default)
+- **Super+Shift+H** → same window
+- Search, scroll, timestamps, pin/star markers
+- **Copy**, **Pin**, **Star**, **Delete**, **Clear all**, **Refresh**
+- Stays **in sync** with the panel menu via `~/.config/clipflow-pro/history.json`
+- Requires **gjs** (GNOME JavaScript) — included on Zorin/Ubuntu/Fedora GNOME
+
+### Panel interactions
+
+| Action | Result |
+|--------|--------|
+| **Left-click** | History Window (full list) |
+| **Right-click** | Recent clips menu with **Show more / Show less** paging |
+| **Super+Shift+V** | Quick panel popup menu (scroll + Prev/Next) |
+
+### Also in v1.4.0
+
+- GNOME 46 settings window: proper **close button** and Adw layout
+- Rendering mode consolidated under **General → Menu & Rendering** (Auto / Classic)
+- Right-click menu streamlined (no duplicate actions)
+- Show more/less no longer closes the menu unexpectedly
+- Numeric-style fixes: ESM-safe extension paths, scrollable enhanced menu on GNOME 45+
+
+[Full changelog](CHANGELOG.md)
+
+---
 
 ## Compatibility
 
-- GNOME 43–44: Classic UI by default (Enhanced available via toggle)
-- GNOME 45–50: Enhanced UI with container + pagination (Classic available)
-- Features:
-  - Pinned strip, Starred section, Others list
-  - Quick filters (All / Pinned / Starred) with active highlighting
-  - Per‑row actions: Pin, Star, Copy, Copy Cleaned, Delete
-  - Show more/less for large histories
-  - Keyboard shortcuts for filters and top item toggles
-  - Export/Import, Purge duplicates, Pin Top 3/5, Unpin All
-  - Reset to Defaults in Preferences → About → Maintenance
+| GNOME | Build | Notes |
+|-------|-------|-------|
+| **45–50** | Main (`main`) | History Window, ESM, enhanced panel menu |
+| **43–44** | Legacy zip | Classic panel menu only (no History Window) |
 
-## Links
+- Panel icon position: **left / center / right** on the GNOME **top bar** (not bottom/side docks)
+- Distribution: **GitHub Releases only** (no extensions.gnome.org)
 
-- GitHub Releases: https://github.com/nickotmazgin/clipflow-pro/releases
-- Issues & Support: https://github.com/nickotmazgin/clipflow-pro/issues
+---
 
-## Installation (local dev)
+## Install
 
-```
-./build.sh
-mkdir -p ~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io
-cp -r build/* ~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io/
+### From GitHub (recommended)
+
+1. Download the zip for your Shell version from **[Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest)**:
+   - `clipflow-pro@nickotmazgin.github.io-1.4.0-gs45-50.zip` — GNOME 45–50
+   - `clipflow-pro@nickotmazgin.github.io-1.4.0-gs43-44.zip` — GNOME 43–44
+2. Install:
+
+```bash
+gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.4.0-gs45-50.zip
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
-# Restart GNOME Shell: Alt+F2 → r → Enter
+# Alt+F2 → r → Enter
 ```
 
-## Packaging
+### Local build
 
-- Run `./build-legacy.sh` to prepare a 43–44 build in `build-43-44/`.
-- Run `./create-release-zips.sh` to produce two zips in `dist/`:
-  - 43–44 zip with `shell-version: ["43","44"]`
-  - 45–50 zip with `shell-version: ["45","46","47","48","49","50"]`
-  - Publish the zips on the GitHub Releases page.
+```bash
+./build.sh && ./install.sh
+# Alt+F2 → r → Enter
+```
 
-### Compliance notes (1.3.9)
-
-- No Gtk imports in the shell process (extension.js)
-- No spawn usage; GNOME Shell APIs only for clipboard
-- Async file reads via `Gio.File.load_contents_async`
-- Logs gated by `enable-debug-logs` (globalThis.__CFP_DEBUG)
-- 45–50: extension and preferences shipped as ES modules (ESM)
-- 43–44: fixed panel watcher syntax and removed duplicate schema keys
-- No `stylesheet` field in `metadata.json`
-
-This branch targets GNOME 45–50. For GNOME 43–44, use the legacy release zip or the `gnome43-44` branch.
+---
 
 ## Quick Start
 
-- Open clipboard menu: Super+Shift+V
-- Click an entry to copy; right‑click for per‑row actions (Pin/Star/Copy/Clean/Delete)
-- Use Actions submenu (bottom): Sort/Filter, Capture PRIMARY, Pause Monitoring, Export/Import, Maintenance
+1. Copy something — it appears in history
+2. **Left-click** panel icon → **History Window**
+3. **Right-click** panel icon → recent clips + shortcuts
+4. **Super+Shift+V** → quick panel menu
+5. **Settings** → General → **Menu & Rendering** (Auto recommended)
 
-### Sorting & Pagination
+### Features
 
-- Enhanced UI: pinned → starred → newest-first; paginated by `entries-per-page`
-- Classic UI: same ordering with quick filters and “Show more/less” batching
+- Pinned / Starred sections, content-type detection
+- Export / Import, purge duplicates, password filtering
+- Pause monitoring, clear on lock/logout
+- Keyboard shortcuts (Settings → Shortcuts)
 
+---
 
-## Screenshots (1.3.5)
+## Links
 
-![Overview collage (1.3.5)](docs/screenshots/1.3.5/collage-3x3.jpg)
-
-<table>
-  <tr>
-    <td align="center"><img src="docs/screenshots/1.3.5/1.png" alt="ClipFlow Pro screenshot 1" width="300"><br><sub>1</sub></td>
-    <td align="center"><img src="docs/screenshots/1.3.5/2.png" alt="ClipFlow Pro screenshot 2" width="300"><br><sub>2</sub></td>
-    <td align="center"><img src="docs/screenshots/1.3.5/3.png" alt="ClipFlow Pro screenshot 3" width="300"><br><sub>3</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/screenshots/1.3.5/4.png" alt="ClipFlow Pro screenshot 4" width="300"><br><sub>4</sub></td>
-    <td align="center"><img src="docs/screenshots/1.3.5/5.png" alt="ClipFlow Pro screenshot 5" width="300"><br><sub>5</sub></td>
-    <td align="center"><img src="docs/screenshots/1.3.5/6.png" alt="ClipFlow Pro screenshot 6" width="300"><br><sub>6</sub></td>
-  </tr>
-  <tr>
-    <td align="center"><img src="docs/screenshots/1.3.5/7.png" alt="ClipFlow Pro screenshot 7" width="300"><br><sub>7</sub></td>
-    <td align="center"><img src="docs/screenshots/1.3.5/8.png" alt="ClipFlow Pro screenshot 8" width="300"><br><sub>8</sub></td>
-    <td align="center"><img src="docs/screenshots/1.3.5/9.png" alt="ClipFlow Pro screenshot 9" width="300"><br><sub>9</sub></td>
-  </tr>
-</table>
-
-## Find this project
-
-**GitHub topics:** `gnome-shell-extension` · `clipboard` · `clipboard-manager` · `copy-paste` · `wayland` · `linux` · `productivity` · `privacy` · `open-source`
-
-**Search for:** GNOME Shell clipboard manager, Linux clipboard history extension, Wayland clipboard tool, ClipFlow Pro
+- **Releases:** https://github.com/nickotmazgin/clipflow-pro/releases
+- **Issues:** https://github.com/nickotmazgin/clipflow-pro/issues
+- **Changelog:** [CHANGELOG.md](CHANGELOG.md)
 
 ## More GNOME extensions by Nick Otmazgin
 
@@ -110,8 +116,5 @@ This branch targets GNOME 45–50. For GNOME 43–44, use the legacy release zip
 
 ## Support
 
-If you find this project useful, you can support development:
-
-[![GitHub Sponsors](https://img.shields.io/badge/Sponsor-GitHub%20Sponsors-ff5c93?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/nickotmazgin)
+[![GitHub Sponsors](https://img.shields.io/github/sponsors/nickotmazgin?style=social)](https://github.com/sponsors/nickotmazgin)
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)
-

@@ -1,10 +1,46 @@
-## 1.3.10 — 2026-05-30
+## 1.4.0 — 2026-05-31
 
-- Fix: restore `pause-on-lock` and `clear-on-lock` GSettings schema keys (preferences window no longer crashes on open).
+### History Window (major — new in this release)
 
-## Unreleased
+- **Full desktop history browser** (CopyQ-style): search, scroll, copy, pin, star, delete, clear all
+- Opens on **left-click** panel icon (default), **Super+Shift+H**, or from the quick menu
+- Syncs with panel history via `~/.config/clipflow-pro/history.json` (file monitor + refresh)
+- Shipped as `history-window/history-window.js` (requires **gjs**)
 
-- Housekeeping: removed obsolete third-party distribution naming from CI, issue templates, Makefile, and release checklist; GitHub-only distribution.
+### Panel & menus
+
+- **Left-click** → History Window; **right-click** → recent clips with **Show more / Show less** paging
+- **Super+Shift+V** → quick panel popup (Auto: scroll + Prev/Next; Classic: show more/less)
+- Right-click menu trimmed: removed duplicate Open History / About / Copy Last / Capture PRIMARY
+- Show more/less keeps menu open (no jump-close on expand)
+
+### Settings (GNOME 46)
+
+- Preferences window: **ToolbarView + close button** (fixes missing X on Zorin)
+- **Rendering Mode** once under General → Menu & Rendering (Auto / Classic; Enhanced removed from UI)
+- Removed duplicate Compatibility rendering block and legacy menu rows toggle
+- Panel position help text clarifies top-bar-only placement
+
+### Fixes
+
+- ESM: `_extension.dir` Gio.File → path (fixes `GObject_Object` filename error)
+- ESM: no `Me` reference at runtime
+- Enhanced scroll menu on GNOME 45+ (no forced classic-only rows)
+- Auto-fallback and pagination fixes from 1.3.10 testing cycle
+
+### Supersedes all prior releases
+
+**v1.4.0 is the only supported download.** Earlier releases (1.3.x) lack the History Window and are withdrawn from GitHub Releases.
+
+## 1.3.10 — 2026-05-30 (superseded by 1.4.0)
+
+- Fix: restore `pause-on-lock` and `clear-on-lock` GSettings schema keys.
+
+## Unreleased (merged into 1.4.0)
+
+- Fix: GNOME 45+ scrollable enhanced history menu with mouse wheel.
+- Fix: classic Show more / Show less both available when expanded.
+- Fix: GNOME 46 Adw preferences page wrapper.
 
 ## 1.3.9 — 2026-05-25
 

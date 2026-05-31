@@ -66,6 +66,15 @@ else
     echo "Warning: icons directory not found; panel icon may be missing." >&2
 fi
 
+echo "Copying history window (CopyQ-style browser)..."
+if [[ -f "tools/history-window/history-window.js" ]]; then
+    mkdir -p "${BUILD_DIR}/history-window"
+    cp "tools/history-window/history-window.js" "${BUILD_DIR}/history-window/"
+    chmod +x "${BUILD_DIR}/history-window/history-window.js"
+else
+    echo "Warning: history-window.js not found; full history window will be unavailable." >&2
+fi
+
 echo "Preparing GSettings schemas (XML only) ..."
 if [[ -d "${SCHEMAS_DIR}" ]]; then
     mkdir -p "${BUILD_DIR}/schemas"

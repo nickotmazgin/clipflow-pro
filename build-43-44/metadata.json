@@ -1,13 +1,13 @@
 {
   "name": "ClipFlow Pro",
-  "description": "A modern, powerful clipboard manager for GNOME Shell with intelligent organization, beautiful UI, and comprehensive history management.",
+  "description": "GNOME clipboard manager with a full history window, panel menu, search, pin/star, and privacy controls. Left-click opens the CopyQ-style browser; right-click shows recent clips.",
   "uuid": "clipflow-pro@nickotmazgin.github.io",
   "shell-version": [
     "43",
     "44"
   ],
-  "version": 34,
-  "version-name": "1.3.9",
+  "version": 36,
+  "version-name": "1.4.0",
   "url": "https://github.com/nickotmazgin/clipflow-pro",
   "settings-schema": "org.gnome.shell.extensions.clipflow-pro",
   "gettext-domain": "clipflow-pro",

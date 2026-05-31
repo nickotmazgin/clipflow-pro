@@ -75,6 +75,18 @@ def convert_legacy_to_esm(source: str) -> str:
     converted = converted.replace(LEGACY_SETTINGS, ESM_SETTINGS, 1)
     converted = converted.replace(LEGACY_VERTICAL, "orientation: Clutter.Orientation.VERTICAL")
     converted = converted.replace(LEGACY_HORIZONTAL, "orientation: Clutter.Orientation.HORIZONTAL")
+    # ESM runtime has no ExtensionUtils — extension dir comes from module _extension only
+    converted = converted.replace(
+        "    try {\n"
+        "        const ext = ExtensionUtils.getCurrentExtension();\n"
+        "        if (!ext)\n"
+        "            return '';\n"
+        "        return _pathFromExtensionLocation(ext.dir) || _pathFromExtensionLocation(ext.path);\n"
+        "    } catch (_e) {\n"
+        "        return '';\n"
+        "    }\n",
+        "    return '';\n",
+    )
     converted = converted.rstrip() + ESM_CLASS
     return converted
 

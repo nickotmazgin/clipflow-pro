@@ -15,6 +15,12 @@
 
 ---
 
+## Screenshots
+
+![ClipFlow Pro — panel menu, history window, and preferences (2026)](screenshots/collage-2026.png)
+
+---
+
 ## What's new in v1.4.0 (important)
 
 ### History Window (new — not in any earlier release)

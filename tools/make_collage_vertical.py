@@ -1,38 +1,24 @@
 #!/usr/bin/env python3
-"""Vertical numbered collage (1→2→3) for ClipFlow Pro screenshots."""
+"""Stack the main collage on top and three screenshots in a horizontal row below."""
 from __future__ import annotations
 
 import argparse
 from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageFilter
 
-# Reuse visual language from make_collage_2026.py
 GRAD_LEFT = (255, 120, 40)
 GRAD_MID = (40, 180, 90)
 GRAD_RIGHT = (120, 60, 200)
 
-TITLE_H = 140
-TITLE_GAP = 48
 PAD = 40
-BOTTOM_PAD = 56
-TILE_GAP = 36
-TILE_PAD = 14
+SECTION_GAP = 56
+BOTTOM_PAD = 48
+TILE_GAP = 32
+TILE_PAD = 12
 TILE_BG = (16, 18, 28)
 RADIUS = 12
-CONTENT_W = 1400
-
-FONT_CANDIDATES = [
-    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
-    "/usr/share/fonts/truetype/liberation/LiberationSans-Bold.ttf",
-]
-
-
-def font(size: int) -> ImageFont.FreeTypeFont | ImageFont.ImageFont:
-    for path in FONT_CANDIDATES:
-        if Path(path).exists():
-            return ImageFont.truetype(path, size)
-    return ImageFont.load_default()
+ROW_MAX_H = 920
 
 
 def horizontal_gradient(w: int, h: int) -> Image.Image:
@@ -59,17 +45,17 @@ def sharpen(img: Image.Image) -> Image.Image:
     return img.filter(ImageFilter.UnsharpMask(radius=1.2, percent=120, threshold=1))
 
 
-def fit_width(img: Image.Image, max_w: int) -> Image.Image:
+def fit_in_box(img: Image.Image, max_w: int, max_h: int) -> Image.Image:
     w, h = img.size
-    if w <= max_w:
-        return sharpen(img.copy())
-    scale = max_w / w
+    scale = min(max_w / w, max_h / h, 1.0)
     nw, nh = max(1, round(w * scale)), max(1, round(h * scale))
+    if nw == w and nh == h:
+        return sharpen(img.copy())
     return sharpen(img.resize((nw, nh), Image.Resampling.LANCZOS))
 
 
-def tile(img: Image.Image) -> Image.Image:
-    fitted = fit_width(img.convert("RGBA"), CONTENT_W)
+def tile(img: Image.Image, max_w: int, max_h: int) -> Image.Image:
+    fitted = fit_in_box(img.convert("RGBA"), max_w, max_h)
     cw, ch = fitted.width + TILE_PAD * 2, fitted.height + TILE_PAD * 2
     canvas = Image.new("RGBA", (cw, ch), TILE_BG + (255,))
     canvas.paste(fitted, (TILE_PAD, TILE_PAD), fitted)
@@ -103,51 +89,33 @@ def paste_layer(base: Image.Image, layer: Image.Image, xy: tuple[int, int]) -> N
     base.paste(layer, xy, layer)
 
 
-def draw_badge(tile: Image.Image, number: int) -> Image.Image:
-    out = tile.copy()
-    draw = ImageDraw.Draw(out)
-    badge_r = 28
-    cx, cy = 24 + badge_r, 24 + badge_r
-    draw.ellipse((cx - badge_r, cy - badge_r, cx + badge_r, cy + badge_r),
-                 fill=(255, 120, 40, 240), outline=(255, 255, 255, 200), width=2)
-    draw.text((cx, cy), str(number), fill=(255, 255, 255), font=font(32), anchor="mm",
-              stroke_width=1, stroke_fill=(0, 0, 0, 160))
-    return out
+def build_stack(main_path: Path, row_paths: list[Path]) -> Image.Image:
+    main = Image.open(main_path).convert("RGBA")
 
+    inner_w = main.width - PAD * 2
+    slot_w = max(1, (inner_w - TILE_GAP * (len(row_paths) - 1)) // len(row_paths))
+    tiles = [tile(Image.open(p).convert("RGBA"), slot_w, ROW_MAX_H) for p in row_paths]
 
-def draw_title(canvas: Image.Image, title: str, subtitle: str) -> None:
-    draw = ImageDraw.Draw(canvas)
-    tw = canvas.width
-    overlay = Image.new("RGBA", (tw, TITLE_H), (0, 0, 0, 120))
-    canvas.paste(overlay, (0, 0), overlay)
-    draw.text((tw // 2, 42), title, fill=(255, 255, 255), font=font(56), anchor="mm",
-              stroke_width=2, stroke_fill=(0, 0, 0, 180))
-    draw.text((tw // 2, 98), subtitle, fill=(245, 245, 250), font=font(26), anchor="mm",
-              stroke_width=1, stroke_fill=(0, 0, 0, 140))
+    row_w = sum(t.width for t in tiles) + TILE_GAP * (len(tiles) - 1)
+    row_h = max(t.height for t in tiles)
 
+    canvas_w = max(main.width, row_w + PAD * 2)
+    canvas_h = main.height + SECTION_GAP + row_h + BOTTOM_PAD
 
-def build_vertical(paths: list[Path], title: str, subtitle: str) -> Image.Image:
-    tiles = []
-    for i, path in enumerate(paths, start=1):
-        im = Image.open(path).convert("RGBA")
-        tiles.append(draw_badge(tile(im), i))
+    canvas = horizontal_gradient(canvas_w, canvas_h)
 
-    col_w = max(t.width for t in tiles)
-    col_h = sum(t.height for t in tiles) + TILE_GAP * (len(tiles) - 1)
-    total_w = col_w + PAD * 2
-    total_h = TITLE_H + TITLE_GAP + col_h + PAD + BOTTOM_PAD
+    mx = (canvas_w - main.width) // 2
+    paste_layer(canvas, main, (mx, 0))
 
-    canvas = horizontal_gradient(total_w, total_h)
-    draw_title(canvas, title, subtitle)
-
-    y = TITLE_H + TITLE_GAP + PAD // 2
+    y = main.height + SECTION_GAP
+    x = PAD + (canvas_w - PAD * 2 - row_w) // 2
     for t in tiles:
-        x = PAD + (col_w - t.width) // 2
         rt = rounded(t)
+        ty = y + (row_h - t.height) // 2
         sh = drop_shadow(rt)
-        paste_layer(canvas, sh, (x - (sh.width - rt.width) // 2, y - (sh.height - rt.height) // 2))
-        paste_layer(canvas, rt, (x, y))
-        y += t.height + TILE_GAP
+        paste_layer(canvas, sh, (x - (sh.width - rt.width) // 2, ty - (sh.height - rt.height) // 2))
+        paste_layer(canvas, rt, (x, ty))
+        x += t.width + TILE_GAP
 
     return canvas
 
@@ -177,22 +145,21 @@ def export_social(collage: Image.Image, tw: int, th: int) -> Image.Image:
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
+    p.add_argument("--main", required=True, help="Top collage PNG (e.g. collage-2026.png)")
     p.add_argument("image1")
     p.add_argument("image2")
     p.add_argument("image3")
-    p.add_argument("-o", "--output", required=True, help="Main collage PNG path")
-    p.add_argument("--social-dir", help="Export social sizes here")
-    p.add_argument("--title", default="ClipFlow Pro v1.4.1")
-    p.add_argument("--subtitle",
-                   default="History Window · Panel Menu · Settings Shortcuts · 2026")
+    p.add_argument("-o", "--output", required=True)
+    p.add_argument("--social-dir")
     args = p.parse_args()
 
-    paths = [Path(args.image1), Path(args.image2), Path(args.image3)]
-    for path in paths:
+    main_path = Path(args.main)
+    row_paths = [Path(args.image1), Path(args.image2), Path(args.image3)]
+    for path in [main_path, *row_paths]:
         if not path.is_file():
-            raise SystemExit(f"Missing image: {path}")
+            raise SystemExit(f"Missing: {path}")
 
-    collage = build_vertical(paths, args.title, args.subtitle)
+    collage = build_stack(main_path, row_paths)
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)
     collage.save(out, "PNG", compress_level=1, optimize=False)

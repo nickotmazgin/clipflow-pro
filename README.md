@@ -17,7 +17,7 @@
 
 ## Screenshots
 
-![ClipFlow Pro v1.4.1 — history window, panel menu, and settings (2026)](screenshots/collage-v1.4.1-2026.png)
+![ClipFlow Pro — main collage plus v1.4.1 highlights (history window, panel, settings)](screenshots/collage-v1.4.1-2026.png)
 
 ---
 

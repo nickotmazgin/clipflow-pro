@@ -17,7 +17,17 @@
 
 ## Screenshots
 
-![ClipFlow Pro — main collage plus v1.4.1 highlights (history window, panel, settings)](screenshots/collage-v1.4.1-2026.png)
+### Main collage
+
+![ClipFlow Pro — panel menu, history window, and preferences (2026)](screenshots/collage-2026.png)
+
+### v1.4.1 highlights (1 → 2 → 3)
+
+| History window | Panel / recent clips | Settings → Shortcuts |
+|:---:|:---:|:---:|
+| ![History window](screenshots/v1.4.1/1.jpg) | ![Panel menu](screenshots/v1.4.1/2.jpg) | ![Settings shortcuts](screenshots/v1.4.1/3.jpg) |
+
+Full combined image (download / social posts): [collage-v1.4.1-2026.png](screenshots/collage-v1.4.1-2026.png)
 
 ---
 

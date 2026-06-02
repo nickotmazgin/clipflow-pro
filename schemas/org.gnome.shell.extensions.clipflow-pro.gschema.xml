@@ -37,12 +37,6 @@
       <description>Keyboard shortcut for enhanced pasting</description>
     </key>
     
-    <key name="show-menu-shortcut" type="as">
-      <default>['&lt;Super&gt;&lt;Shift&gt;v']</default>
-      <summary>Show clipboard menu shortcut</summary>
-      <description>Keyboard shortcut to show clipboard history menu</description>
-    </key>
-
     <key name="show-history-window-shortcut" type="as">
       <default>['&lt;Super&gt;&lt;Shift&gt;h']</default>
       <summary>Open history window shortcut</summary>
@@ -56,7 +50,7 @@
       </choices>
       <default>'history-window'</default>
       <summary>Panel icon left-click action</summary>
-      <description>Left-click opens the full history window by default. Right-click always shows the recent-clips menu. You can switch left-click back to the quick panel menu here.</description>
+      <description>Left-click opens the full history window by default. Right-click always shows the recent-clips menu.</description>
     </key>
 
     <key name="open-history-window-on-login" type="b">
@@ -151,6 +145,12 @@
       <default>false</default>
       <summary>Copy as plain text</summary>
       <description>Sanitize copied text by stripping zero-width and control characters and normalizing whitespace.</description>
+    </key>
+
+    <key name="enable-xdotool-insert" type="b">
+      <default>true</default>
+      <summary>Enable xdotool auto insert</summary>
+      <description>When enabled, selecting a history entry can auto-paste into the previously focused app using xdotool (X11) or wtype (Wayland).</description>
     </key>
 
     <key name="show-copy-notifications" type="b">

@@ -179,7 +179,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
             menuFrame.set_child(menuBox);
 
             const menuHint = new Gtk.Label({
-                label: _('Left-click opens the history window. Right-click shows recent clips (Show more/less). Super+Shift+V opens the quick panel menu.'),
+                label: _('Left-click opens the history window. Right-click shows recent clips (Show more/less).'),
                 wrap: true,
                 wrap_mode: Pango.WrapMode.WORD,
                 xalign: 0,
@@ -189,7 +189,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
             menuBox.append(this._createComboRow(
                 _('Rendering Mode'),
-                _('Auto: scrollable quick menu with Prev/Next. Classic: simple list with Show more/less (for Super+Shift+V menu only).'),
+                _('Auto: scrollable menu with Prev/Next. Classic: simple list with Show more/less.'),
                 'rendering-mode',
                 [
                     ['auto', _('Auto (recommended)')],
@@ -205,8 +205,8 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
             ));
 
             menuBox.append(this._createSpinRow(
-                _('Entries Per Page (Quick Panel Menu)'),
-                _('For Super+Shift+V popup menu — not the history window.'),
+                _('Entries Per Page (Menu)'),
+                _('Controls how many items are shown per page in the panel menu.'),
                 'entries-per-page',
                 5, 50, 10
             ));
@@ -409,6 +409,22 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
             ]
         );
         clipBox.append(dedupeModeBox);
+
+        const autoInsertToggle = this._createSwitchRow(
+            _('Enable Auto Insert (xdotool / wtype)'),
+            _('If enabled, clicking a clipboard entry can auto-paste into the previously focused app. Disable this if you want copy-only behavior.'),
+            'enable-xdotool-insert'
+        );
+        clipBox.append(autoInsertToggle);
+
+        const autoInsertHelp = new Gtk.Label({
+            label: _('X11 (recommended): install xdotool with `sudo apt install xdotool`.\nWayland fallback uses `wtype` if available.\nThis feature simulates key presses and may be blocked by some apps.'),
+            wrap: true,
+            wrap_mode: Pango.WrapMode.WORD_CHAR,
+            xalign: 0,
+        });
+        autoInsertHelp.get_style_context().add_class('dim-label');
+        clipBox.append(autoInsertHelp);
 
         const pauseDurationBox = this._createSpinRow(
             _('Pause Duration (minutes)'),
@@ -680,15 +696,6 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
             spacing: 10
         });
         shortcutsFrame.set_child(shortcutsListBox);
-
-        // Show menu shortcut
-        const showMenuBox = this._createShortcutRow(
-            _('Show Clipboard Menu'),
-            _('Open the clipboard history menu'),
-            'show-menu-shortcut',
-            '<Super><Shift>v'
-        );
-        shortcutsListBox.append(showMenuBox);
 
         const showWindowBox = this._createShortcutRow(
             _('Open History Window'),

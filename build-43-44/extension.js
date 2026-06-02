@@ -8,6 +8,7 @@ const {St, GObject, GLib, Gio, Clutter, Meta, Shell, Pango} = imports.gi;
 
 const Me = ExtensionUtils.getCurrentExtension();
 const _ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
+const ByteArray = imports.byteArray;
 
 function _pathFromExtensionLocation(dir) {
     if (!dir)
@@ -185,6 +186,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._clipboardRetryTimeoutId = 0;
         this._clipboardRetryAttempts = 0;
         this._clipboardRetryNotified = false;
+        this._lastInsertTargetWindow = null;
+        this._lastInsertTargetWindowId = '';
+        this._insertFocusTrackId = 0;
         this._lastClipboardText = '';
         this._lastPrimaryText = '';
         this._monitoringResumeTimeoutId = 0;
@@ -283,7 +287,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             this._disableCss = this._safeGetBoolean('disable-css', false);
             this._buildMenu();
         }));
-        ['show-menu-shortcut', 'show-history-window-shortcut', 'enhanced-copy-shortcut', 'enhanced-paste-shortcut'].forEach(key => {
+        ['show-history-window-shortcut', 'enhanced-copy-shortcut', 'enhanced-paste-shortcut'].forEach(key => {
             this._settingsSignalIds.push(this._settings.connect(`changed::${key}`, () => {
                 this._registerKeybindings();
             }));
@@ -297,6 +301,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._createIcon();
         this._watchPanelForIconSize();
         this._buildContextMenu();
+        this._setupInsertTargetTracking();
         this._loadHistoryFromDisk();
         this._setupHistoryFileMonitor();
         if (this._safeGetBoolean('open-history-window-on-login', false)) {
@@ -1462,11 +1467,15 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
         this._contextMenu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
-        const openClipboardItem = this._contextMenu.addAction(_('Open Quick Menu (Super+Shift+V)'), () => {
-            this._contextMenu.close();
-            this.menu.open(true);
-        });
-        this._applyContextMenuItemStyle(openClipboardItem);
+        const openHistoryWindowItem = this._contextMenu.addAction(
+            _('Open History Window (Full Clipboard)'),
+            () => {
+                if (this._contextMenu?.isOpen)
+                    this._contextMenu.close();
+                this._openHistoryWindow();
+            }
+        );
+        this._applyContextMenuItemStyle(openHistoryWindowItem);
 
         const settingsItem = this._contextMenu.addAction(_('Settings'), () => {
             this._openPreferencesTab('general');
@@ -1574,10 +1583,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
             const entryItem = new PopupMenu.PopupMenuItem(label);
             this._applyContextMenuItemStyle(entryItem);
             entryItem.connect('activate', () => {
-                this._copyToClipboard(item.text);
-                if (this._contextMenu) {
+                if (this._contextMenu?.isOpen)
                     this._contextMenu.close();
-                }
+                this._activateHistoryItem(item);
             });
             this._contextMenuRecentSection.addMenuItem(entryItem);
         });
@@ -1630,8 +1638,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
     _updateContextMenuNavigation(shown, total, pageSize) {
         if (this._contextMenuNavInfo) {
             const info = total === 0
-                ? _('Left-click icon for the full history window')
-                : _('Showing %d of %d — left-click for all entries').format(shown, total);
+                ? _('Left-click the panel icon to open the full history window.')
+                : _('Showing %d of %d entries. Use Show more/Show less, or left-click the panel icon to open all.').format(shown, total);
             this._setContextMenuItemLabel(this._contextMenuNavInfo, info);
             this._setContextMenuItemVisible(this._contextMenuNavInfo, total > 0);
         }
@@ -1686,6 +1694,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return;
         }
 
+        this._captureInsertTargetWindow();
         this._populateContextMenuRecentEntries();
         this._syncContextMenuToggles();
 
@@ -1726,12 +1735,137 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
     _openMainMenuWithFallback() {
         try {
+            this._captureInsertTargetWindow();
             if (!this.menu) return;
             if (!this._menuBuilt) {
                 try { this._buildMenu(); this._menuBuilt = true; } catch (_e) {}
             }
             this.menu.open(true);
         } catch (_e) {}
+    }
+
+    _setupInsertTargetTracking() {
+        if (this._insertFocusTrackId)
+            return;
+        try {
+            this._insertFocusTrackId = global.display.connect(
+                'notify::focus-window',
+                () => this._trackInsertTargetWindow(global.display.focus_window)
+            );
+            this._trackInsertTargetWindow(global.display.focus_window);
+        } catch (_e) {}
+    }
+
+    _teardownInsertTargetTracking() {
+        if (this._insertFocusTrackId) {
+            try {
+                global.display.disconnect(this._insertFocusTrackId);
+            } catch (_e) {}
+            this._insertFocusTrackId = 0;
+        }
+    }
+
+    _isShellOrClipFlowWindow(win) {
+        if (!win)
+            return true;
+        try {
+            const wmClass = win.get_wm_class?.();
+            if (!wmClass)
+                return false;
+            const name = String(wmClass[0] || '').toLowerCase();
+            const instance = String(wmClass[1] || '').toLowerCase();
+            return name.includes('gnome-shell')
+                || instance.includes('gnome-shell')
+                || name.includes('mutter')
+                || instance.includes('mutter');
+        } catch (_e) {
+            return false;
+        }
+    }
+
+    _getWindowXid(win) {
+        if (!win)
+            return '';
+        try {
+            if (typeof win.get_xid === 'function') {
+                const xid = win.get_xid();
+                if (xid > 0)
+                    return String(xid);
+            }
+        } catch (_e) {}
+        return '';
+    }
+
+    _trackInsertTargetWindow(win) {
+        if (!win || this._isShellOrClipFlowWindow(win))
+            return;
+        this._lastInsertTargetWindow = win;
+        const xid = this._getWindowXid(win);
+        if (xid) {
+            this._lastInsertTargetWindowId = xid;
+            this._persistInsertTargetWindowId(xid);
+        }
+    }
+
+    _persistInsertTargetWindowId(xid) {
+        if (!xid || !this._storageDir)
+            return;
+        try {
+            this._ensureStorageDir();
+            const path = GLib.build_filenamev([this._storageDir, 'insert-target-window-id.txt']);
+            GLib.file_set_contents(path, String(xid));
+        } catch (_e) {}
+    }
+
+    _loadPersistedInsertTargetWindowId() {
+        try {
+            const path = GLib.build_filenamev([this._storageDir, 'insert-target-window-id.txt']);
+            if (!GLib.file_test(path, GLib.FileTest.EXISTS))
+                return '';
+            const [, bytes] = GLib.file_get_contents(path);
+            const id = String(ByteArray.toString(bytes)).trim();
+            return /^\d+$/.test(id) ? id : '';
+        } catch (_e) {
+            return '';
+        }
+    }
+
+    _captureInsertTargetWindow() {
+        try {
+            const persisted = this._loadPersistedInsertTargetWindowId();
+            if (persisted)
+                this._lastInsertTargetWindowId = persisted;
+            const win = global?.display?.focus_window || null;
+            if (win && !this._isShellOrClipFlowWindow(win))
+                this._trackInsertTargetWindow(win);
+            if (!this._lastInsertTargetWindowId && GLib.find_program_in_path('xdotool')) {
+                const [ok, out] = GLib.spawn_command_line_sync('xdotool getactivewindow');
+                if (ok && out) {
+                    const id = String(ByteArray.toString(out)).trim();
+                    if (/^\d+$/.test(id))
+                        this._lastInsertTargetWindowId = id;
+                }
+            }
+        } catch (_e) {}
+    }
+
+    _restoreInsertTargetWindow() {
+        try {
+            if (this._lastInsertTargetWindowId && GLib.find_program_in_path('xdotool')) {
+                const ok = this._runInsertCommand(['xdotool', 'windowactivate', '--sync', this._lastInsertTargetWindowId]);
+                if (ok)
+                    return true;
+            }
+        } catch (_e) {}
+        const win = this._lastInsertTargetWindow;
+        if (!win)
+            return false;
+        try {
+            win.activate(global.get_current_time());
+            return true;
+        } catch (_e) {
+            return false;
+        }
     }
 
     _createSearchRow() {
@@ -3259,7 +3393,6 @@ class ClipFlowIndicator extends PanelMenu.Button {
             }
         };
 
-        register('show-menu-shortcut', this._handleShowMenuShortcut.bind(this));
         register('show-history-window-shortcut', () => this._openHistoryWindow());
         register('enhanced-copy-shortcut', this._handleEnhancedCopyShortcut.bind(this));
         register('enhanced-paste-shortcut', this._handleEnhancedPasteShortcut.bind(this));
@@ -3288,12 +3421,6 @@ class ClipFlowIndicator extends PanelMenu.Button {
         }
 
         this._keybindingRegistrations.clear();
-    }
-
-    _handleShowMenuShortcut() {
-        if (!this.menu) return;
-        if (this.menu.isOpen) { this.menu.close(); return; }
-        this._openMainMenuWithFallback();
     }
 
     _handleEnhancedCopyShortcut() {
@@ -4265,9 +4392,72 @@ class ClipFlowIndicator extends PanelMenu.Button {
             }
         }
 
-        if (this.menu && typeof this.menu.close === 'function') {
+        if (this._contextMenu?.isOpen)
+            this._contextMenu.close();
+        if (this.menu && typeof this.menu.close === 'function')
             this.menu.close();
+
+        // Copy first, close menus, then restore the last app window and paste.
+        GLib.timeout_add(GLib.PRIORITY_DEFAULT, 180, () => {
+            this._restoreInsertTargetWindow();
+            GLib.timeout_add(GLib.PRIORITY_DEFAULT, 220, () => {
+                this._insertClipboardIntoFocusedTarget(false);
+                return GLib.SOURCE_REMOVE;
+            });
+            return GLib.SOURCE_REMOVE;
+        });
+    }
+
+    _runInsertCommand(argv) {
+        try {
+            const proc = Gio.Subprocess.new(
+                argv,
+                Gio.SubprocessFlags.SEARCH_PATH_FROM_ENVP
+                    | Gio.SubprocessFlags.STDOUT_SILENCE
+                    | Gio.SubprocessFlags.STDERR_SILENCE
+            );
+            proc.wait(null);
+            return proc.get_successful();
+        } catch (_e) {
+            return false;
         }
+    }
+
+    _insertClipboardIntoFocusedTarget(submit = false) {
+        if (!this._safeGetBoolean('enable-xdotool-insert', true))
+            return false;
+
+        const text = (this._lastClipboardText || '').trim();
+        if (!text)
+            return false;
+
+        const wid = this._lastInsertTargetWindowId;
+
+        try {
+            if (GLib.find_program_in_path('xdotool')) {
+                if (wid) {
+                    const chain = submit
+                        ? `xdotool windowactivate --sync ${wid} key --clearmodifiers ctrl+v key --clearmodifiers Return`
+                        : `xdotool windowactivate --sync ${wid} key --clearmodifiers ctrl+v`;
+                    GLib.spawn_command_line_async(chain);
+                    return true;
+                }
+                let pasted = this._runInsertCommand(['xdotool', 'key', '--clearmodifiers', 'ctrl+v']);
+                if (!pasted)
+                    pasted = this._runInsertCommand(['xdotool', 'key', '--clearmodifiers', 'shift+Insert']);
+                if (pasted && submit)
+                    this._runInsertCommand(['xdotool', 'key', '--clearmodifiers', 'Return']);
+                return pasted;
+            }
+            if (GLib.find_program_in_path('wtype')) {
+                const pasted = this._runInsertCommand(['wtype', text]);
+                if (pasted && submit)
+                    this._runInsertCommand(['wtype', '\n']);
+                return pasted;
+            }
+        } catch (_e) {}
+
+        return false;
     }
 
     _createTimestampLabel(item) {
@@ -4513,6 +4703,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
     destroy() {
         this._teardownHistoryFileMonitor();
+        this._teardownInsertTargetTracking();
         if (this._destroyed) {
             return;
         }

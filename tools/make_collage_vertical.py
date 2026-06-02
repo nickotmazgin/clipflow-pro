@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Stack the main collage on top and three screenshots in a horizontal row below."""
+"""Stack the main collage on top; three screenshots below, horizontal, as-is (no tile frames)."""
 from __future__ import annotations
 
 import argparse
@@ -12,13 +12,11 @@ GRAD_MID = (40, 180, 90)
 GRAD_RIGHT = (120, 60, 200)
 
 PAD = 40
-SECTION_GAP = 56
-BOTTOM_PAD = 48
-TILE_GAP = 32
-TILE_PAD = 12
-TILE_BG = (16, 18, 28)
-RADIUS = 12
-ROW_MAX_H = 920
+SECTION_GAP = 44
+BOTTOM_PAD = 44
+IMAGE_GAP = 28
+RADIUS = 8
+ROW_MAX_H = 1000
 
 
 def horizontal_gradient(w: int, h: int) -> Image.Image:
@@ -45,44 +43,27 @@ def sharpen(img: Image.Image) -> Image.Image:
     return img.filter(ImageFilter.UnsharpMask(radius=1.2, percent=120, threshold=1))
 
 
-def fit_in_box(img: Image.Image, max_w: int, max_h: int) -> Image.Image:
+def fit_in_box(img: Image.Image, max_w: int, max_h: int, *, allow_upscale: bool = True) -> Image.Image:
     w, h = img.size
-    scale = min(max_w / w, max_h / h, 1.0)
+    scale = min(max_w / w, max_h / h)
+    if not allow_upscale:
+        scale = min(scale, 1.0)
     nw, nh = max(1, round(w * scale)), max(1, round(h * scale))
     if nw == w and nh == h:
         return sharpen(img.copy())
     return sharpen(img.resize((nw, nh), Image.Resampling.LANCZOS))
 
 
-def tile(img: Image.Image, max_w: int, max_h: int) -> Image.Image:
-    fitted = fit_in_box(img.convert("RGBA"), max_w, max_h)
-    cw, ch = fitted.width + TILE_PAD * 2, fitted.height + TILE_PAD * 2
-    canvas = Image.new("RGBA", (cw, ch), TILE_BG + (255,))
-    canvas.paste(fitted, (TILE_PAD, TILE_PAD), fitted)
-    draw = ImageDraw.Draw(canvas)
-    draw.rounded_rectangle((1, 1, cw - 2, ch - 2), radius=RADIUS, outline=(255, 255, 255, 40), width=1)
-    return canvas
-
-
-def rounded(im: Image.Image, radius: int = RADIUS) -> Image.Image:
-    w, h = im.size
-    mask = Image.new("L", (w, h), 0)
-    ImageDraw.Draw(mask).rounded_rectangle((0, 0, w, h), radius=radius, fill=255)
-    out = im.copy()
-    out.putalpha(mask)
-    return out
-
-
-def drop_shadow(im: Image.Image) -> Image.Image:
-    blur, offset = 14, (0, 6)
-    w, h = im.size
-    pad = blur * 2 + abs(offset[0]) + abs(offset[1])
-    layer = Image.new("RGBA", (w + pad, h + pad), (0, 0, 0, 0))
-    shadow = Image.new("RGBA", im.size, (0, 0, 0, 90))
-    shadow.putalpha(im.split()[3])
-    sx, sy = blur + max(offset[0], 0), blur + max(offset[1], 0)
-    layer.paste(shadow, (sx + offset[0], sy + offset[1]))
-    return layer.filter(ImageFilter.GaussianBlur(blur))
+def build_row_as_is(row_paths: list[Path], inner_w: int) -> tuple[list[Image.Image], int, int]:
+    n = len(row_paths)
+    slot_w = max(1, (inner_w - IMAGE_GAP * (n - 1)) // n)
+    images = [
+        fit_in_box(Image.open(p).convert("RGB"), slot_w, ROW_MAX_H, allow_upscale=True)
+        for p in row_paths
+    ]
+    row_w = sum(im.width for im in images) + IMAGE_GAP * (n - 1)
+    row_h = max(im.height for im in images)
+    return images, row_w, row_h
 
 
 def paste_layer(base: Image.Image, layer: Image.Image, xy: tuple[int, int]) -> None:
@@ -91,17 +72,11 @@ def paste_layer(base: Image.Image, layer: Image.Image, xy: tuple[int, int]) -> N
 
 def build_stack(main_path: Path, row_paths: list[Path]) -> Image.Image:
     main = Image.open(main_path).convert("RGBA")
-
     inner_w = main.width - PAD * 2
-    slot_w = max(1, (inner_w - TILE_GAP * (len(row_paths) - 1)) // len(row_paths))
-    tiles = [tile(Image.open(p).convert("RGBA"), slot_w, ROW_MAX_H) for p in row_paths]
-
-    row_w = sum(t.width for t in tiles) + TILE_GAP * (len(tiles) - 1)
-    row_h = max(t.height for t in tiles)
+    row_images, row_w, row_h = build_row_as_is(row_paths, inner_w)
 
     canvas_w = max(main.width, row_w + PAD * 2)
     canvas_h = main.height + SECTION_GAP + row_h + BOTTOM_PAD
-
     canvas = horizontal_gradient(canvas_w, canvas_h)
 
     mx = (canvas_w - main.width) // 2
@@ -109,13 +84,10 @@ def build_stack(main_path: Path, row_paths: list[Path]) -> Image.Image:
 
     y = main.height + SECTION_GAP
     x = PAD + (canvas_w - PAD * 2 - row_w) // 2
-    for t in tiles:
-        rt = rounded(t)
-        ty = y + (row_h - t.height) // 2
-        sh = drop_shadow(rt)
-        paste_layer(canvas, sh, (x - (sh.width - rt.width) // 2, ty - (sh.height - rt.height) // 2))
-        paste_layer(canvas, rt, (x, ty))
-        x += t.width + TILE_GAP
+    for im in row_images:
+        ty = y + (row_h - im.height) // 2
+        canvas.paste(im, (x, ty))
+        x += im.width + IMAGE_GAP
 
     return canvas
 
@@ -137,9 +109,7 @@ def export_social(collage: Image.Image, tw: int, th: int) -> Image.Image:
     ImageDraw.Draw(mask).rounded_rectangle((0, 0, nw, nh), radius=RADIUS + 4, fill=255)
     fitted.putalpha(mask)
     x, y = (tw - nw) // 2, (th - nh) // 2
-    sh = drop_shadow(fitted)
-    paste_layer(canvas, sh, (x - (sh.width - nw) // 2, y - (sh.height - nh) // 2))
-    paste_layer(canvas, fitted, (x, y))
+    canvas.paste(fitted, (x, y), fitted)
     return canvas
 
 

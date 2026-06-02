@@ -9,7 +9,25 @@ const { GObject, GLib, Gio, Gtk, Adw, Gdk, Pango } = imports.gi;
 
 const HISTORY_DIR = GLib.build_filenamev([GLib.get_user_config_dir(), 'clipflow-pro']);
 const HISTORY_FILE = GLib.build_filenamev([HISTORY_DIR, 'history.json']);
+const INSERT_TARGET_FILE = GLib.build_filenamev([HISTORY_DIR, 'insert-target-window-id.txt']);
 const APP_ID = 'io.github.nickotmazgin.ClipFlowProHistory';
+const SETTINGS_SCHEMA = 'org.gnome.shell.extensions.clipflow-pro';
+const PREVIEW_MAX_CHARS = 140;
+let _settings = null;
+
+function normalizeText(value) {
+    return typeof value === 'string' ? value.trim() : '';
+}
+
+function sortEntries(entries) {
+    return entries.slice().sort((a, b) => {
+        if (Boolean(a.pinned) !== Boolean(b.pinned))
+            return a.pinned ? -1 : 1;
+        if (Boolean(a.starred) !== Boolean(b.starred))
+            return a.starred ? -1 : 1;
+        return (b.timestampUnix || 0) - (a.timestampUnix || 0);
+    });
+}
 
 function loadHistory() {
     if (!GLib.file_test(HISTORY_FILE, GLib.FileTest.EXISTS))
@@ -20,9 +38,9 @@ function loadHistory() {
         const parsed = JSON.parse(raw);
         if (!Array.isArray(parsed))
             return [];
-        return parsed
+        return sortEntries(parsed
             .map(e => {
-                const text = (e && e.text) ? String(e.text).trim() : '';
+                const text = normalizeText(e && e.text);
                 if (!text)
                     return null;
                 return {
@@ -34,8 +52,7 @@ function loadHistory() {
                     sensitive: Boolean(e.sensitive),
                 };
             })
-            .filter(Boolean)
-            .sort((a, b) => (b.timestampUnix || 0) - (a.timestampUnix || 0));
+            .filter(Boolean));
     } catch (_e) {
         return [];
     }
@@ -43,7 +60,7 @@ function loadHistory() {
 
 function saveHistory(entries) {
     GLib.mkdir_with_parents(HISTORY_DIR, 0o700);
-    const payload = JSON.stringify(entries, null, 2);
+    const payload = JSON.stringify(sortEntries(entries), null, 2);
     GLib.file_set_contents(HISTORY_FILE, payload);
     try {
         const file = Gio.File.new_for_path(HISTORY_FILE);
@@ -86,6 +103,79 @@ function copyToClipboard(text) {
     }
 }
 
+function _runCommand(argv) {
+    try {
+        const proc = Gio.Subprocess.new(argv, Gio.SubprocessFlags.NONE);
+        proc.wait(null);
+        return proc.get_successful();
+    } catch (_e) {
+        return false;
+    }
+}
+
+function loadInsertTargetWindowId() {
+    try {
+        if (!GLib.file_test(INSERT_TARGET_FILE, GLib.FileTest.EXISTS))
+            return '';
+        const [, bytes] = GLib.file_get_contents(INSERT_TARGET_FILE);
+        const id = String(ByteArray.toString(bytes)).trim();
+        return /^\d+$/.test(id) ? id : '';
+    } catch (_e) {
+        return '';
+    }
+}
+
+function insertToFocusedTarget(text, submit = false) {
+    const value = normalizeText(text);
+    if (!value)
+        return false;
+
+    if (!_isAutoInsertEnabled())
+        return false;
+
+    if (!copyToClipboard(value))
+        return false;
+
+    if (GLib.find_program_in_path('xdotool')) {
+        const wid = loadInsertTargetWindowId();
+        if (wid) {
+            const chain = submit
+                ? `xdotool windowactivate --sync ${wid} key --clearmodifiers ctrl+v key --clearmodifiers Return`
+                : `xdotool windowactivate --sync ${wid} key --clearmodifiers ctrl+v`;
+            GLib.spawn_command_line_async(chain);
+            return true;
+        }
+        const pasted = _runCommand(['xdotool', 'key', '--clearmodifiers', 'ctrl+v'])
+            || _runCommand(['xdotool', 'key', '--clearmodifiers', 'shift+Insert']);
+        if (!pasted)
+            return false;
+        if (submit)
+            _runCommand(['xdotool', 'key', '--clearmodifiers', 'Return']);
+        return true;
+    }
+
+    if (GLib.find_program_in_path('wtype')) {
+        const typed = _runCommand(['wtype', value]);
+        if (!typed)
+            return false;
+        if (submit)
+            _runCommand(['wtype', '\n']);
+        return true;
+    }
+
+    return false;
+}
+
+function _isAutoInsertEnabled() {
+    try {
+        if (!_settings)
+            _settings = new Gio.Settings({ schema_id: SETTINGS_SCHEMA });
+        if (_settings.settings_schema?.has_key?.('enable-xdotool-insert'))
+            return _settings.get_boolean('enable-xdotool-insert');
+    } catch (_e) {}
+    return true;
+}
+
 const ClipFlowHistoryWindow = GObject.registerClass(
 class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
     _init(app) {
@@ -94,7 +184,12 @@ class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
         this._entries = [];
         this._filter = '';
         this._refreshTimer = 0;
-        this._previewTimer = 0;
+        this._selectedIds = new Set();
+        this._rowById = new Map();
+        this._activeRowId = null;
+        this._lastCopiedId = null;
+        this._lastCopiedTs = 0;
+        this._lastReloadSignature = '';
 
         const toolbar = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL, spacing: 6 });
         toolbar.set_margin_start(12);
@@ -117,6 +212,8 @@ class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
         toolbar.append(this._search);
         toolbar.append(mkBtn('Refresh', () => this._reloadFromDisk()));
         toolbar.append(mkBtn('Copy', () => this._copySelected()));
+        toolbar.append(mkBtn('Insert', () => this._insertSelected(false)));
+        toolbar.append(mkBtn('Insert + Enter', () => this._insertSelected(true)));
         toolbar.append(mkBtn('Pin', () => this._toggleSelected('pinned')));
         toolbar.append(mkBtn('Star', () => this._toggleSelected('starred')));
         toolbar.append(mkBtn('Delete', () => this._deleteSelected()));
@@ -125,9 +222,19 @@ class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
         this._list = Gtk.ListBox.new();
         this._list.set_selection_mode(Gtk.SelectionMode.SINGLE);
         this._list.connect('row-activated', (_lb, row) => {
-            const idx = row._cfpIndex;
-            if (idx >= 0 && this._entries[idx])
-                copyToClipboard(this._entries[idx].text);
+            const entry = this._entryFromRow(row);
+            if (!entry)
+                return;
+            this._copyEntry(entry);
+        });
+        this._list.connect('selected-rows-changed', () => {
+            const row = this._list.get_selected_row();
+            if (!row) {
+                this._activeRowId = null;
+            } else if (row._cfpId) {
+                this._activeRowId = row._cfpId;
+            }
+            this._updateStatus();
         });
 
         const scrolled = new Gtk.ScrolledWindow({
@@ -158,20 +265,14 @@ class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
         });
         header.pack_end(prefsBtn);
 
-        const panelBtn = new Gtk.Button({ label: 'Panel menu' });
-        panelBtn.set_tooltip_text('Tip: left-click the panel icon for the quick menu; this window stays in sync.');
-        panelBtn.connect('clicked', () => {
-            this.minimize();
-        });
-        header.pack_start(panelBtn);
-
         this.set_content(new Adw.ToolbarView());
         this.get_content().add_top_bar(header);
         this.get_content().set_content(content);
 
         this._reloadFromDisk();
         this._setupFileMonitor();
-        this._refreshTimer = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 3, () => {
+        // Keep a low-frequency safety refresh; file monitor is primary.
+        this._refreshTimer = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 20, () => {
             this._reloadFromDisk(true);
             return GLib.SOURCE_CONTINUE;
         });
@@ -197,16 +298,39 @@ class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
         return this._entries.filter(e => e.text.toLowerCase().includes(q));
     }
 
+    _buildSignature(entries) {
+        return JSON.stringify(entries.map(e => [
+            e.id,
+            e.timestampUnix || 0,
+            Boolean(e.pinned),
+            Boolean(e.starred),
+            Boolean(e.sensitive),
+            e.text,
+        ]));
+    }
+
     _rebuildList() {
         const children = [...this._list];
         children.forEach(c => this._list.remove(c));
+        this._rowById.clear();
 
         const visible = this._visibleEntries();
         visible.forEach((entry, index) => {
             const row = new Gtk.ListBoxRow();
-            row._cfpIndex = this._entries.indexOf(entry);
+            row._cfpId = entry.id;
 
             const box = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL, spacing: 10, margin_top: 6, margin_bottom: 6, margin_start: 8, margin_end: 8 });
+            const select = new Gtk.CheckButton({ valign: Gtk.Align.START });
+            select.set_active(this._selectedIds.has(entry.id));
+            select.set_tooltip_text('Select for bulk actions');
+            select.connect('toggled', btn => {
+                if (btn.get_active())
+                    this._selectedIds.add(entry.id);
+                else
+                    this._selectedIds.delete(entry.id);
+                this._updateStatus();
+            });
+
             const meta = new Gtk.Label({
                 label: formatTs(entry.timestampUnix),
                 xalign: 0,
@@ -219,63 +343,140 @@ class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
             if (entry.starred) flags.push('★');
             const prefix = flags.length ? `${flags.join(' ')} ` : '';
 
-            const preview = entry.text.length > 120 ? `${entry.text.slice(0, 117)}…` : entry.text;
+            const preview = entry.text.length > PREVIEW_MAX_CHARS
+                ? `${entry.text.slice(0, PREVIEW_MAX_CHARS - 1)}…`
+                : entry.text;
             const label = new Gtk.Label({
                 label: prefix + preview,
                 xalign: 0,
                 hexpand: true,
                 wrap: true,
                 wrap_mode: Pango.WrapMode.WORD_CHAR,
-                selectable: true,
+                selectable: false,
             });
 
+            box.append(select);
             box.append(meta);
             box.append(label);
             row.set_child(box);
+            this._attachRowGestures(row, entry);
+            this._rowById.set(entry.id, row);
             this._list.append(row);
         });
 
-        this._status.label = visible.length === this._entries.length
-            ? `${this._entries.length} entries — double-click to copy`
-            : `${visible.length} of ${this._entries.length} entries — double-click to copy`;
+        this._updateStatus(visible.length);
     }
 
     _reloadFromDisk(quiet = false) {
         const loaded = loadHistory();
-        loaded.sort((a, b) => (b.timestampUnix || 0) - (a.timestampUnix || 0));
-        this._entries = loaded;
+        const sorted = sortEntries(loaded);
+        const signature = this._buildSignature(sorted);
+        if (quiet && signature === this._lastReloadSignature)
+            return;
+        this._lastReloadSignature = signature;
+        this._entries = sorted;
+        const validIds = new Set(this._entries.map(e => e.id));
+        this._selectedIds = new Set([...this._selectedIds].filter(id => validIds.has(id)));
+        if (this._activeRowId && !validIds.has(this._activeRowId))
+            this._activeRowId = null;
+        if (this._lastCopiedId && !validIds.has(this._lastCopiedId))
+            this._lastCopiedId = null;
         this._rebuildList();
         if (!quiet && this._entries.length === 0)
             this._status.label = 'No history yet — copy something or use the panel icon.';
     }
 
+    _entryFromRow(row) {
+        if (!row || !row._cfpId)
+            return null;
+        return this._entries.find(e => e.id === row._cfpId) || null;
+    }
+
     _selectedEntry() {
         const row = this._list.get_selected_row();
-        if (!row || row._cfpIndex === undefined || row._cfpIndex < 0)
-            return null;
-        return this._entries[row._cfpIndex] || null;
+        return this._entryFromRow(row);
+    }
+
+    _selectedEntries() {
+        const selected = this._entries.filter(e => this._selectedIds.has(e.id));
+        if (selected.length > 0)
+            return selected;
+        const fallback = this._selectedEntry();
+        return fallback ? [fallback] : [];
+    }
+
+    _copyEntry(entry) {
+        if (!entry)
+            return false;
+        const ok = copyToClipboard(entry.text);
+        if (!ok)
+            return false;
+        this._lastCopiedId = entry.id;
+        this._lastCopiedTs = Math.floor(Date.now() / 1000);
+        this._selectedIds.clear();
+        this._selectedIds.add(entry.id);
+        this._updateStatus();
+        return true;
     }
 
     _copySelected() {
-        const e = this._selectedEntry();
-        if (e)
-            copyToClipboard(e.text);
+        const entries = this._selectedEntries();
+        if (entries.length === 0)
+            return;
+        if (entries.length === 1) {
+            this._copyEntry(entries[0]);
+            return;
+        }
+        const merged = entries.map(e => e.text).join('\n');
+        if (copyToClipboard(merged)) {
+            this._lastCopiedId = entries[0].id;
+            this._lastCopiedTs = Math.floor(Date.now() / 1000);
+            this._updateStatus();
+        }
+    }
+
+    _insertSelected(submit = false) {
+        const entries = this._selectedEntries();
+        if (entries.length === 0)
+            return;
+        const payload = entries.map(e => e.text).join('\n');
+        this.minimize();
+        GLib.timeout_add(GLib.PRIORITY_DEFAULT, 220, () => {
+            const ok = insertToFocusedTarget(payload, submit);
+            if (ok) {
+                this._lastCopiedId = entries[0].id;
+                this._lastCopiedTs = Math.floor(Date.now() / 1000);
+                this._status.label = submit
+                    ? 'Inserted and submitted into focused field.'
+                    : 'Inserted into focused field.';
+            } else {
+                this._status.label = 'Insert failed (or disabled). Check "Enable Auto Insert" in ClipFlow settings and ensure xdotool/wtype is installed.';
+            }
+            return GLib.SOURCE_REMOVE;
+        });
     }
 
     _toggleSelected(field) {
-        const e = this._selectedEntry();
-        if (!e)
+        const targets = this._selectedEntries();
+        if (targets.length === 0)
             return;
-        e[field] = !e[field];
+        // Flip using the first selected entry as baseline to keep bulk action predictable.
+        const newValue = !Boolean(targets[0][field]);
+        targets.forEach(e => {
+            e[field] = newValue;
+        });
+        this._entries = sortEntries(this._entries);
         saveHistory(this._entries);
         this._rebuildList();
     }
 
     _deleteSelected() {
-        const e = this._selectedEntry();
-        if (!e)
+        const targets = this._selectedEntries();
+        if (targets.length === 0)
             return;
-        this._entries = this._entries.filter(x => x.id !== e.id);
+        const ids = new Set(targets.map(t => t.id));
+        this._entries = this._entries.filter(x => !ids.has(x.id));
+        ids.forEach(id => this._selectedIds.delete(id));
         saveHistory(this._entries);
         this._rebuildList();
     }
@@ -293,6 +494,9 @@ class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
         dialog.connect('response', (_d, id) => {
             if (id === 'clear') {
                 this._entries = [];
+                this._selectedIds.clear();
+                this._activeRowId = null;
+                this._lastCopiedId = null;
                 saveHistory([]);
                 this._rebuildList();
             }
@@ -300,11 +504,126 @@ class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
         dialog.present();
     }
 
+    _attachRowGestures(row, entry) {
+        const leftClick = Gtk.GestureClick.new();
+        leftClick.set_button(0);
+        try {
+            leftClick.set_propagation_phase(Gtk.PropagationPhase.CAPTURE);
+        } catch (_e) {}
+        leftClick.connect('pressed', (_gesture, nPress) => {
+            this._activeRowId = entry.id;
+            if (nPress === 2) {
+                this._selectedIds.clear();
+                this._selectedIds.add(entry.id);
+                this._insertSelected(false);
+            }
+        });
+        row.add_controller(leftClick);
+
+        const rightClick = Gtk.GestureClick.new();
+        rightClick.set_button(0);
+        try {
+            rightClick.set_propagation_phase(Gtk.PropagationPhase.CAPTURE);
+        } catch (_e) {}
+        rightClick.connect('pressed', (gesture, _nPress, x, y) => {
+            const button = gesture.get_current_button ? gesture.get_current_button() : 0;
+            if (button !== Gdk.BUTTON_SECONDARY)
+                return;
+            this._activeRowId = entry.id;
+            this._showRowContextMenu(row, entry, Number.isFinite(x) ? x : 12, Number.isFinite(y) ? y : 12);
+        });
+        row.add_controller(rightClick);
+    }
+
+    _showRowContextMenu(row, entry, x, y) {
+        if (this._rowMenu) {
+            try {
+                this._rowMenu.popdown();
+                this._rowMenu.unparent();
+            } catch (_e) {}
+            this._rowMenu = null;
+        }
+
+        const pop = new Gtk.Popover();
+        pop.set_has_arrow(true);
+        pop.set_parent(row);
+        const rect = new Gdk.Rectangle({ x: Math.floor(x), y: Math.floor(y), width: 1, height: 1 });
+        pop.set_pointing_to(rect);
+
+        const box = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, spacing: 4, margin_top: 6, margin_bottom: 6, margin_start: 6, margin_end: 6 });
+        const mk = (label, cb) => {
+            const b = new Gtk.Button({ label, halign: Gtk.Align.FILL, hexpand: true });
+            b.connect('clicked', () => {
+                cb();
+                pop.popdown();
+            });
+            box.append(b);
+        };
+
+        mk('Copy', () => this._copyEntry(entry));
+        mk('Insert into focused field', () => {
+            this._selectedIds.clear();
+            this._selectedIds.add(entry.id);
+            this._insertSelected(false);
+        });
+        mk('Insert + Enter', () => {
+            this._selectedIds.clear();
+            this._selectedIds.add(entry.id);
+            this._insertSelected(true);
+        });
+        mk(entry.pinned ? 'Unpin' : 'Pin', () => this._toggleEntryField(entry.id, 'pinned'));
+        mk(entry.starred ? 'Unstar' : 'Star', () => this._toggleEntryField(entry.id, 'starred'));
+        mk('Delete', () => this._deleteById(entry.id));
+        pop.set_child(box);
+        pop.popup();
+        this._rowMenu = pop;
+    }
+
+    _toggleEntryField(id, field) {
+        const target = this._entries.find(e => e.id === id);
+        if (!target)
+            return;
+        target[field] = !target[field];
+        this._entries = sortEntries(this._entries);
+        saveHistory(this._entries);
+        this._rebuildList();
+    }
+
+    _deleteById(id) {
+        this._entries = this._entries.filter(e => e.id !== id);
+        this._selectedIds.delete(id);
+        saveHistory(this._entries);
+        this._rebuildList();
+    }
+
+    _updateStatus(visibleCount = null) {
+        const shown = visibleCount === null ? this._visibleEntries().length : visibleCount;
+        const total = this._entries.length;
+        const selectedCount = this._selectedEntries().length;
+        const parts = [];
+        parts.push(`${shown} shown / ${total} total`);
+        parts.push(`${selectedCount} selected`);
+        if (this._lastCopiedId) {
+            const entry = this._entries.find(e => e.id === this._lastCopiedId);
+            if (entry) {
+                const preview = entry.text.length > 36 ? `${entry.text.slice(0, 35)}…` : entry.text;
+                parts.push(`last copied: "${preview}"`);
+            }
+        }
+        parts.push('double-click = insert');
+        parts.push('right-click = actions');
+        this._status.label = parts.join('  •  ');
+    }
+
     vfunc_close_request() {
         if (this._refreshTimer)
             GLib.source_remove(this._refreshTimer);
         if (this._monitor)
             this._monitor.cancel();
+        if (this._rowMenu) {
+            try { this._rowMenu.unparent(); } catch (_e) {}
+            this._rowMenu = null;
+        }
         return super.vfunc_close_request();
     }
 });

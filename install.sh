@@ -70,7 +70,7 @@ fi
 echo ""
 echo "ClipFlow Pro ready to use:"
 echo "  • Left-click panel icon: history window. Right-click: recent clips menu."
-echo "  • Super+Shift+V: panel menu | Super+Shift+H: full history window (needs gjs)."
+echo "  • Super+Shift+H: full history window (needs gjs)."
 echo "Settings are available from the GNOME Extensions app."
 
 echo ""

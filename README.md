@@ -9,7 +9,7 @@
 
 **ClipFlow Pro** is a clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.github.io`).
 
-> **Latest: v1.4.0** — introduces the **History Window**, a full desktop browser for your clipboard (CopyQ-style). **Previous releases are superseded**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
+> **Latest: v1.4.1** — reliability update for copy/insert workflows, right-click menu behavior, and History Window sync/actions. **Previous releases are superseded**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
 
 > **Keywords:** GNOME clipboard manager · Linux clipboard history · Wayland clipboard · history window · copy paste · productivity · privacy · open source
 
@@ -21,16 +21,16 @@
 
 ---
 
-## What's new in v1.4.0 (important)
+## What's new in v1.4.1 (important)
 
-### History Window (new — not in any earlier release)
+### History Window + insert workflow upgrades
 
 A dedicated **desktop window** for browsing, searching, and managing clipboard history:
 
 - **Left-click** the panel icon → opens the History Window (default)
 - **Super+Shift+H** → same window
 - Search, scroll, timestamps, pin/star markers
-- **Copy**, **Pin**, **Star**, **Delete**, **Clear all**, **Refresh**
+- **Copy**, **Insert**, **Insert + Enter**, **Pin**, **Star**, **Delete**, **Clear all**, **Refresh**
 - Stays **in sync** with the panel menu via `~/.config/clipflow-pro/history.json`
 - Requires **gjs** (GNOME JavaScript) — included on Zorin/Ubuntu/Fedora GNOME
 
@@ -40,14 +40,15 @@ A dedicated **desktop window** for browsing, searching, and managing clipboard h
 |--------|--------|
 | **Left-click** | History Window (full list) |
 | **Right-click** | Recent clips menu with **Show more / Show less** paging |
-| **Super+Shift+V** | Quick panel popup menu (scroll + Prev/Next) |
 
-### Also in v1.4.0
+### Also in v1.4.1
 
 - GNOME 46 settings window: proper **close button** and Adw layout
 - Rendering mode consolidated under **General → Menu & Rendering** (Auto / Classic)
-- Right-click menu streamlined (no duplicate actions)
+- Right-click recent-clip menu now applies full **copy + insert** behavior
+- Added **Enable Auto Insert (xdotool / wtype)** setting for copy-only fallback
 - Show more/less no longer closes the menu unexpectedly
+- Removed deprecated **Super+Shift+V** quick-menu shortcut path
 - Numeric-style fixes: ESM-safe extension paths, scrollable enhanced menu on GNOME 45+
 
 [Full changelog](CHANGELOG.md)
@@ -71,12 +72,12 @@ A dedicated **desktop window** for browsing, searching, and managing clipboard h
 ### From GitHub (recommended)
 
 1. Download the zip for your Shell version from **[Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest)**:
-   - `clipflow-pro@nickotmazgin.github.io-1.4.0-gs45-50.zip` — GNOME 45–50
-   - `clipflow-pro@nickotmazgin.github.io-1.4.0-gs43-44.zip` — GNOME 43–44
+   - `clipflow-pro@nickotmazgin.github.io-1.4.1-gs45-50.zip` — GNOME 45–50
+   - `clipflow-pro@nickotmazgin.github.io-1.4.1-gs43-44.zip` — GNOME 43–44
 2. Install:
 
 ```bash
-gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.4.0-gs45-50.zip
+gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.4.1-gs45-50.zip
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 # Alt+F2 → r → Enter
 ```
@@ -95,8 +96,7 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 1. Copy something — it appears in history
 2. **Left-click** panel icon → **History Window**
 3. **Right-click** panel icon → recent clips + shortcuts
-4. **Super+Shift+V** → quick panel menu
-5. **Settings** → General → **Menu & Rendering** (Auto recommended)
+4. **Settings** → General → **Menu & Rendering** (Auto recommended)
 
 ### Features
 

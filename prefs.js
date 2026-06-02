@@ -596,15 +596,6 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         });
         shortcutsFrame.set_child(shortcutsListBox);
 
-        // Show menu shortcut
-        const showMenuBox = this._createShortcutRow(
-            _('Show Clipboard Menu'),
-            _('Open the clipboard history menu'),
-            'show-menu-shortcut',
-            '<Super><Shift>v'
-        );
-        shortcutsListBox.append(showMenuBox);
-
         // Enhanced copy shortcut
         const copyShortcutBox = this._createShortcutRow(
             _('Enhanced Copy'),

@@ -115,7 +115,7 @@ def export_social(collage: Image.Image, tw: int, th: int) -> Image.Image:
 
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--main", required=True, help="Top collage PNG (e.g. collage-2026.png)")
+    p.add_argument("--main", required=True, help="Top grid PNG (tools/assets/collage-main-grid-2026.png)")
     p.add_argument("image1")
     p.add_argument("image2")
     p.add_argument("image3")

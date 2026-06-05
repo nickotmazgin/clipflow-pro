@@ -881,7 +881,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
             spacing: 10
         });
         const copyrightLabel = new Gtk.Label({ label: _('Copyright:') });
-        const copyrightValue = new Gtk.Label({ label: '© 2025 Nick Otmazgin' });
+        const copyrightValue = new Gtk.Label({ label: '© 2026 Nick Otmazgin' });
         copyrightBox.append(copyrightLabel);
         copyrightBox.append(copyrightValue);
         appInfoBox.append(copyrightBox);
@@ -931,16 +931,14 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         featuresFrame.set_child(featuresBox);
 
         const features = [
-            _('- Advanced clipboard history management'),
-            _('- Intelligent search and filtering with debouncing'),
+            _('- Full History Window with search, multi-select, and bulk delete'),
+            _('- Panel recent-clips menu with copy, insert, pin, star, and delete'),
+            _('- Keyboard shortcuts for history window, recent menu, and paste actions'),
             _('- Pin and star system for important entries'),
-            _('- Smart content type detection (URLs, emails, code)'),
             _('- Password detection and filtering'),
             _('- Secure local-only storage with privacy protection'),
-            _('- Keyboard shortcuts support'),
-            _('- Search-aware pagination'),
-            _('- GNOME theme integration'),
-            _('- Auto-clear sensitive data option')
+            _('- Export, import, and duplicate purge tools'),
+            _('- GNOME theme integration and auto-clear sensitive data')
         ];
 
         features.forEach(feature => {
@@ -963,17 +961,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         resetInfo.set_halign(Gtk.Align.START);
         const resetButton = new Gtk.Button({ label: _('Reset to Defaults') });
         resetButton.set_halign(Gtk.Align.START);
-        resetButton.connect('clicked', () => {
-            try {
-                const schema = this._settings.settings_schema;
-                if (schema && typeof schema.list_keys === 'function') {
-                    const keys = schema.list_keys();
-                    keys.forEach(key => {
-                        try { this._settings.reset(key); } catch (_e) {}
-                    });
-                }
-            } catch (_e) {}
-        });
+        resetButton.connect('clicked', () => this._confirmResetToDefaults());
         resetBox.append(resetInfo);
         resetBox.append(resetButton);
         aboutBox.append(resetFrame);
@@ -1008,6 +996,59 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         messageBox.append(title);
         messageBox.append(body);
         this.append(messageBox);
+    }
+
+    _showToast(message) {
+        const root = this.get_root?.();
+        if (root && typeof root.add_toast === 'function') {
+            root.add_toast(new Adw.Toast({ title: message, timeout: 3 }));
+            return;
+        }
+        const dialog = new Adw.MessageDialog({
+            transient_for: root,
+            heading: message,
+            close_response: 'ok',
+        });
+        dialog.add_response('ok', _('OK'));
+        dialog.connect('response', () => dialog.destroy());
+        dialog.present();
+    }
+
+    _confirmResetToDefaults() {
+        const dialog = new Adw.MessageDialog({
+            transient_for: this.get_root?.(),
+            heading: _('Reset to Defaults?'),
+            body: _('This restores every ClipFlow Pro setting to its default value. Your clipboard history file is not cleared.'),
+            close_response: 'cancel',
+        });
+        dialog.add_response('cancel', _('Cancel'));
+        dialog.add_response('reset', _('Reset'));
+        dialog.set_response_appearance('reset', Adw.ResponseAppearance.DESTRUCTIVE);
+        dialog.connect('response', (_d, response) => {
+            if (response === 'reset')
+                this._resetAllSettingsToDefaults();
+            dialog.destroy();
+        });
+        dialog.present();
+    }
+
+    _resetAllSettingsToDefaults() {
+        let resetCount = 0;
+        try {
+            const schema = this._settings.settings_schema;
+            if (schema && typeof schema.list_keys === 'function') {
+                schema.list_keys().forEach(key => {
+                    try {
+                        this._settings.reset(key);
+                        resetCount++;
+                    } catch (_e) {}
+                });
+            }
+        } catch (_e) {}
+        if (resetCount > 0)
+            this._showToast(_('ClipFlow Pro settings were reset to defaults.'));
+        else
+            this._showToast(_('Could not reset settings. Try reopening preferences.'));
     }
 
     _setTabIndex(name, index) {

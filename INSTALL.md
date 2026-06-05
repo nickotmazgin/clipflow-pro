@@ -2,6 +2,8 @@
 
 This guide provides detailed installation instructions for ClipFlow Pro on various Linux distributions.
 
+> **GNOME Shell 43–44 is no longer supported.** Install only the **GNOME 45–50** zip (`*-gs45-50.zip`). GNOME Shell **45** or newer is required.
+
 ## Quick Install
 
 ### Method 1: From GitHub Releases
@@ -77,7 +79,7 @@ The repository ships with a precompiled `schemas/gschemas.compiled` file. During
 
 ### Prerequisites
 - Git
-- GNOME Shell 40+
+- GNOME Shell **45–50**
 - GLib development tools
 - Make
 

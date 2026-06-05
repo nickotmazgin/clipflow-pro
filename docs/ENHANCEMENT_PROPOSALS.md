@@ -86,7 +86,7 @@ _detectContentType(text) {
 ### 2.3 Export/Import History (Easy)
 **Problem:** No way to backup or restore clipboard history
 **Solution:** Add export to JSON and import functions
-**Files:** `extension.js` (new methods), `prefs.js` (new buttons)
+**Files:** `extension.js` (new methods), `prefs-es6.js` (new buttons)
 **Effort:** 1 hour
 
 ### 2.4 Search Highlighting (Medium)
@@ -138,7 +138,7 @@ _detectContentType(text) {
 ### 4.4 Quick Copy Shortcuts (Easy)
 **Problem:** Users must open menu to copy
 **Solution:** Add Super+1, Super+2, etc. for recent entries
-**Files:** `extension.js` ~line 1270-1350, `prefs.js`
+**Files:** `extension.js` ~line 1270-1350, `prefs-es6.js`
 **Effort:** 1 hour
 
 ## 🔒 Priority 5: Security & Privacy
@@ -152,13 +152,13 @@ _detectContentType(text) {
 ### 5.2 History Scrubbing (Medium)
 **Problem:** Old entries never expire
 **Solution:** Auto-delete entries older than X days
-**Files:** `extension.js` ~line 850-950, `prefs.js`
+**Files:** `extension.js` ~line 850-950, `prefs-es6.js`
 **Effort:** 45 minutes
 
 ### 5.3 Privacy Mode (Easy)
 **Problem:** No temporary/per-app history
 **Solution:** Add privacy mode that clears on close
-**Files:** `extension.js`, `prefs.js`
+**Files:** `extension.js`, `prefs-es6.js`
 **Effort:** 30 minutes
 
 ## 🚀 Priority 6: Advanced Features
@@ -172,7 +172,7 @@ _detectContentType(text) {
 ### 6.2 Cloud Sync (Hard)
 **Problem:** History isolated to one machine
 **Solution:** Optional cloud backup (Nextcloud, Dropbox, etc.)
-**Files:** New sync module, `prefs.js`
+**Files:** New sync module, `prefs-es6.js`
 **Effort:** 4-6 hours
 
 ### 6.3 Rich Text Support (Hard)

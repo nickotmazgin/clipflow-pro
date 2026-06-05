@@ -2,7 +2,6 @@ module.exports = [
   {
     ignores: [
       'build/**',
-      'build-43-44/**',
       'dist/**',
       '**/*.min.js',
     ],

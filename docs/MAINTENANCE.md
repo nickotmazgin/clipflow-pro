@@ -34,9 +34,11 @@ git push origin :refs/tags/v1.2.6
 ## Packaging
 
 - Flat zip: `make pack` or `make dist` → `dist/clipflow-pro@nickotmazgin.github.io.shell-extension.zip`
+- Release zip: `./create-release-zips.sh` → `dist/*-gs45-50.zip` (GNOME 45–50 only)
 - Source zip: `dist/clipflow-pro-source.zip`
 
 ## Distribution
 
-- Publish zips on the GitHub Releases page.
+- Publish the **45–50** zip on the GitHub Releases page.
+- GNOME Shell **43–44** is discontinued; do not rebuild or advertise legacy packages.
 - Include tested shell versions in release notes.

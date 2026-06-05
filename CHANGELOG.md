@@ -1,3 +1,13 @@
+## End of GNOME Shell 43–44 support — 2026-06-02
+
+**ClipFlow Pro no longer builds, tests, or maintains a GNOME Shell 43–44 package.**
+
+- Removed `build-legacy.sh`, `install-legacy.sh`, `prefs.js`, and the `build-43-44/` tree
+- Release packaging now produces **GNOME 45–50** zips only
+- Deleted the `gnome43-44` development branch
+- **Minimum supported Shell:** GNOME **45**
+- Removed the **v1.4.2** `*-gs43-44.zip` asset from the GitHub release; legacy builds are no longer distributed
+
 ## 1.4.2 — 2026-06-02
 
 **Shortcuts, bulk delete, and panel delete controls.**
@@ -36,7 +46,7 @@
 
 ## 1.4.0 — 2026-05-31
 
-**Current release for GNOME Shell 45–50 (ESM) and legacy 43–44.**
+**Current release for GNOME Shell 45–50 (ESM).**
 
 ### History Window
 - Full desktop history browser (CopyQ-style): search, scroll, copy, pin, star, delete, clear all

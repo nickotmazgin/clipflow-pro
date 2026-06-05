@@ -13,13 +13,13 @@ jobs:
   prune:
     runs-on: ubuntu-latest
     steps:
-      - name: Delete merged PR branches (keep main & gnome43-44)
+      - name: Delete merged PR branches (keep main)
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
           set -e
-          KEEP=" main gnome43-44 "
+          KEEP=" main "
           mapfile -t heads < <(gh pr list --state merged --limit 500 -R "$REPO" --json headRefName --jq '.[].headRefName')
           for b in "${heads[@]}"; do
             if [[ "$KEEP" == *" $b "* ]]; then continue; fi

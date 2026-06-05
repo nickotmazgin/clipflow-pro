@@ -2,9 +2,9 @@ name: Lint
 
 on:
   push:
-    branches: [ "main", "gnome43-44" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "main", "gnome43-44" ]
+    branches: [ "main" ]
   schedule:
     - cron: '0 4 * * 1'
   workflow_dispatch:
@@ -25,4 +25,4 @@ jobs:
 
       - name: Run ESLint
         run: |
-          npx -y eslint@9 extension.js extension-esm.js prefs.js prefs-es6.js eslint.config.cjs
+          npx -y eslint@9 extension.js extension-esm.js prefs-es6.js eslint.config.cjs

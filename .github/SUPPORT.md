@@ -2,6 +2,8 @@
 
 Thank you for using ClipFlow Pro! We're here to help you get the most out of your clipboard manager.
 
+> **Compatibility:** ClipFlow Pro supports **GNOME Shell 45–50** only. GNOME 43–44 support has ended; upgrade your desktop to GNOME **45** or newer.
+
 ## 📚 Documentation
 
 - **[README.md](../README.md)** - Comprehensive overview and features

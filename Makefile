@@ -21,7 +21,6 @@ INSTALL_PATH = ~/.local/share/gnome-shell/extensions/$(EXTENSION_UUID)
 EXTENSION_FILES = \
 	extension.js \
 	extension-esm.js \
-	prefs.js \
 	prefs-es6.js \
 	metadata.json \
 	stylesheet.css \
@@ -66,8 +65,8 @@ dist: build
 	rm -f $(DIST_DIR)/clipflow-pro-source.zip
 	$(PYTHON) tools/zip_dir.py . $(DIST_DIR)/clipflow-pro-source.zip \
 		$(EXTENSION_FILES) $(EXTRA_FILES) Makefile \
-		build.sh build-modern.sh build-legacy.sh create-release-zips.sh package.sh \
-		install.sh install-legacy.sh safe-reload.sh verify_clipflow.sh \
+		build.sh build-modern.sh create-release-zips.sh package.sh \
+		install.sh safe-reload.sh verify_clipflow.sh \
 		$(SCHEMAS_DIR) $(LOCALE_DIR) tools --exclude "schemas/gschemas.compiled"
 	@echo "Distribution packages created in $(DIST_DIR)/"
 

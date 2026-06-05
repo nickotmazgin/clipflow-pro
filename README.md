@@ -3,13 +3,14 @@
 [![Release](https://img.shields.io/github/v/release/nickotmazgin/clipflow-pro)](https://github.com/nickotmazgin/clipflow-pro/releases)
 [![Downloads](https://img.shields.io/github/downloads/nickotmazgin/clipflow-pro/total?label=downloads)](https://github.com/nickotmazgin/clipflow-pro/releases)
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-[![GNOME 43–44](https://img.shields.io/badge/GNOME-43%E2%80%9344-blue?logo=gnome&logoColor=white)](#compatibility)
 [![GNOME 45–50](https://img.shields.io/badge/GNOME-45%E2%80%9350-blue?logo=gnome&logoColor=white)](#compatibility)
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ff5c93?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/nickotmazgin)
 
 **ClipFlow Pro** is a clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.github.io`).
 
 > **Latest: v1.4.2** — shortcuts polish, bulk delete fix, and per-entry delete in the panel recent-clips menu. **Previous releases are superseded**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
+
+> **GNOME Shell 43–44 is no longer supported.** ClipFlow Pro now targets **GNOME 45–50 only**. Upgrade your desktop environment to GNOME **45** or newer.
 
 > **Keywords:** GNOME clipboard manager · Linux clipboard history · Wayland clipboard · history window · copy paste · productivity · privacy · open source
 
@@ -67,10 +68,12 @@ A dedicated **desktop window** for browsing, searching, and managing clipboard h
 
 ## Compatibility
 
-| GNOME | Build | Notes |
-|-------|-------|-------|
-| **45–50** | Main (`main`) | History Window, ESM, enhanced panel menu |
-| **43–44** | Legacy zip | Classic panel menu only (no History Window) |
+| GNOME | Status | Notes |
+|-------|--------|-------|
+| **45–50** | **Supported** | History Window, ESM, enhanced panel menu — use `*-gs45-50.zip` |
+| **43–44** | **Discontinued** | No longer built, distributed, or maintained |
+
+**Minimum requirement:** GNOME Shell **45** or newer.
 
 - Panel icon position: **left / center / right** on the GNOME **top bar** (not bottom/side docks)
 - Distribution: **GitHub Releases only** (no extensions.gnome.org)
@@ -81,13 +84,11 @@ A dedicated **desktop window** for browsing, searching, and managing clipboard h
 
 ### From GitHub (recommended)
 
-1. Download the zip for your Shell version from **[Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest)**:
-   - `clipflow-pro@nickotmazgin.github.io-1.4.1-gs45-50.zip` — GNOME 45–50
-   - `clipflow-pro@nickotmazgin.github.io-1.4.1-gs43-44.zip` — GNOME 43–44
+1. Download **`clipflow-pro@nickotmazgin.github.io-*-gs45-50.zip`** from **[Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest)** (GNOME 45–50 only).
 2. Install:
 
 ```bash
-gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.4.1-gs45-50.zip
+gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.4.2-gs45-50.zip
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 # Alt+F2 → r → Enter
 ```

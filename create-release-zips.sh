@@ -20,27 +20,8 @@ vn=(m.get('version-name') or '').strip()
 print(vn.split()[0] if vn else '1.3.7')
 PYEOF
 )
-VERSION_NUM=$(ROOT_DIR="${ROOT_DIR}" "${PYTHON}" - <<'PYEOF'
-import json
-import os
-from pathlib import Path
-with (Path(os.environ['ROOT_DIR']) / 'metadata.json').open('r',encoding='utf-8') as f:
-    m=json.load(f)
-print(m.get('version', 1))
-PYEOF
-)
 
 mkdir -p "${DIST_DIR}"
-
-echo "Building GNOME 43-44 package tree..."
-"${ROOT_DIR}/build-legacy.sh"
-
-echo "Creating GNOME 43-44 zip..."
-"${PYTHON}" "${ROOT_DIR}/tools/zip_dir.py" \
-  "${ROOT_DIR}/build-43-44" \
-  "${DIST_DIR}/${UUID}-${VERSION_BASE}-gs43-44.zip" \
-  . \
-  --exclude "schemas/gschemas.compiled"
 
 echo "Building GNOME 45-50 package tree..."
 "${ROOT_DIR}/build.sh"
@@ -53,5 +34,4 @@ echo "Creating GNOME 45-50 zip..."
   --exclude "schemas/gschemas.compiled"
 
 echo "Done! Created:"
-echo "  - ${DIST_DIR}/${UUID}-${VERSION_BASE}-gs43-44.zip"
 echo "  - ${DIST_DIR}/${UUID}-${VERSION_BASE}-gs45-50.zip"

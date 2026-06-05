@@ -39,6 +39,11 @@ elif [[ -d "${REPO_ROOT}/build" ]]; then
   log "Preserving build/ (per --keep-build)"
 fi
 
+if [[ -d "${REPO_ROOT}/dist" ]]; then
+  log "Removing legacy GNOME 43-44 zips from dist/"
+  rm -f "${REPO_ROOT}"/dist/*-gs43-44.zip "${REPO_ROOT}"/dist/clipflow-pro-gnome43-44.zip
+fi
+
 if [[ -f "${REPO_ROOT}/schemas/gschemas.compiled" ]]; then
   log "Removing compiled schema cache"
   rm -f "${REPO_ROOT}/schemas/gschemas.compiled"

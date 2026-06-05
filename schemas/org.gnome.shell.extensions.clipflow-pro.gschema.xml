@@ -316,7 +316,7 @@
     <key name="migration-complete-43" type="b">
       <default>false</default>
       <summary>Migration complete from 43 schema</summary>
-      <description>Internal flag to avoid repeating one-time settings migration from the GNOME 43 schema.</description>
+      <description>Internal flag to avoid repeating one-time settings migration from an older schema revision.</description>
     </key>
 
     <!-- Pause Monitoring -->

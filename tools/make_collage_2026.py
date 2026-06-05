@@ -183,7 +183,14 @@ def build_clipflow(src: Path) -> Image.Image:
     imgs = load_numbered_images(src)
     tiles = [tile_native(im) for im in imgs]
     meta = PRODUCT["clipflow"]
-    return compose_grid([tiles[0:5], tiles[5:10]], meta["title"], meta["subtitle"])
+    n = len(tiles)
+    if n <= 5:
+        rows = [tiles]
+    elif n == 7:
+        rows = [tiles[0:4], tiles[4:7]]
+    else:
+        rows = [tiles[0:5], tiles[5:10]]
+    return compose_grid(rows, meta["title"], meta["subtitle"])
 
 
 def build_numeric(src: Path) -> Image.Image:

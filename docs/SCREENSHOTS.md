@@ -2,11 +2,22 @@
 
 | Path | Use |
 |------|-----|
-| `screenshots/collage-v1.4.1-2026.png` | Main README collage (full overview + v1.4.1 row) |
-| `screenshots/v1.4.1/1.jpg` | v1.4.1 shot **1** — History window |
-| `screenshots/v1.4.1/2.jpg` | v1.4.1 shot **2** — Panel / recent clips |
-| `screenshots/v1.4.1/3.jpg` | v1.4.1 shot **3** — Settings → Behavior |
+| `screenshots/collage-v1.4.2-2026.jpg` | Main README collage (HD JPEG, 7-tile grid) |
+| `screenshots/v1.4.2/1c.jpg` | History window — multi-select, context menu |
+| `screenshots/v1.4.2/2c.jpg` | Panel recent clips / shortcuts |
+| `screenshots/v1.4.2/3.jpg` | Settings → Behavior (unchanged from v1.4.1) |
+| `screenshots/v1.4.2/3c.jpg` | Settings → Shortcuts |
+| `screenshots/v1.4.2/4c.jpg` | About → Maintenance reset |
 
-Rebuild source grid (not shown in README): `tools/assets/collage-main-grid-2026.png`
+Source PNGs and JPEG exports live in `~/Pictures/Screenshots/clipflow pro 2026/` (grid inputs under `collage-grid/`).
 
-The README shows the combined collage plus the three v1.4.1 JPGs in a table (GitHub crops very tall PNG previews).
+Rebuild collage:
+
+```bash
+python3 tools/make_collage_2026.py clipflow \
+  "$HOME/Pictures/Screenshots/clipflow pro 2026/collage-grid" \
+  /tmp/clipflow-collage.png
+# then export JPEG with quality 93 (see tools/rebuild_all_collages.sh)
+```
+
+The README shows the collage plus five highlight JPGs in a table.

@@ -35,14 +35,8 @@ jobs:
           echo "zip=dist/clipflow-pro@nickotmazgin.github.io-${VERSION}-gs45-50.zip" >> "$GITHUB_OUTPUT"
 
       - name: Build release notes from CHANGELOG
-        id: notes
         run: |
-          NOTES=$(python3 tools/release_notes_from_changelog.py "${{ steps.meta.outputs.version }}")
-          {
-            echo 'body<<EOF'
-            echo "$NOTES"
-            echo EOF
-          } >> "$GITHUB_OUTPUT"
+          python3 tools/release_notes_from_changelog.py "${{ steps.meta.outputs.version }}" > /tmp/release-notes.md
 
       - name: Publish GitHub Release
         env:
@@ -52,13 +46,12 @@ jobs:
           ZIP="${{ steps.meta.outputs.zip }}"
           VERSION="${{ steps.meta.outputs.version }}"
           TITLE="ClipFlow Pro ${VERSION} — GNOME 45–50"
-          NOTES="${{ steps.notes.outputs.body }}"
 
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release upload "$TAG" "$ZIP" --clobber
-            gh release edit "$TAG" --title "$TITLE" --notes "$NOTES"
+            gh release edit "$TAG" --title "$TITLE" --notes-file /tmp/release-notes.md
           else
-            gh release create "$TAG" "$ZIP" --title "$TITLE" --notes "$NOTES"
+            gh release create "$TAG" "$ZIP" --title "$TITLE" --notes-file /tmp/release-notes.md
           fi
 
       - name: Attest release zip (Sigstore)

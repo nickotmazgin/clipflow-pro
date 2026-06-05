@@ -321,9 +321,13 @@ class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
 
             const box = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL, spacing: 10, margin_top: 6, margin_bottom: 6, margin_start: 8, margin_end: 8 });
             const select = new Gtk.CheckButton({ valign: Gtk.Align.START });
+            select._cfpBlocking = true;
             select.set_active(this._selectedIds.has(entry.id));
+            select._cfpBlocking = false;
             select.set_tooltip_text('Select for bulk actions');
             select.connect('toggled', btn => {
+                if (select._cfpBlocking)
+                    return;
                 if (btn.get_active())
                     this._selectedIds.add(entry.id);
                 else
@@ -477,8 +481,11 @@ class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
         const ids = new Set(targets.map(t => t.id));
         this._entries = this._entries.filter(x => !ids.has(x.id));
         ids.forEach(id => this._selectedIds.delete(id));
+        this._entries = sortEntries(this._entries);
         saveHistory(this._entries);
+        this._lastReloadSignature = this._buildSignature(this._entries);
         this._rebuildList();
+        this._updateStatus();
     }
 
     _clearAll() {
@@ -592,8 +599,11 @@ class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
     _deleteById(id) {
         this._entries = this._entries.filter(e => e.id !== id);
         this._selectedIds.delete(id);
+        this._entries = sortEntries(this._entries);
         saveHistory(this._entries);
+        this._lastReloadSignature = this._buildSignature(this._entries);
         this._rebuildList();
+        this._updateStatus();
     }
 
     _updateStatus(visibleCount = null) {

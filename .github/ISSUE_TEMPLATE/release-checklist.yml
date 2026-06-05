@@ -40,5 +40,7 @@ body:
     attributes:
       label: Publish
       options:
-        - label: "Create GitHub tag and release with zips"
-        - label: "Attach tested shell versions in release notes"
+        - label: "./tools/setup-release-signing.sh (first time only)"
+        - label: "./tools/release-publish.sh from clean main (signed tag → Actions)"
+        - label: "Confirm Verified tag + Immutable release on GitHub"
+        - label: "Attach tested shell versions in release notes (CHANGELOG)"

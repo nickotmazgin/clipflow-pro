@@ -9,7 +9,7 @@
 
 **ClipFlow Pro** is a clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.github.io`).
 
-> **Latest: v1.4.2** — refreshed GitHub social preview image. — shortcuts polish, bulk delete fix, and per-entry delete in the panel recent-clips menu. **Previous releases are superseded**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
+> **Latest: v1.4.2** — shortcuts polish, bulk delete fix, and per-entry delete in the panel recent-clips menu. **Previous releases are superseded**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
 
 > **Keywords:** GNOME clipboard manager · Linux clipboard history · Wayland clipboard · history window · copy paste · productivity · privacy · open source
 

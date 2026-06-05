@@ -8,6 +8,20 @@
 - **Minimum supported Shell:** GNOME **45**
 - Removed the **v1.4.2** `*-gs43-44.zip` asset from the GitHub release; legacy builds are no longer distributed
 
+## 1.4.3 — 2026-06-05
+
+**History Window header, About maintenance polish, and refreshed docs/screenshots.**
+
+### History Window
+- Header bar **Settings** and **About** buttons open ClipFlow preferences on the matching tab.
+
+### About tab
+- **Maintenance → Reset to Defaults** now asks for confirmation before resetting.
+- Success toast after reset completes.
+
+### Documentation
+- New HD JPEG collage and five-shot highlight gallery in README (`screenshots/v1.4.2/`).
+
 ## 1.4.2 — 2026-06-02
 
 **Shortcuts, bulk delete, and panel delete controls.**

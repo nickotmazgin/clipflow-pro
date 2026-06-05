@@ -8,7 +8,7 @@
 
 **ClipFlow Pro** is a clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.github.io`).
 
-> **Latest: v1.4.2** — shortcuts polish, bulk delete fix, and per-entry delete in the panel recent-clips menu. **Previous releases are superseded**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
+> **Latest: v1.4.3** — History Window Settings/About header, About Maintenance reset confirm, shortcuts polish, bulk delete fix, and panel delete. **Previous releases are superseded**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
 
 > **GNOME Shell 43–44 is no longer supported.** ClipFlow Pro now targets **GNOME 45–50 only**. Upgrade your desktop environment to GNOME **45** or newer.
 
@@ -20,17 +20,29 @@
 
 ### Main collage
 
-![ClipFlow Pro v1.4.1 — overview and highlights (2026)](screenshots/collage-v1.4.1-2026.png)
+![ClipFlow Pro v1.4.2 — overview and highlights (2026)](screenshots/collage-v1.4.2-2026.jpg)
 
-### v1.4.1 highlights (1 → 2 → 3)
+### v1.4.2 highlights
 
-| History window | Panel / recent clips | Settings → Behavior |
-|:---:|:---:|:---:|
-| ![History window](screenshots/v1.4.1/1.jpg) | ![Panel menu](screenshots/v1.4.1/2.jpg) | ![Settings Behavior tab](screenshots/v1.4.1/3.jpg) |
+| History window | Panel / recent clips | Settings → Behavior | Settings → Shortcuts | About → Maintenance |
+|:---:|:---:|:---:|:---:|:---:|
+| ![History window](screenshots/v1.4.2/1c.jpg) | ![Panel menu](screenshots/v1.4.2/2c.jpg) | ![Settings Behavior tab](screenshots/v1.4.2/3.jpg) | ![Settings Shortcuts tab](screenshots/v1.4.2/3c.jpg) | ![About Maintenance](screenshots/v1.4.2/4c.jpg) |
 
-Full combined image (download): [collage-v1.4.1-2026.png](screenshots/collage-v1.4.1-2026.png)
+Full combined image (download): [collage-v1.4.2-2026.jpg](screenshots/collage-v1.4.2-2026.jpg)
 
 ---
+
+## What's new in v1.4.3
+
+- **History Window header:** labeled **Settings** and **About** buttons (opens preferences on the right tab)
+- **About → Maintenance:** confirm dialog before **Reset to Defaults**, with success toast
+- **README / screenshots:** refreshed 2026 collage and highlight gallery (v1.4.2+ UI)
+
+## What's new in v1.4.2
+
+- **History Window:** multi-select checkbox delete removes all selected entries
+- **Panel menu:** **Delete** row under each recent clip (right-click panel icon)
+- **Shortcuts:** Open Recent Clips Menu, Paste Latest, Paste Previous, Classic filters/toggles
 
 ## What's new in v1.4.1 (important)
 
@@ -88,7 +100,7 @@ A dedicated **desktop window** for browsing, searching, and managing clipboard h
 2. Install:
 
 ```bash
-gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.4.2-gs45-50.zip
+gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.4.3-gs45-50.zip
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 # Alt+F2 → r → Enter
 ```

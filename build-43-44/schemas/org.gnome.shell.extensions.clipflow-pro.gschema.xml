@@ -43,6 +43,24 @@
       <description>Keyboard shortcut to open the full ClipFlow history window (CopyQ-style browser)</description>
     </key>
 
+    <key name="open-recent-menu-shortcut" type="as">
+      <default>[]</default>
+      <summary>Open recent clips menu shortcut</summary>
+      <description>Keyboard shortcut to open the panel right-click recent clips menu</description>
+    </key>
+
+    <key name="paste-latest-insert-shortcut" type="as">
+      <default>[]</default>
+      <summary>Paste latest history entry shortcut</summary>
+      <description>Copy the newest history entry and insert into the previously focused app</description>
+    </key>
+
+    <key name="paste-previous-shortcut" type="as">
+      <default>[]</default>
+      <summary>Paste previous history entry shortcut</summary>
+      <description>Copy the second-newest history entry and insert into the previously focused app</description>
+    </key>
+
     <key name="panel-left-click-action" type="s">
       <choices>
         <choice value="panel-menu"/>

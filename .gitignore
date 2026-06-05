@@ -100,3 +100,4 @@ secrets*
 *.crt
 *.cer
 *.der
+allowed_signers

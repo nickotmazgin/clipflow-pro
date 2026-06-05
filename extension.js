@@ -287,7 +287,19 @@ class ClipFlowIndicator extends PanelMenu.Button {
             this._disableCss = this._safeGetBoolean('disable-css', false);
             this._buildMenu();
         }));
-        ['show-history-window-shortcut', 'enhanced-copy-shortcut', 'enhanced-paste-shortcut'].forEach(key => {
+        [
+            'show-history-window-shortcut',
+            'enhanced-copy-shortcut',
+            'enhanced-paste-shortcut',
+            'open-recent-menu-shortcut',
+            'paste-latest-insert-shortcut',
+            'paste-previous-shortcut',
+            'classic-filter-all-shortcut',
+            'classic-filter-pinned-shortcut',
+            'classic-filter-starred-shortcut',
+            'classic-toggle-pin-top-shortcut',
+            'classic-toggle-star-top-shortcut',
+        ].forEach(key => {
             this._settingsSignalIds.push(this._settings.connect(`changed::${key}`, () => {
                 this._registerKeybindings();
             }));
@@ -1171,6 +1183,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
             const file = Gio.File.new_for_path(this._historyFile);
             this._historyMonitor = file.monitor_file(Gio.FileMonitorFlags.NONE, null);
             this._historyMonitor.connect('changed', () => {
+                // History window (or another writer) updated the file — do not overwrite with a stale queued save.
+                this._cancelHistorySaveTimeout();
                 if (this._historyReloadTimeout)
                     GLib.source_remove(this._historyReloadTimeout);
                 this._historyReloadTimeout = GLib.timeout_add(GLib.PRIORITY_DEFAULT, 400, () => {
@@ -1588,6 +1602,17 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 this._activateHistoryItem(item);
             });
             this._contextMenuRecentSection.addMenuItem(entryItem);
+
+            const deleteItem = new PopupMenu.PopupMenuItem(`  ${_('Delete')}`);
+            this._applyContextMenuItemStyle(deleteItem);
+            if (deleteItem.actor)
+                deleteItem.actor.add_style_class_name('clipflow-delete-entry');
+            deleteItem.connect('activate', () => {
+                this._removeHistoryItemById(item.id);
+                this._populateContextMenuRecentEntries();
+                this._reopenContextMenuIfNeeded();
+            });
+            this._contextMenuRecentSection.addMenuItem(deleteItem);
         });
 
         this._updateContextMenuNavigation(visibleCount, total, pageSize);
@@ -3396,6 +3421,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
         register('show-history-window-shortcut', () => this._openHistoryWindow());
         register('enhanced-copy-shortcut', this._handleEnhancedCopyShortcut.bind(this));
         register('enhanced-paste-shortcut', this._handleEnhancedPasteShortcut.bind(this));
+        register('open-recent-menu-shortcut', () => this._openContextMenu());
+        register('paste-latest-insert-shortcut', () => this._activateHistoryItemByOffset(0));
+        register('paste-previous-shortcut', () => this._activateHistoryItemByOffset(1));
         register('classic-filter-all-shortcut', () => this._handleFilterShortcut('all'));
         register('classic-filter-pinned-shortcut', () => this._handleFilterShortcut('pinned'));
         register('classic-filter-starred-shortcut', () => this._handleFilterShortcut('starred'));
@@ -3421,6 +3449,15 @@ class ClipFlowIndicator extends PanelMenu.Button {
         }
 
         this._keybindingRegistrations.clear();
+    }
+
+    _activateHistoryItemByOffset(offset) {
+        const index = Math.max(0, Number(offset) || 0);
+        const item = this._clipboardHistory[index];
+        if (!item)
+            return;
+        this._captureInsertTargetWindow();
+        this._activateHistoryItem(item);
     }
 
     _handleEnhancedCopyShortcut() {

@@ -1,3 +1,17 @@
+## 1.4.2 — 2026-06-02
+
+**Shortcuts, bulk delete, and panel delete controls.**
+
+### Shortcuts (Settings → Shortcuts)
+- Clearer Enhanced Copy / Enhanced Paste descriptions matching real behavior.
+- Exposed Classic panel menu shortcuts (filter all/pinned/starred, toggle pin/star on top item).
+- New optional shortcuts: **Open Recent Clips Menu**, **Paste Latest Entry**, **Paste Previous Entry**.
+- Removed duplicate “Keyboard Shortcuts” section header.
+
+### Delete controls
+- Fixed History Window multi-select delete (checkbox selections now remove all chosen entries; prevents extension stale-save overwrite).
+- Panel right-click recent clips: **Delete** row under each entry.
+
 ## 1.4.1 — 2026-06-02
 
 **Stability and workflow release focused on reliable insert/paste behavior and clean menu semantics.**

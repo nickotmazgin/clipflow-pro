@@ -684,12 +684,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
             spacing: 15
         });
         shortcutsBox.set_margin_top(12);
-        
-        // Header
-        const header = this._createSectionHeader(_('Keyboard Shortcuts'));
-        shortcutsBox.append(header);
 
-        // Shortcuts Frame
         const shortcutsFrame = this._createFrame(_('Keyboard Shortcuts'));
         const shortcutsListBox = new Gtk.Box({ 
             orientation: Gtk.Orientation.VERTICAL,
@@ -705,23 +700,78 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         );
         shortcutsListBox.append(showWindowBox);
 
-        // Enhanced copy shortcut
+        const recentMenuBox = this._createShortcutRow(
+            _('Open Recent Clips Menu'),
+            _('Open the panel right-click recent clips menu'),
+            'open-recent-menu-shortcut',
+            '<Super><Shift>r'
+        );
+        shortcutsListBox.append(recentMenuBox);
+
+        const pasteLatestBox = this._createShortcutRow(
+            _('Paste Latest Entry'),
+            _('Copy the newest history entry and insert into the last focused app'),
+            'paste-latest-insert-shortcut',
+            '<Super><Shift>Insert'
+        );
+        shortcutsListBox.append(pasteLatestBox);
+
+        const pastePreviousBox = this._createShortcutRow(
+            _('Paste Previous Entry'),
+            _('Copy the second-newest history entry and insert into the last focused app'),
+            'paste-previous-shortcut',
+            '<Super><Shift>v'
+        );
+        shortcutsListBox.append(pastePreviousBox);
+
         const copyShortcutBox = this._createShortcutRow(
             _('Enhanced Copy'),
-            _('Copy selected text to clipboard history'),
+            _('Add current selection or clipboard to history'),
             'enhanced-copy-shortcut',
-            '<Super>c'
+            '<Super><Shift>c'
         );
         shortcutsListBox.append(copyShortcutBox);
 
-        // Enhanced paste shortcut
         const pasteShortcutBox = this._createShortcutRow(
             _('Enhanced Paste'),
-            _('Paste with formatting cleanup'),
+            _('Sanitize clipboard text before you paste'),
             'enhanced-paste-shortcut',
-            '<Super>v'
+            ''
         );
         shortcutsListBox.append(pasteShortcutBox);
+
+        shortcutsListBox.append(this._createShortcutSectionLabel(_('Classic panel menu (optional)')));
+
+        shortcutsListBox.append(this._createShortcutRow(
+            _('Classic: Filter All'),
+            _('Switch Classic filter to All and open the menu'),
+            'classic-filter-all-shortcut',
+            ''
+        ));
+        shortcutsListBox.append(this._createShortcutRow(
+            _('Classic: Filter Pinned'),
+            _('Switch Classic filter to Pinned and open the menu'),
+            'classic-filter-pinned-shortcut',
+            ''
+        ));
+        shortcutsListBox.append(this._createShortcutRow(
+            _('Classic: Filter Starred'),
+            _('Switch Classic filter to Starred and open the menu'),
+            'classic-filter-starred-shortcut',
+            ''
+        ));
+        shortcutsListBox.append(this._createShortcutRow(
+            _('Classic: Toggle Pin (Top)'),
+            _('Toggle pinned on the most recent history item'),
+            'classic-toggle-pin-top-shortcut',
+            ''
+        ));
+        shortcutsListBox.append(this._createShortcutRow(
+            _('Classic: Toggle Star (Top)'),
+            _('Toggle starred on the most recent history item'),
+            'classic-toggle-star-top-shortcut',
+            ''
+        ));
 
         shortcutsBox.append(shortcutsFrame);
 
@@ -1232,6 +1282,15 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         box.append(entry);
 
         return box;
+    }
+
+    _createShortcutSectionLabel(text) {
+        const label = new Gtk.Label({ label: text });
+        label.set_halign(Gtk.Align.START);
+        label.set_xalign(0);
+        label.set_margin_top(10);
+        label.add_css_class('title-4');
+        return label;
     }
 
     _createShortcutRow(title, description, settingKey, defaultShortcut) {

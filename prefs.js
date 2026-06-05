@@ -599,18 +599,17 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         // Enhanced copy shortcut
         const copyShortcutBox = this._createShortcutRow(
             _('Enhanced Copy'),
-            _('Copy selected text to clipboard history'),
+            _('Add current selection or clipboard to history'),
             'enhanced-copy-shortcut',
-            '<Super>c'
+            '<Super><Shift>c'
         );
         shortcutsListBox.append(copyShortcutBox);
 
-        // Enhanced paste shortcut
         const pasteShortcutBox = this._createShortcutRow(
             _('Enhanced Paste'),
-            _('Paste with formatting cleanup'),
+            _('Sanitize clipboard text before you paste'),
             'enhanced-paste-shortcut',
-            '<Super>v'
+            ''
         );
         shortcutsListBox.append(pasteShortcutBox);
 

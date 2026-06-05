@@ -188,6 +188,8 @@ def build_clipflow(src: Path) -> Image.Image:
         rows = [tiles]
     elif n == 7:
         rows = [tiles[0:4], tiles[4:7]]
+    elif n == 8:
+        rows = [tiles[0:4], tiles[4:8]]
     else:
         rows = [tiles[0:5], tiles[5:10]]
     return compose_grid(rows, meta["title"], meta["subtitle"])

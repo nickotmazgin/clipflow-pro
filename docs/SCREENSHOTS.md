@@ -2,7 +2,7 @@
 
 | Path | Use |
 |------|-----|
-| `screenshots/collage-v1.4.2-2026.jpg` | Main README collage (HD JPEG, 7-tile grid) |
+| `screenshots/collage-v1.4.2-2026.jpg` | Main README collage (HD JPEG, 8-tile grid; About Maintenance last) |
 | `screenshots/v1.4.2/1c.jpg` | History window — multi-select, context menu |
 | `screenshots/v1.4.2/2c.jpg` | Panel recent clips / shortcuts |
 | `screenshots/v1.4.2/3.jpg` | Settings → Behavior (unchanged from v1.4.1) |

@@ -8,23 +8,9 @@
 - **Minimum supported Shell:** GNOME **45**
 - Removed the **v1.4.2** `*-gs43-44.zip` asset from the GitHub release; legacy builds are no longer distributed
 
-## 1.4.3 — 2026-06-05
+## 1.4.2 — 2026-06-05
 
-**History Window header, About maintenance polish, and refreshed docs/screenshots.**
-
-### History Window
-- Header bar **Settings** and **About** buttons open ClipFlow preferences on the matching tab.
-
-### About tab
-- **Maintenance → Reset to Defaults** now asks for confirmation before resetting.
-- Success toast after reset completes.
-
-### Documentation
-- New HD JPEG collage and five-shot highlight gallery in README (`screenshots/v1.4.2/`).
-
-## 1.4.2 — 2026-06-02
-
-**Shortcuts, bulk delete, and panel delete controls.**
+**Shortcuts, bulk delete, panel delete, History Window header, About maintenance, and refreshed docs.**
 
 ### Shortcuts (Settings → Shortcuts)
 - Clearer Enhanced Copy / Enhanced Paste descriptions matching real behavior.
@@ -35,6 +21,16 @@
 ### Delete controls
 - Fixed History Window multi-select delete (checkbox selections now remove all chosen entries; prevents extension stale-save overwrite).
 - Panel right-click recent clips: **Delete** row under each entry.
+
+### History Window
+- Header bar **Settings** and **About** buttons open ClipFlow preferences on the matching tab.
+
+### About tab
+- **Maintenance → Reset to Defaults** now asks for confirmation before resetting.
+- Success toast after reset completes.
+
+### Documentation
+- New HD JPEG collage (8 tiles, About Maintenance last) and five-shot highlight gallery in README (`screenshots/v1.4.2/`).
 
 ## 1.4.1 — 2026-06-02
 

@@ -166,14 +166,46 @@ function insertToFocusedTarget(text, submit = false) {
     return false;
 }
 
+function _getSettings() {
+    if (!_settings)
+        _settings = new Gio.Settings({ schema_id: SETTINGS_SCHEMA });
+    return _settings;
+}
+
 function _isAutoInsertEnabled() {
     try {
-        if (!_settings)
-            _settings = new Gio.Settings({ schema_id: SETTINGS_SCHEMA });
-        if (_settings.settings_schema?.has_key?.('enable-xdotool-insert'))
-            return _settings.get_boolean('enable-xdotool-insert');
+        const settings = _getSettings();
+        if (settings.settings_schema?.has_key?.('enable-xdotool-insert'))
+            return settings.get_boolean('enable-xdotool-insert');
     } catch (_e) {}
     return true;
+}
+
+function _openExtensionPrefs(targetTab = 'general') {
+    try {
+        const settings = _getSettings();
+        if (settings.settings_schema?.has_key?.('target-prefs-tab'))
+            settings.set_string('target-prefs-tab', targetTab);
+        Gio.Subprocess.new(
+            ['gnome-extensions', 'prefs', 'clipflow-pro@nickotmazgin.github.io'],
+            Gio.SubprocessFlags.NONE
+        );
+    } catch (_e) {}
+}
+
+function _mkHeaderTextButton(label, iconName, onClick) {
+    const box = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL, spacing: 6 });
+    if (iconName) {
+        const icon = new Gtk.Image({ icon_name: iconName });
+        box.append(icon);
+    }
+    box.append(new Gtk.Label({ label }));
+    const btn = new Gtk.Button();
+    btn.set_tooltip_text(label);
+    btn.set_child(box);
+    btn.add_css_class('flat');
+    btn.connect('clicked', onClick);
+    return btn;
 }
 
 const ClipFlowHistoryWindow = GObject.registerClass(
@@ -254,16 +286,21 @@ class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
         content.append(this._status);
 
         const header = new Adw.HeaderBar();
-        const prefsBtn = new Gtk.Button({ icon_name: 'preferences-system-symbolic', tooltip_text: 'ClipFlow settings' });
-        prefsBtn.connect('clicked', () => {
-            try {
-                Gio.Subprocess.new(
-                    ['gnome-extensions', 'prefs', 'clipflow-pro@nickotmazgin.github.io'],
-                    Gio.SubprocessFlags.NONE
-                );
-            } catch (_e) {}
+        const headerTitle = new Gtk.Label({
+            label: 'ClipFlow Pro — History',
+            css_classes: ['title'],
         });
-        header.pack_end(prefsBtn);
+        header.set_title_widget(headerTitle);
+
+        const aboutBtn = _mkHeaderTextButton('About', 'help-about-symbolic', () => {
+            _openExtensionPrefs('about');
+        });
+        const settingsBtn = _mkHeaderTextButton('Settings', 'preferences-system-symbolic', () => {
+            _openExtensionPrefs('general');
+        });
+        settingsBtn.add_css_class('suggested-action');
+        header.pack_end(aboutBtn);
+        header.pack_end(settingsBtn);
 
         this.set_content(new Adw.ToolbarView());
         this.get_content().add_top_bar(header);

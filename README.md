@@ -1,10 +1,16 @@
 # ClipFlow Pro
 
-[![Release](https://img.shields.io/github/v/release/nickotmazgin/clipflow-pro)](https://github.com/nickotmazgin/clipflow-pro/releases)
-[![Downloads](https://img.shields.io/github/downloads/nickotmazgin/clipflow-pro/total?label=downloads)](https://github.com/nickotmazgin/clipflow-pro/releases)
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](LICENSE)
-[![GNOME 45–50](https://img.shields.io/badge/GNOME-45%E2%80%9350-blue?logo=gnome&logoColor=white)](#compatibility)
+[![Release](https://img.shields.io/github/v/release/nickotmazgin/clipflow-pro?include_prereleases=false&display_name=tag)](https://github.com/nickotmazgin/clipflow-pro/releases/latest)
+[![Downloads](https://img.shields.io/github/downloads/nickotmazgin/clipflow-pro/total?label=downloads&color=success)](https://github.com/nickotmazgin/clipflow-pro/releases)
+[![License: GPL-3.0](https://img.shields.io/github/license/nickotmazgin/clipflow-pro)](LICENSE)
+[![GNOME 45–50](https://img.shields.io/badge/GNOME-45%E2%80%9350-4A86CF?logo=gnome&logoColor=white)](#compatibility)
+[![ESM](https://img.shields.io/badge/ESM-GJS%20modules-orange)](#compatibility)
+[![Wayland](https://img.shields.io/badge/Wayland-ready-0078D4)](#compatibility)
+
+[![Issues](https://img.shields.io/github/issues/nickotmazgin/clipflow-pro)](https://github.com/nickotmazgin/clipflow-pro/issues)
+[![Discussions](https://img.shields.io/github/discussions/nickotmazgin/clipflow-pro?label=discussions&color=8B5CF6)](https://github.com/nickotmazgin/clipflow-pro/discussions)
 [![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ff5c93?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/nickotmazgin)
+[![PayPal](https://img.shields.io/badge/Donate-PayPal-0070BA?logo=paypal&logoColor=white)](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)
 
 **ClipFlow Pro** is a clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.github.io`).
 
@@ -142,5 +148,5 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 
 ## Support
 
-[![GitHub Sponsors](https://img.shields.io/github/sponsors/nickotmazgin?style=social)](https://github.com/sponsors/nickotmazgin)
-[![PayPal](https://img.shields.io/badge/Donate-PayPal-blue.svg)](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)
+[![Sponsor](https://img.shields.io/badge/Sponsor-%E2%9D%A4-ff5c93?logo=github-sponsors&logoColor=white)](https://github.com/sponsors/nickotmazgin)
+[![PayPal](https://img.shields.io/badge/Donate-PayPal-0070BA?logo=paypal&logoColor=white)](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)

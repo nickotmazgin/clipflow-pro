@@ -47,3 +47,4 @@ build_one easehub "$PICTURES/easehub 2026" "$HOME/dev/comfort-control-easehub"
 echo ""
 echo "=== Downloads/socials post collages ==="
 ls -lh "$SOCIAL_DIR"
+# Social previews also uploaded via GitHub repo Settings → General → Social preview.

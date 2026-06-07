@@ -70,6 +70,7 @@ echo "Copying history window (CopyQ-style browser)..."
 if [[ -f "tools/history-window/history-window.js" ]]; then
     mkdir -p "${BUILD_DIR}/history-window"
     cp "tools/history-window/history-window.js" "${BUILD_DIR}/history-window/"
+    cp "tools/history-window/clipboardInsert.js" "${BUILD_DIR}/clipboardInsert.js"
     chmod +x "${BUILD_DIR}/history-window/history-window.js"
 else
     echo "Warning: history-window.js not found; full history window will be unavailable." >&2

@@ -7,6 +7,9 @@ imports.gi.versions.Adw = '1';
 const ByteArray = imports.byteArray;
 const { GObject, GLib, Gio, Gtk, Adw, Gdk, Pango } = imports.gi;
 
+imports.searchPath.unshift(GLib.path_get_dirname(GLib.path_get_dirname(imports.system.programInvocationName)));
+const ClipboardInsert = imports.clipboardInsert;
+
 const HISTORY_DIR = GLib.build_filenamev([GLib.get_user_config_dir(), 'clipflow-pro']);
 const HISTORY_FILE = GLib.build_filenamev([HISTORY_DIR, 'history.json']);
 const INSERT_TARGET_FILE = GLib.build_filenamev([HISTORY_DIR, 'insert-target-window-id.txt']);
@@ -80,37 +83,7 @@ function formatTs(unix) {
 }
 
 function copyToClipboard(text) {
-    const cmd = GLib.getenv('WAYLAND_DISPLAY') && GLib.find_program_in_path('wl-copy')
-        ? 'wl-copy'
-        : GLib.find_program_in_path('xclip') ? 'xclip' : null;
-    if (!cmd)
-        return false;
-    try {
-        const argv = cmd === 'xclip'
-            ? ['xclip', '-selection', 'clipboard']
-            : ['wl-copy'];
-        const proc = Gio.Subprocess.new(
-            argv,
-            Gio.SubprocessFlags.STDIN_PIPE | Gio.SubprocessFlags.NONE
-        );
-        const stream = proc.get_stdin_pipe();
-        stream.write_all(text, null);
-        stream.close(null);
-        proc.wait(null);
-        return true;
-    } catch (_e) {
-        return false;
-    }
-}
-
-function _runCommand(argv) {
-    try {
-        const proc = Gio.Subprocess.new(argv, Gio.SubprocessFlags.NONE);
-        proc.wait(null);
-        return proc.get_successful();
-    } catch (_e) {
-        return false;
-    }
+    return ClipboardInsert.setSystemClipboardPlainText(text == null ? '' : String(text));
 }
 
 function loadInsertTargetWindowId() {
@@ -133,37 +106,11 @@ function insertToFocusedTarget(text, submit = false) {
     if (!_isAutoInsertEnabled())
         return false;
 
-    if (!copyToClipboard(value))
-        return false;
-
-    if (GLib.find_program_in_path('xdotool')) {
-        const wid = loadInsertTargetWindowId();
-        if (wid) {
-            const chain = submit
-                ? `xdotool windowactivate --sync ${wid} key --clearmodifiers ctrl+v key --clearmodifiers Return`
-                : `xdotool windowactivate --sync ${wid} key --clearmodifiers ctrl+v`;
-            GLib.spawn_command_line_async(chain);
-            return true;
-        }
-        const pasted = _runCommand(['xdotool', 'key', '--clearmodifiers', 'ctrl+v'])
-            || _runCommand(['xdotool', 'key', '--clearmodifiers', 'shift+Insert']);
-        if (!pasted)
-            return false;
-        if (submit)
-            _runCommand(['xdotool', 'key', '--clearmodifiers', 'Return']);
-        return true;
-    }
-
-    if (GLib.find_program_in_path('wtype')) {
-        const typed = _runCommand(['wtype', value]);
-        if (!typed)
-            return false;
-        if (submit)
-            _runCommand(['wtype', '\n']);
-        return true;
-    }
-
-    return false;
+    return ClipboardInsert.insertPlainTextIntoTarget({
+        text: value,
+        windowId: loadInsertTargetWindowId(),
+        submit,
+    });
 }
 
 function _getSettings() {

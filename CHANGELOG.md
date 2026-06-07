@@ -1,3 +1,13 @@
+## 1.4.3 — 2026-06-07
+
+**Reliable paste into agent terminals, chats, and special inputs (Codex, etc.).**
+
+### Paste / insert
+- Set system clipboard as **plain text only** via `xclip` / `wl-copy` before insert (avoids stale image/HTML formats confusing target apps).
+- **Auto-detect** agent terminals and similar UIs (e.g. Codex) that treat Ctrl+V as image paste — use **direct keystroke typing** (`xdotool type`) instead.
+- Shared insert helper (`clipboardInsert.js`) used by the panel menu, history window, and shortcuts.
+- Capture insert-target window before opening the history window so paste returns to the prior app.
+
 ## End of GNOME Shell 43–44 support — 2026-06-02
 
 **ClipFlow Pro no longer builds, tests, or maintains a GNOME Shell 43–44 package.**

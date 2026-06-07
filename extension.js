@@ -9,6 +9,7 @@ const {St, GObject, GLib, Gio, Clutter, Meta, Shell, Pango} = imports.gi;
 const Me = ExtensionUtils.getCurrentExtension();
 const _ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
 const ByteArray = imports.byteArray;
+const ClipboardInsert = imports.clipboardInsert;
 
 function _pathFromExtensionLocation(dir) {
     if (!dir)
@@ -1154,6 +1155,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _openHistoryWindow() {
+        this._captureInsertTargetWindow();
         if (!this._historyWindowScript || !GLib.file_test(this._historyWindowScript, GLib.FileTest.EXISTS)) {
             Main.notify('ClipFlow Pro', _('History window is not installed. Reinstall the extension and ensure gjs is available.'));
             return;
@@ -1802,7 +1804,11 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return name.includes('gnome-shell')
                 || instance.includes('gnome-shell')
                 || name.includes('mutter')
-                || instance.includes('mutter');
+                || instance.includes('mutter')
+                || name.includes('clipflow')
+                || instance.includes('clipflow')
+                || name.includes('clipflowprohistory')
+                || instance.includes('clipflowprohistory');
         } catch (_e) {
             return false;
         }
@@ -4468,33 +4474,15 @@ class ClipFlowIndicator extends PanelMenu.Button {
         if (!text)
             return false;
 
-        const wid = this._lastInsertTargetWindowId;
-
         try {
-            if (GLib.find_program_in_path('xdotool')) {
-                if (wid) {
-                    const chain = submit
-                        ? `xdotool windowactivate --sync ${wid} key --clearmodifiers ctrl+v key --clearmodifiers Return`
-                        : `xdotool windowactivate --sync ${wid} key --clearmodifiers ctrl+v`;
-                    GLib.spawn_command_line_async(chain);
-                    return true;
-                }
-                let pasted = this._runInsertCommand(['xdotool', 'key', '--clearmodifiers', 'ctrl+v']);
-                if (!pasted)
-                    pasted = this._runInsertCommand(['xdotool', 'key', '--clearmodifiers', 'shift+Insert']);
-                if (pasted && submit)
-                    this._runInsertCommand(['xdotool', 'key', '--clearmodifiers', 'Return']);
-                return pasted;
-            }
-            if (GLib.find_program_in_path('wtype')) {
-                const pasted = this._runInsertCommand(['wtype', text]);
-                if (pasted && submit)
-                    this._runInsertCommand(['wtype', '\n']);
-                return pasted;
-            }
-        } catch (_e) {}
-
-        return false;
+            return ClipboardInsert.insertPlainTextIntoTarget({
+                text,
+                windowId: this._lastInsertTargetWindowId || '',
+                submit,
+            });
+        } catch (_e) {
+            return false;
+        }
     }
 
     _createTimestampLabel(item) {
@@ -4643,6 +4631,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             const clipboard = St.Clipboard.get_default();
             clipboard.set_text(St.ClipboardType.CLIPBOARD, text);
             clipboard.set_text(St.ClipboardType.PRIMARY, text);
+            ClipboardInsert.setSystemClipboardPlainText(text);
             const cached = typeof text === 'string' ? text.trim() : '';
             this._lastClipboardText = cached;
             this._lastPrimaryText = cached;

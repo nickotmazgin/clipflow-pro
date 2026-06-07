@@ -9,7 +9,157 @@ const {St, GObject, GLib, Gio, Clutter, Meta, Shell, Pango} = imports.gi;
 const Me = ExtensionUtils.getCurrentExtension();
 const _ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
 const ByteArray = imports.byteArray;
-const ClipboardInsert = imports.clipboardInsert;
+
+const _CLIPFLOW_DIRECT_TYPE_WM_PATTERNS = [
+    'codex', 'openai codex', 'cursor agent', 'cursor agents',
+    'warp', 'aider', 'chatgpt', 'claude', 'ghostty',
+];
+
+function _clipflowSpawnWait(argv, stdinText = null) {
+    try {
+        let flags = Gio.SubprocessFlags.SEARCH_PATH_FROM_ENVP;
+        if (stdinText != null)
+            flags |= Gio.SubprocessFlags.STDIN_PIPE;
+        else
+            flags |= Gio.SubprocessFlags.STDOUT_SILENCE | Gio.SubprocessFlags.STDERR_SILENCE;
+        const proc = Gio.Subprocess.new(argv, flags);
+        if (stdinText != null) {
+            const stream = proc.get_stdin_pipe();
+            stream.write_all(String(stdinText), null);
+            stream.close(null);
+        }
+        proc.wait(null);
+        return proc.get_successful();
+    } catch (_e) {
+        return false;
+    }
+}
+
+function _clipflowSpawnRead(argv) {
+    try {
+        const proc = Gio.Subprocess.new(
+            argv,
+            Gio.SubprocessFlags.SEARCH_PATH_FROM_ENVP
+                | Gio.SubprocessFlags.STDOUT_PIPE
+                | Gio.SubprocessFlags.STDERR_SILENCE
+        );
+        const [, stdout] = proc.communicate_utf8(null, null);
+        proc.wait(null);
+        if (!proc.get_successful())
+            return '';
+        return (stdout || '').trim();
+    } catch (_e) {
+        return '';
+    }
+}
+
+function _clipflowSetSystemClipboardPlainText(text) {
+    const payload = text == null ? '' : String(text);
+    if (GLib.getenv('WAYLAND_DISPLAY') && GLib.find_program_in_path('wl-copy'))
+        return _clipflowSpawnWait(['wl-copy', '--type', 'text/plain'], payload);
+    if (GLib.find_program_in_path('xclip')) {
+        if (!_clipflowSpawnWait(['xclip', '-selection', 'clipboard'], payload))
+            return false;
+        _clipflowSpawnWait(['xclip', '-selection', 'primary'], payload);
+        return true;
+    }
+    return false;
+}
+
+function _clipflowGetWindowIdentity(windowId) {
+    const id = String(windowId || '').trim();
+    if (!id || !/^\d+$/.test(id) || !GLib.find_program_in_path('xdotool'))
+        return { name: '', cls: '' };
+    return {
+        name: _clipflowSpawnRead(['xdotool', 'getwindowname', id]),
+        cls: _clipflowSpawnRead(['xdotool', 'getwindowclassname', id]),
+    };
+}
+
+function _clipflowShouldPreferDirectTyping(windowId) {
+    const { name, cls } = _clipflowGetWindowIdentity(windowId);
+    const hay = `${name} ${cls}`.toLowerCase();
+    if (!hay.trim())
+        return false;
+    return _CLIPFLOW_DIRECT_TYPE_WM_PATTERNS.some(pattern => hay.includes(pattern));
+}
+
+function _clipflowActivateWindow(windowId) {
+    const id = String(windowId || '').trim();
+    if (!id || !GLib.find_program_in_path('xdotool'))
+        return false;
+    return _clipflowSpawnWait(['xdotool', 'windowactivate', '--sync', id]);
+}
+
+function _clipflowPasteViaKeyboard(windowId) {
+    if (windowId)
+        _clipflowActivateWindow(windowId);
+    return _clipflowSpawnWait(['xdotool', 'key', '--clearmodifiers', 'ctrl+v'])
+        || _clipflowSpawnWait(['xdotool', 'key', '--clearmodifiers', 'shift+Insert']);
+}
+
+function _clipflowTypeText(text, windowId, submit = false) {
+    const value = text == null ? '' : String(text);
+    if (!value)
+        return false;
+
+    if (GLib.find_program_in_path('wtype')) {
+        if (windowId)
+            _clipflowActivateWindow(windowId);
+        if (!_clipflowSpawnWait(['wtype', value]))
+            return false;
+        if (submit)
+            _clipflowSpawnWait(['wtype', '\n']);
+        return true;
+    }
+
+    if (!GLib.find_program_in_path('xdotool'))
+        return false;
+
+    if (windowId)
+        _clipflowActivateWindow(windowId);
+
+    const lines = value.split('\n');
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        if (line.length > 0) {
+            if (!_clipflowSpawnWait(['xdotool', 'type', '--clearmodifiers', '--delay', '12', '--', line]))
+                return false;
+        }
+        if (i < lines.length - 1) {
+            if (!_clipflowSpawnWait(['xdotool', 'key', '--clearmodifiers', 'Return']))
+                return false;
+        }
+    }
+    if (submit)
+        return _clipflowSpawnWait(['xdotool', 'key', '--clearmodifiers', 'Return']);
+    return true;
+}
+
+function _clipflowInsertPlainTextIntoTarget({ text, windowId = '', submit = false, forceDirectType = null }) {
+    const value = typeof text === 'string' ? text.trim() : '';
+    if (!value)
+        return false;
+
+    _clipflowSetSystemClipboardPlainText(value);
+
+    const wid = String(windowId || '').trim();
+    const direct = forceDirectType === true
+        || (forceDirectType !== false && _clipflowShouldPreferDirectTyping(wid));
+
+    if (direct)
+        return _clipflowTypeText(value, wid, submit);
+
+    if (GLib.find_program_in_path('xdotool')) {
+        if (_clipflowPasteViaKeyboard(wid)) {
+            if (submit)
+                _clipflowSpawnWait(['xdotool', 'key', '--clearmodifiers', 'Return']);
+            return true;
+        }
+    }
+
+    return _clipflowTypeText(value, wid, submit);
+}
 
 function _pathFromExtensionLocation(dir) {
     if (!dir)
@@ -4475,7 +4625,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return false;
 
         try {
-            return ClipboardInsert.insertPlainTextIntoTarget({
+            return _clipflowInsertPlainTextIntoTarget({
                 text,
                 windowId: this._lastInsertTargetWindowId || '',
                 submit,
@@ -4631,7 +4781,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             const clipboard = St.Clipboard.get_default();
             clipboard.set_text(St.ClipboardType.CLIPBOARD, text);
             clipboard.set_text(St.ClipboardType.PRIMARY, text);
-            ClipboardInsert.setSystemClipboardPlainText(text);
+            _clipflowSetSystemClipboardPlainText(text);
             const cached = typeof text === 'string' ? text.trim() : '';
             this._lastClipboardText = cached;
             this._lastPrimaryText = cached;

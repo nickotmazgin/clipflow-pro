@@ -5,7 +5,7 @@
 ### Paste / insert
 - Set system clipboard as **plain text only** via `xclip` / `wl-copy` before insert (avoids stale image/HTML formats confusing target apps).
 - **Auto-detect** agent terminals and similar UIs (e.g. Codex) that treat Ctrl+V as image paste — use **direct keystroke typing** (`xdotool type`) instead.
-- Shared insert helper (`clipboardInsert.js`) used by the panel menu, history window, and shortcuts.
+- Shared insert helper (`clipboardInsert.js`) used by the history window; panel menu logic is inlined for GNOME Shell ESM compatibility.
 - Capture insert-target window before opening the history window so paste returns to the prior app.
 
 ## End of GNOME Shell 43–44 support — 2026-06-02

@@ -14,7 +14,7 @@
 
 **ClipFlow Pro** is a clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.github.io`).
 
-> **Latest: v1.4.2** — History Window Settings/About header, About Maintenance reset confirm, shortcuts polish, bulk delete fix, and panel delete. **Previous releases are superseded**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
+> **Latest: v1.4.3** — Reliable paste into agent terminals and special inputs (Codex, chats): plain-text clipboard + direct typing when Ctrl+V fails. **Previous releases are superseded**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
 
 > **GNOME Shell 43–44 is no longer supported.** ClipFlow Pro now targets **GNOME 45–50 only**. Upgrade your desktop environment to GNOME **45** or newer.
 
@@ -37,6 +37,12 @@
 Full combined image (download): [collage-v1.4.2-2026.jpg](screenshots/collage-v1.4.2-2026.jpg)
 
 ---
+
+## What's new in v1.4.3
+
+- **Reliable paste into agent terminals** (Codex, Cursor Agents, etc.): plain-text clipboard via `xclip`/`wl-copy` plus direct keystroke typing when Ctrl+V is treated as image paste
+- **History window insert** captures and restores the target app window; panel menu and history window now behave the same
+- **ESM-safe** paste helpers (no broken `imports` load in GNOME Shell)
 
 ## What's new in v1.4.2
 
@@ -103,7 +109,7 @@ A dedicated **desktop window** for browsing, searching, and managing clipboard h
 2. Install:
 
 ```bash
-gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.4.2-gs45-50.zip
+gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.4.3-gs45-50.zip
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 # Alt+F2 → r → Enter
 ```

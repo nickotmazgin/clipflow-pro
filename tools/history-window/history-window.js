@@ -7,6 +7,9 @@ imports.gi.versions.Adw = '1';
 const ByteArray = imports.byteArray;
 const { GObject, GLib, Gio, Gtk, Adw, Gdk, Pango } = imports.gi;
 
+imports.searchPath.unshift(GLib.path_get_dirname(GLib.path_get_dirname(imports.system.programInvocationName)));
+const ClipboardInsert = imports.clipboardInsert;
+
 const HISTORY_DIR = GLib.build_filenamev([GLib.get_user_config_dir(), 'clipflow-pro']);
 const HISTORY_FILE = GLib.build_filenamev([HISTORY_DIR, 'history.json']);
 const INSERT_TARGET_FILE = GLib.build_filenamev([HISTORY_DIR, 'insert-target-window-id.txt']);
@@ -80,41 +83,14 @@ function formatTs(unix) {
 }
 
 function copyToClipboard(text) {
-    const cmd = GLib.getenv('WAYLAND_DISPLAY') && GLib.find_program_in_path('wl-copy')
-        ? 'wl-copy'
-        : GLib.find_program_in_path('xclip') ? 'xclip' : null;
-    if (!cmd)
-        return false;
-    try {
-        const argv = cmd === 'xclip'
-            ? ['xclip', '-selection', 'clipboard']
-            : ['wl-copy'];
-        const proc = Gio.Subprocess.new(
-            argv,
-            Gio.SubprocessFlags.STDIN_PIPE | Gio.SubprocessFlags.NONE
-        );
-        const stream = proc.get_stdin_pipe();
-        stream.write_all(text, null);
-        stream.close(null);
-        proc.wait(null);
-        return true;
-    } catch (_e) {
-        return false;
-    }
-}
-
-function _runCommand(argv) {
-    try {
-        const proc = Gio.Subprocess.new(argv, Gio.SubprocessFlags.NONE);
-        proc.wait(null);
-        return proc.get_successful();
-    } catch (_e) {
-        return false;
-    }
+    return ClipboardInsert.setSystemClipboardPlainText(text == null ? '' : String(text));
 }
 
 function loadInsertTargetWindowId() {
     try {
+        const fromEnv = (GLib.getenv('CLIPFLOW_INSERT_TARGET_WID') || '').trim();
+        if (/^\d+$/.test(fromEnv))
+            return fromEnv;
         if (!GLib.file_test(INSERT_TARGET_FILE, GLib.FileTest.EXISTS))
             return '';
         const [, bytes] = GLib.file_get_contents(INSERT_TARGET_FILE);
@@ -125,7 +101,7 @@ function loadInsertTargetWindowId() {
     }
 }
 
-function insertToFocusedTarget(text, submit = false) {
+function insertToFocusedTarget(text, submit = false, windowId = null) {
     const value = normalizeText(text);
     if (!value)
         return false;
@@ -133,37 +109,13 @@ function insertToFocusedTarget(text, submit = false) {
     if (!_isAutoInsertEnabled())
         return false;
 
-    if (!copyToClipboard(value))
-        return false;
+    const wid = String(windowId || loadInsertTargetWindowId() || '').trim();
 
-    if (GLib.find_program_in_path('xdotool')) {
-        const wid = loadInsertTargetWindowId();
-        if (wid) {
-            const chain = submit
-                ? `xdotool windowactivate --sync ${wid} key --clearmodifiers ctrl+v key --clearmodifiers Return`
-                : `xdotool windowactivate --sync ${wid} key --clearmodifiers ctrl+v`;
-            GLib.spawn_command_line_async(chain);
-            return true;
-        }
-        const pasted = _runCommand(['xdotool', 'key', '--clearmodifiers', 'ctrl+v'])
-            || _runCommand(['xdotool', 'key', '--clearmodifiers', 'shift+Insert']);
-        if (!pasted)
-            return false;
-        if (submit)
-            _runCommand(['xdotool', 'key', '--clearmodifiers', 'Return']);
-        return true;
-    }
-
-    if (GLib.find_program_in_path('wtype')) {
-        const typed = _runCommand(['wtype', value]);
-        if (!typed)
-            return false;
-        if (submit)
-            _runCommand(['wtype', '\n']);
-        return true;
-    }
-
-    return false;
+    return ClipboardInsert.insertPlainTextIntoTarget({
+        text: value,
+        windowId: wid,
+        submit,
+    });
 }
 
 function _getSettings() {
@@ -222,6 +174,7 @@ class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
         this._lastCopiedId = null;
         this._lastCopiedTs = 0;
         this._lastReloadSignature = '';
+        this._insertTargetWindowId = loadInsertTargetWindowId();
 
         const toolbar = new Gtk.Box({ orientation: Gtk.Orientation.HORIZONTAL, spacing: 6 });
         toolbar.set_margin_start(12);
@@ -257,7 +210,7 @@ class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
             const entry = this._entryFromRow(row);
             if (!entry)
                 return;
-            this._copyEntry(entry);
+            this._activateEntry(entry);
         });
         this._list.connect('selected-rows-changed', () => {
             const row = this._list.get_selected_row();
@@ -460,6 +413,14 @@ class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
         return true;
     }
 
+    _activateEntry(entry) {
+        if (!entry)
+            return;
+        this._selectedIds.clear();
+        this._selectedIds.add(entry.id);
+        this._insertSelected(false);
+    }
+
     _copySelected() {
         const entries = this._selectedEntries();
         if (entries.length === 0)
@@ -481,18 +442,26 @@ class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
         if (entries.length === 0)
             return;
         const payload = entries.map(e => e.text).join('\n');
+        const windowId = this._insertTargetWindowId || loadInsertTargetWindowId();
         this.minimize();
-        GLib.timeout_add(GLib.PRIORITY_DEFAULT, 220, () => {
-            const ok = insertToFocusedTarget(payload, submit);
-            if (ok) {
-                this._lastCopiedId = entries[0].id;
-                this._lastCopiedTs = Math.floor(Date.now() / 1000);
-                this._status.label = submit
-                    ? 'Inserted and submitted into focused field.'
-                    : 'Inserted into focused field.';
-            } else {
-                this._status.label = 'Insert failed (or disabled). Check "Enable Auto Insert" in ClipFlow settings and ensure xdotool/wtype is installed.';
-            }
+        GLib.timeout_add(GLib.PRIORITY_DEFAULT, 180, () => {
+            if (windowId)
+                ClipboardInsert.activateWindow(windowId);
+            GLib.timeout_add(GLib.PRIORITY_DEFAULT, 280, () => {
+                const ok = insertToFocusedTarget(payload, submit, windowId);
+                if (ok) {
+                    this._lastCopiedId = entries[0].id;
+                    this._lastCopiedTs = Math.floor(Date.now() / 1000);
+                    this._status.label = submit
+                        ? 'Inserted and submitted into focused field.'
+                        : 'Inserted into focused field.';
+                } else {
+                    this._status.label = windowId
+                        ? 'Insert failed. Check "Enable Auto Insert" in ClipFlow settings and ensure xdotool is installed.'
+                        : 'Insert failed: no target window saved. Focus Codex (or your app) first, then reopen the history window from the panel.';
+                }
+                return GLib.SOURCE_REMOVE;
+            });
             return GLib.SOURCE_REMOVE;
         });
     }
@@ -559,7 +528,7 @@ class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
             if (nPress === 2) {
                 this._selectedIds.clear();
                 this._selectedIds.add(entry.id);
-                this._insertSelected(false);
+                this._activateEntry(entry);
             }
         });
         row.add_controller(leftClick);

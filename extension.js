@@ -18,21 +18,36 @@ const _CLIPFLOW_DIRECT_TYPE_WM_PATTERNS = [
 function _clipflowSpawnWait(argv, stdinText = null) {
     try {
         let flags = Gio.SubprocessFlags.SEARCH_PATH_FROM_ENVP;
-        if (stdinText != null)
-            flags |= Gio.SubprocessFlags.STDIN_PIPE;
-        else
+        if (stdinText == null) {
             flags |= Gio.SubprocessFlags.STDOUT_SILENCE | Gio.SubprocessFlags.STDERR_SILENCE;
-        const proc = Gio.Subprocess.new(argv, flags);
-        if (stdinText != null) {
-            const stream = proc.get_stdin_pipe();
-            stream.write_all(String(stdinText), null);
-            stream.close(null);
+            const proc = Gio.Subprocess.new(argv, flags);
+            proc.wait(null);
+            return proc.get_successful();
         }
-        proc.wait(null);
+        flags |= Gio.SubprocessFlags.STDIN_PIPE | Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_SILENCE;
+        const proc = Gio.Subprocess.new(argv, flags);
+        proc.communicate_utf8(String(stdinText), null);
         return proc.get_successful();
     } catch (_e) {
         return false;
     }
+}
+
+function _clipflowIsValidWindowId(windowId) {
+    const id = String(windowId || '').trim();
+    if (!id || !/^\d+$/.test(id) || !GLib.find_program_in_path('xdotool'))
+        return false;
+    return _clipflowSpawnWait(['xdotool', 'getwindowname', id]);
+}
+
+function _clipflowResolveWindowId(windowId) {
+    const id = String(windowId || '').trim();
+    if (_clipflowIsValidWindowId(id))
+        return id;
+    if (!GLib.find_program_in_path('xdotool'))
+        return '';
+    const active = _clipflowSpawnRead(['xdotool', 'getactivewindow']);
+    return /^\d+$/.test(active) && _clipflowIsValidWindowId(active) ? active : '';
 }
 
 function _clipflowSpawnRead(argv) {
@@ -85,15 +100,16 @@ function _clipflowShouldPreferDirectTyping(windowId) {
 }
 
 function _clipflowActivateWindow(windowId) {
-    const id = String(windowId || '').trim();
-    if (!id || !GLib.find_program_in_path('xdotool'))
+    const id = _clipflowResolveWindowId(windowId);
+    if (!id)
         return false;
     return _clipflowSpawnWait(['xdotool', 'windowactivate', '--sync', id]);
 }
 
 function _clipflowPasteViaKeyboard(windowId) {
-    if (windowId)
-        _clipflowActivateWindow(windowId);
+    const id = _clipflowResolveWindowId(windowId);
+    if (id)
+        _clipflowSpawnWait(['xdotool', 'windowactivate', '--sync', id]);
     return _clipflowSpawnWait(['xdotool', 'key', '--clearmodifiers', 'ctrl+v'])
         || _clipflowSpawnWait(['xdotool', 'key', '--clearmodifiers', 'shift+Insert']);
 }
@@ -103,9 +119,11 @@ function _clipflowTypeText(text, windowId, submit = false) {
     if (!value)
         return false;
 
+    const id = _clipflowResolveWindowId(windowId);
+
     if (GLib.find_program_in_path('wtype')) {
-        if (windowId)
-            _clipflowActivateWindow(windowId);
+        if (id)
+            _clipflowSpawnWait(['xdotool', 'windowactivate', '--sync', id]);
         if (!_clipflowSpawnWait(['wtype', value]))
             return false;
         if (submit)
@@ -116,8 +134,8 @@ function _clipflowTypeText(text, windowId, submit = false) {
     if (!GLib.find_program_in_path('xdotool'))
         return false;
 
-    if (windowId)
-        _clipflowActivateWindow(windowId);
+    if (id)
+        _clipflowSpawnWait(['xdotool', 'windowactivate', '--sync', id]);
 
     const lines = value.split('\n');
     for (let i = 0; i < lines.length; i++) {
@@ -143,7 +161,7 @@ function _clipflowInsertPlainTextIntoTarget({ text, windowId = '', submit = fals
 
     _clipflowSetSystemClipboardPlainText(value);
 
-    const wid = String(windowId || '').trim();
+    const wid = _clipflowResolveWindowId(windowId);
     const direct = forceDirectType === true
         || (forceDirectType !== false && _clipflowShouldPreferDirectTyping(wid));
 
@@ -2035,29 +2053,51 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
     _captureInsertTargetWindow() {
         try {
-            const persisted = this._loadPersistedInsertTargetWindowId();
-            if (persisted)
-                this._lastInsertTargetWindowId = persisted;
+            let candidate = '';
             const win = global?.display?.focus_window || null;
-            if (win && !this._isShellOrClipFlowWindow(win))
+            if (win && !this._isShellOrClipFlowWindow(win)) {
+                const xid = this._getWindowXid(win);
+                if (xid && _clipflowIsValidWindowId(xid))
+                    candidate = xid;
                 this._trackInsertTargetWindow(win);
-            if (!this._lastInsertTargetWindowId && GLib.find_program_in_path('xdotool')) {
+            }
+            if (!candidate && this._lastInsertTargetWindowId && _clipflowIsValidWindowId(this._lastInsertTargetWindowId))
+                candidate = this._lastInsertTargetWindowId;
+            if (!candidate) {
+                const persisted = this._loadPersistedInsertTargetWindowId();
+                if (persisted && _clipflowIsValidWindowId(persisted))
+                    candidate = persisted;
+            }
+            if (!candidate && GLib.find_program_in_path('xdotool')) {
                 const [ok, out] = GLib.spawn_command_line_sync('xdotool getactivewindow');
                 if (ok && out) {
                     const id = String(ByteArray.toString(out)).trim();
-                    if (/^\d+$/.test(id))
-                        this._lastInsertTargetWindowId = id;
+                    if (_clipflowIsValidWindowId(id))
+                        candidate = id;
                 }
             }
-            if (this._lastInsertTargetWindowId)
-                this._persistInsertTargetWindowId(this._lastInsertTargetWindowId);
+            this._lastInsertTargetWindowId = candidate;
+            if (candidate)
+                this._persistInsertTargetWindowId(candidate);
+            else
+                this._clearPersistedInsertTargetWindowId();
+        } catch (_e) {}
+    }
+
+    _clearPersistedInsertTargetWindowId() {
+        try {
+            const path = GLib.build_filenamev([this._storageDir, 'insert-target-window-id.txt']);
+            if (GLib.file_test(path, GLib.FileTest.EXISTS))
+                GLib.unlink(path);
         } catch (_e) {}
     }
 
     _restoreInsertTargetWindow() {
         try {
-            if (this._lastInsertTargetWindowId && GLib.find_program_in_path('xdotool')) {
-                const ok = this._runInsertCommand(['xdotool', 'windowactivate', '--sync', this._lastInsertTargetWindowId]);
+            const wid = _clipflowResolveWindowId(this._lastInsertTargetWindowId || '');
+            if (wid && GLib.find_program_in_path('xdotool')) {
+                this._lastInsertTargetWindowId = wid;
+                const ok = this._runInsertCommand(['xdotool', 'windowactivate', '--sync', wid]);
                 if (ok)
                     return true;
             }

@@ -1,3 +1,11 @@
+## 1.4.4 — 2026-06-07
+
+**Fix paste failing after target window closes (screen recording, reopened terminals).**
+
+- Validate insert-target window IDs before paste; discard stale/dead X11 windows
+- Prefer live focus window over stale saved ID when capturing paste target
+- Fix `xclip` stdin on GNOME 46 GJS (`communicate_utf8` instead of deprecated `UnixOutputStream`)
+
 ## 1.4.3 — 2026-06-07
 
 **Reliable paste into agent terminals, chats, and special inputs (Codex, etc.).**

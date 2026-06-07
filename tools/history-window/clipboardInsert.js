@@ -25,21 +25,36 @@ function isWaylandSession() {
 function _spawnWait(argv, stdinText = null) {
     try {
         let flags = Gio.SubprocessFlags.SEARCH_PATH_FROM_ENVP;
-        if (stdinText != null)
-            flags |= Gio.SubprocessFlags.STDIN_PIPE;
-        else
+        if (stdinText == null) {
             flags |= Gio.SubprocessFlags.STDOUT_SILENCE | Gio.SubprocessFlags.STDERR_SILENCE;
-        const proc = Gio.Subprocess.new(argv, flags);
-        if (stdinText != null) {
-            const stream = proc.get_stdin_pipe();
-            stream.write_all(String(stdinText), null);
-            stream.close(null);
+            const proc = Gio.Subprocess.new(argv, flags);
+            proc.wait(null);
+            return proc.get_successful();
         }
-        proc.wait(null);
+        flags |= Gio.SubprocessFlags.STDIN_PIPE | Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_SILENCE;
+        const proc = Gio.Subprocess.new(argv, flags);
+        proc.communicate_utf8(String(stdinText), null);
         return proc.get_successful();
     } catch (_e) {
         return false;
     }
+}
+
+function isValidWindowId(windowId) {
+    const id = String(windowId || '').trim();
+    if (!id || !/^\d+$/.test(id) || !GLib.find_program_in_path('xdotool'))
+        return false;
+    return _spawnWait(['xdotool', 'getwindowname', id]);
+}
+
+function resolveWindowId(windowId) {
+    const id = String(windowId || '').trim();
+    if (isValidWindowId(id))
+        return id;
+    if (!GLib.find_program_in_path('xdotool'))
+        return '';
+    const active = _spawnRead(['xdotool', 'getactivewindow']);
+    return /^\d+$/.test(active) && isValidWindowId(active) ? active : '';
 }
 
 function _spawnRead(argv) {
@@ -92,15 +107,16 @@ function shouldPreferDirectTyping(windowId) {
 }
 
 function activateWindow(windowId) {
-    const id = String(windowId || '').trim();
+    const id = resolveWindowId(windowId);
     if (!id || !GLib.find_program_in_path('xdotool'))
         return false;
     return _spawnWait(['xdotool', 'windowactivate', '--sync', id]);
 }
 
 function pasteViaKeyboard(windowId) {
-    if (windowId)
-        activateWindow(windowId);
+    const id = resolveWindowId(windowId);
+    if (id)
+        _spawnWait(['xdotool', 'windowactivate', '--sync', id]);
     return _spawnWait(['xdotool', 'key', '--clearmodifiers', 'ctrl+v'])
         || _spawnWait(['xdotool', 'key', '--clearmodifiers', 'shift+Insert']);
 }
@@ -110,9 +126,11 @@ function typeText(text, windowId, submit = false) {
     if (!value)
         return false;
 
+    const id = resolveWindowId(windowId);
+
     if (GLib.find_program_in_path('wtype')) {
-        if (windowId)
-            activateWindow(windowId);
+        if (id)
+            _spawnWait(['xdotool', 'windowactivate', '--sync', id]);
         if (!_spawnWait(['wtype', value]))
             return false;
         if (submit)
@@ -123,8 +141,8 @@ function typeText(text, windowId, submit = false) {
     if (!GLib.find_program_in_path('xdotool'))
         return false;
 
-    if (windowId)
-        activateWindow(windowId);
+    if (id)
+        _spawnWait(['xdotool', 'windowactivate', '--sync', id]);
 
     const lines = value.split('\n');
     for (let i = 0; i < lines.length; i++) {
@@ -150,7 +168,7 @@ function insertPlainTextIntoTarget({ text, windowId = '', submit = false, forceD
 
     setSystemClipboardPlainText(value);
 
-    const wid = String(windowId || '').trim();
+    const wid = resolveWindowId(windowId);
     const direct = forceDirectType === true
         || (forceDirectType !== false && shouldPreferDirectTyping(wid));
 
@@ -173,6 +191,8 @@ var exports = {
     setSystemClipboardPlainText,
     getWindowIdentity,
     shouldPreferDirectTyping,
+    isValidWindowId,
+    resolveWindowId,
     activateWindow,
     pasteViaKeyboard,
     typeText,

@@ -90,12 +90,12 @@ function loadInsertTargetWindowId() {
     try {
         const fromEnv = (GLib.getenv('CLIPFLOW_INSERT_TARGET_WID') || '').trim();
         if (/^\d+$/.test(fromEnv))
-            return fromEnv;
+            return ClipboardInsert.resolveWindowId(fromEnv);
         if (!GLib.file_test(INSERT_TARGET_FILE, GLib.FileTest.EXISTS))
-            return '';
+            return ClipboardInsert.resolveWindowId('');
         const [, bytes] = GLib.file_get_contents(INSERT_TARGET_FILE);
         const id = String(ByteArray.toString(bytes)).trim();
-        return /^\d+$/.test(id) ? id : '';
+        return ClipboardInsert.resolveWindowId(/^\d+$/.test(id) ? id : '');
     } catch (_e) {
         return '';
     }

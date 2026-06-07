@@ -1315,10 +1315,13 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return;
         }
         try {
+            const envp = this._lastInsertTargetWindowId
+                ? [`CLIPFLOW_INSERT_TARGET_WID=${this._lastInsertTargetWindowId}`]
+                : null;
             GLib.spawn_async(
                 null,
                 ['gjs', this._historyWindowScript],
-                null,
+                envp,
                 GLib.SpawnFlags.SEARCH_PATH_FROM_ENVP | GLib.SpawnFlags.DO_NOT_REAP_CHILD,
                 null
             );
@@ -2027,6 +2030,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
                         this._lastInsertTargetWindowId = id;
                 }
             }
+            if (this._lastInsertTargetWindowId)
+                this._persistInsertTargetWindowId(this._lastInsertTargetWindowId);
         } catch (_e) {}
     }
 

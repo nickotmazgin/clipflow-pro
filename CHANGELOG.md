@@ -7,6 +7,7 @@
 - **Auto-detect** agent terminals and similar UIs (e.g. Codex) that treat Ctrl+V as image paste — use **direct keystroke typing** (`xdotool type`) instead.
 - Shared insert helper (`clipboardInsert.js`) used by the history window; panel menu logic is inlined for GNOME Shell ESM compatibility.
 - Capture insert-target window before opening the history window so paste returns to the prior app.
+- History window now receives the target window ID (env + persisted file), activates it before insert, and matches panel timing.
 
 ## End of GNOME Shell 43–44 support — 2026-06-02
 

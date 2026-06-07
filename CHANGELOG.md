@@ -8,6 +8,7 @@
 - Shared insert helper (`clipboardInsert.js`) used by the history window; panel menu logic is inlined for GNOME Shell ESM compatibility.
 - Capture insert-target window before opening the history window so paste returns to the prior app.
 - History window now receives the target window ID (env + persisted file), activates it before insert, and matches panel timing.
+- Fixed history window launch when passing insert-target env (merge full environment so gjs/DISPLAY are preserved).
 
 ## End of GNOME Shell 43–44 support — 2026-06-02
 

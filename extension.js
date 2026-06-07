@@ -161,6 +161,22 @@ function _clipflowInsertPlainTextIntoTarget({ text, windowId = '', submit = fals
     return _clipflowTypeText(value, wid, submit);
 }
 
+function _clipflowChildEnviron(extraVars = null) {
+    const merged = {};
+    try {
+        GLib.get_environ().forEach(entry => {
+            const idx = entry.indexOf('=');
+            if (idx > 0)
+                merged[entry.slice(0, idx)] = entry.slice(idx + 1);
+        });
+    } catch (_e) {}
+    if (extraVars && typeof extraVars === 'object') {
+        for (const key of Object.keys(extraVars))
+            merged[key] = String(extraVars[key]);
+    }
+    return Object.keys(merged).map(key => `${key}=${merged[key]}`);
+}
+
 function _pathFromExtensionLocation(dir) {
     if (!dir)
         return '';
@@ -1315,9 +1331,12 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return;
         }
         try {
-            const envp = this._lastInsertTargetWindowId
-                ? [`CLIPFLOW_INSERT_TARGET_WID=${this._lastInsertTargetWindowId}`]
-                : null;
+            let envp = null;
+            if (this._lastInsertTargetWindowId) {
+                envp = _clipflowChildEnviron({
+                    CLIPFLOW_INSERT_TARGET_WID: String(this._lastInsertTargetWindowId),
+                });
+            }
             GLib.spawn_async(
                 null,
                 ['gjs', this._historyWindowScript],

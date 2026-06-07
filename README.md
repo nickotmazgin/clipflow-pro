@@ -38,6 +38,12 @@ Full combined image (download): [collage-v1.4.2-2026.jpg](screenshots/collage-v1
 
 ---
 
+## What's new in v1.4.3
+
+- **Reliable paste into agent terminals** (Codex, Cursor Agents, etc.): plain-text clipboard via `xclip`/`wl-copy` plus direct keystroke typing when Ctrl+V is treated as image paste
+- **History window insert** captures and restores the target app window; panel menu and history window now behave the same
+- **ESM-safe** paste helpers (no broken `imports` load in GNOME Shell)
+
 ## What's new in v1.4.2
 
 - **History Window header:** labeled **Settings** and **About** buttons (opens preferences on the right tab)
@@ -103,7 +109,7 @@ A dedicated **desktop window** for browsing, searching, and managing clipboard h
 2. Install:
 
 ```bash
-gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.4.2-gs45-50.zip
+gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.4.3-gs45-50.zip
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 # Alt+F2 → r → Enter
 ```

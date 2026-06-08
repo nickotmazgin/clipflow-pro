@@ -25,4 +25,11 @@ jobs:
 
       - name: Run ESLint
         run: |
-          npx -y eslint@9 extension.js extension-esm.js prefs-es6.js eslint.config.cjs
+          npx -y eslint@9 \
+            extension.js \
+            extension-esm.js \
+            prefs-es6.js \
+            tools/history-window/clipboardInsert.js \
+            tools/history-window/clipboard-set-runner.js \
+            tools/history-window/insert-runner.js \
+            eslint.config.cjs

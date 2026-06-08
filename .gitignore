@@ -1,6 +1,7 @@
 # Build directories
 build/
 dist/
+schemas/gschemas.compiled
 
 # OS generated files
 .DS_Store

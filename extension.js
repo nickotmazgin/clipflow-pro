@@ -10,155 +10,17 @@ const Me = ExtensionUtils.getCurrentExtension();
 const _ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
 const ByteArray = imports.byteArray;
 
-const _CLIPFLOW_DIRECT_TYPE_WM_PATTERNS = [
-    'codex', 'openai codex', 'cursor agent', 'cursor agents',
-    'warp', 'aider', 'chatgpt', 'claude', 'ghostty',
-];
-
-function _clipflowSpawnWait(argv, stdinText = null) {
-    try {
-        let flags = Gio.SubprocessFlags.SEARCH_PATH_FROM_ENVP;
-        if (stdinText != null)
-            flags |= Gio.SubprocessFlags.STDIN_PIPE;
-        else
-            flags |= Gio.SubprocessFlags.STDOUT_SILENCE | Gio.SubprocessFlags.STDERR_SILENCE;
-        const proc = Gio.Subprocess.new(argv, flags);
-        if (stdinText != null) {
-            const stream = proc.get_stdin_pipe();
-            stream.write_all(String(stdinText), null);
-            stream.close(null);
-        }
-        proc.wait(null);
-        return proc.get_successful();
-    } catch (_e) {
-        return false;
-    }
-}
-
-function _clipflowSpawnRead(argv) {
-    try {
-        const proc = Gio.Subprocess.new(
-            argv,
-            Gio.SubprocessFlags.SEARCH_PATH_FROM_ENVP
-                | Gio.SubprocessFlags.STDOUT_PIPE
-                | Gio.SubprocessFlags.STDERR_SILENCE
-        );
-        const [, stdout] = proc.communicate_utf8(null, null);
-        proc.wait(null);
-        if (!proc.get_successful())
-            return '';
-        return (stdout || '').trim();
-    } catch (_e) {
-        return '';
-    }
-}
-
-function _clipflowSetSystemClipboardPlainText(text) {
-    const payload = text == null ? '' : String(text);
-    if (GLib.getenv('WAYLAND_DISPLAY') && GLib.find_program_in_path('wl-copy'))
-        return _clipflowSpawnWait(['wl-copy', '--type', 'text/plain'], payload);
-    if (GLib.find_program_in_path('xclip')) {
-        if (!_clipflowSpawnWait(['xclip', '-selection', 'clipboard'], payload))
-            return false;
-        _clipflowSpawnWait(['xclip', '-selection', 'primary'], payload);
-        return true;
-    }
-    return false;
-}
-
-function _clipflowGetWindowIdentity(windowId) {
+function _clipflowLooksLikeWindowId(windowId) {
     const id = String(windowId || '').trim();
-    if (!id || !/^\d+$/.test(id) || !GLib.find_program_in_path('xdotool'))
-        return { name: '', cls: '' };
-    return {
-        name: _clipflowSpawnRead(['xdotool', 'getwindowname', id]),
-        cls: _clipflowSpawnRead(['xdotool', 'getwindowclassname', id]),
-    };
+    return /^\d+$/.test(id);
 }
 
-function _clipflowShouldPreferDirectTyping(windowId) {
-    const { name, cls } = _clipflowGetWindowIdentity(windowId);
-    const hay = `${name} ${cls}`.toLowerCase();
-    if (!hay.trim())
-        return false;
-    return _CLIPFLOW_DIRECT_TYPE_WM_PATTERNS.some(pattern => hay.includes(pattern));
-}
-
-function _clipflowActivateWindow(windowId) {
-    const id = String(windowId || '').trim();
-    if (!id || !GLib.find_program_in_path('xdotool'))
-        return false;
-    return _clipflowSpawnWait(['xdotool', 'windowactivate', '--sync', id]);
-}
-
-function _clipflowPasteViaKeyboard(windowId) {
-    if (windowId)
-        _clipflowActivateWindow(windowId);
-    return _clipflowSpawnWait(['xdotool', 'key', '--clearmodifiers', 'ctrl+v'])
-        || _clipflowSpawnWait(['xdotool', 'key', '--clearmodifiers', 'shift+Insert']);
-}
-
-function _clipflowTypeText(text, windowId, submit = false) {
-    const value = text == null ? '' : String(text);
-    if (!value)
-        return false;
-
-    if (GLib.find_program_in_path('wtype')) {
-        if (windowId)
-            _clipflowActivateWindow(windowId);
-        if (!_clipflowSpawnWait(['wtype', value]))
-            return false;
-        if (submit)
-            _clipflowSpawnWait(['wtype', '\n']);
-        return true;
+function _clipflowTextToEnvB64(text) {
+    try {
+        return GLib.base64_encode(ByteArray.fromString(String(text), 'UTF-8'));
+    } catch (_e) {
+        return GLib.base64_encode(String(text));
     }
-
-    if (!GLib.find_program_in_path('xdotool'))
-        return false;
-
-    if (windowId)
-        _clipflowActivateWindow(windowId);
-
-    const lines = value.split('\n');
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        if (line.length > 0) {
-            if (!_clipflowSpawnWait(['xdotool', 'type', '--clearmodifiers', '--delay', '12', '--', line]))
-                return false;
-        }
-        if (i < lines.length - 1) {
-            if (!_clipflowSpawnWait(['xdotool', 'key', '--clearmodifiers', 'Return']))
-                return false;
-        }
-    }
-    if (submit)
-        return _clipflowSpawnWait(['xdotool', 'key', '--clearmodifiers', 'Return']);
-    return true;
-}
-
-function _clipflowInsertPlainTextIntoTarget({ text, windowId = '', submit = false, forceDirectType = null }) {
-    const value = typeof text === 'string' ? text.trim() : '';
-    if (!value)
-        return false;
-
-    _clipflowSetSystemClipboardPlainText(value);
-
-    const wid = String(windowId || '').trim();
-    const direct = forceDirectType === true
-        || (forceDirectType !== false && _clipflowShouldPreferDirectTyping(wid));
-
-    if (direct)
-        return _clipflowTypeText(value, wid, submit);
-
-    if (GLib.find_program_in_path('xdotool')) {
-        if (_clipflowPasteViaKeyboard(wid)) {
-            if (submit)
-                _clipflowSpawnWait(['xdotool', 'key', '--clearmodifiers', 'Return']);
-            return true;
-        }
-    }
-
-    return _clipflowTypeText(value, wid, submit);
 }
 
 function _clipflowChildEnviron(extraVars = null) {
@@ -175,6 +37,49 @@ function _clipflowChildEnviron(extraVars = null) {
             merged[key] = String(extraVars[key]);
     }
     return Object.keys(merged).map(key => `${key}=${merged[key]}`);
+}
+
+function _clipflowSpawnAsync(argv, extraVars = null) {
+    try {
+        GLib.spawn_async(
+            null,
+            argv,
+            _clipflowChildEnviron(extraVars),
+            GLib.SpawnFlags.SEARCH_PATH_FROM_ENVP,
+            null
+        );
+        return true;
+    } catch (_e) {
+        return false;
+    }
+}
+
+function _clipflowSpawnInsertRunner(runnerScript, text, windowId, submit) {
+    if (!runnerScript || !GLib.file_test(runnerScript, GLib.FileTest.EXISTS))
+        return false;
+    const value = typeof text === 'string' ? text.trim() : '';
+    if (!value)
+        return false;
+    return _clipflowSpawnAsync(
+        ['gjs', runnerScript],
+        {
+            CLIPFLOW_INSERT_B64: _clipflowTextToEnvB64(value),
+            CLIPFLOW_INSERT_TARGET_WID: String(windowId || '').trim(),
+            CLIPFLOW_INSERT_SUBMIT: submit ? '1' : '0',
+        }
+    );
+}
+
+function _clipflowSpawnSetClipboard(runnerScript, text) {
+    if (!runnerScript || !GLib.file_test(runnerScript, GLib.FileTest.EXISTS))
+        return false;
+    const value = text == null ? '' : String(text);
+    if (!value)
+        return false;
+    return _clipflowSpawnAsync(
+        ['gjs', runnerScript],
+        { CLIPFLOW_CLIPBOARD_B64: _clipflowTextToEnvB64(value) }
+    );
 }
 
 function _pathFromExtensionLocation(dir) {
@@ -287,6 +192,12 @@ class ClipFlowIndicator extends PanelMenu.Button {
         const extDir = _getExtensionDir();
         this._historyWindowScript = extDir
             ? GLib.build_filenamev([extDir, 'history-window', 'history-window.js'])
+            : '';
+        this._insertRunnerScript = extDir
+            ? GLib.build_filenamev([extDir, 'history-window', 'insert-runner.js'])
+            : '';
+        this._clipboardSetRunnerScript = extDir
+            ? GLib.build_filenamev([extDir, 'history-window', 'clipboard-set-runner.js'])
             : '';
         this._historyMonitor = null;
         this._historyReloadTimeout = 0;
@@ -2035,33 +1946,39 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
     _captureInsertTargetWindow() {
         try {
-            const persisted = this._loadPersistedInsertTargetWindowId();
-            if (persisted)
-                this._lastInsertTargetWindowId = persisted;
+            let candidate = '';
             const win = global?.display?.focus_window || null;
-            if (win && !this._isShellOrClipFlowWindow(win))
+            if (win && !this._isShellOrClipFlowWindow(win)) {
+                const xid = this._getWindowXid(win);
+                if (_clipflowLooksLikeWindowId(xid))
+                    candidate = xid;
                 this._trackInsertTargetWindow(win);
-            if (!this._lastInsertTargetWindowId && GLib.find_program_in_path('xdotool')) {
-                const [ok, out] = GLib.spawn_command_line_sync('xdotool getactivewindow');
-                if (ok && out) {
-                    const id = String(ByteArray.toString(out)).trim();
-                    if (/^\d+$/.test(id))
-                        this._lastInsertTargetWindowId = id;
-                }
             }
-            if (this._lastInsertTargetWindowId)
-                this._persistInsertTargetWindowId(this._lastInsertTargetWindowId);
+            const tracked = this._lastInsertTargetWindow;
+            if (!candidate && tracked && !this._isShellOrClipFlowWindow(tracked)) {
+                const trackedXid = this._getWindowXid(tracked);
+                if (_clipflowLooksLikeWindowId(trackedXid))
+                    candidate = trackedXid;
+            }
+            if (!candidate && _clipflowLooksLikeWindowId(this._lastInsertTargetWindowId))
+                candidate = this._lastInsertTargetWindowId;
+            this._lastInsertTargetWindowId = candidate;
+            if (candidate)
+                this._persistInsertTargetWindowId(candidate);
+            else
+                this._clearPersistedInsertTargetWindowId();
+        } catch (_e) {}
+    }
+
+    _clearPersistedInsertTargetWindowId() {
+        try {
+            const path = GLib.build_filenamev([this._storageDir, 'insert-target-window-id.txt']);
+            if (GLib.file_test(path, GLib.FileTest.EXISTS))
+                GLib.unlink(path);
         } catch (_e) {}
     }
 
     _restoreInsertTargetWindow() {
-        try {
-            if (this._lastInsertTargetWindowId && GLib.find_program_in_path('xdotool')) {
-                const ok = this._runInsertCommand(['xdotool', 'windowactivate', '--sync', this._lastInsertTargetWindowId]);
-                if (ok)
-                    return true;
-            }
-        } catch (_e) {}
         const win = this._lastInsertTargetWindow;
         if (!win)
             return false;
@@ -4614,30 +4531,11 @@ class ClipFlowIndicator extends PanelMenu.Button {
         if (this.menu && typeof this.menu.close === 'function')
             this.menu.close();
 
-        // Copy first, close menus, then restore the last app window and paste.
-        GLib.timeout_add(GLib.PRIORITY_DEFAULT, 180, () => {
-            this._restoreInsertTargetWindow();
-            GLib.timeout_add(GLib.PRIORITY_DEFAULT, 220, () => {
-                this._insertClipboardIntoFocusedTarget(false);
-                return GLib.SOURCE_REMOVE;
-            });
+        // Copy first, close menus, then paste in a child process (never block GNOME Shell).
+        GLib.timeout_add(GLib.PRIORITY_DEFAULT, 350, () => {
+            this._insertClipboardIntoFocusedTarget(false);
             return GLib.SOURCE_REMOVE;
         });
-    }
-
-    _runInsertCommand(argv) {
-        try {
-            const proc = Gio.Subprocess.new(
-                argv,
-                Gio.SubprocessFlags.SEARCH_PATH_FROM_ENVP
-                    | Gio.SubprocessFlags.STDOUT_SILENCE
-                    | Gio.SubprocessFlags.STDERR_SILENCE
-            );
-            proc.wait(null);
-            return proc.get_successful();
-        } catch (_e) {
-            return false;
-        }
     }
 
     _insertClipboardIntoFocusedTarget(submit = false) {
@@ -4649,11 +4547,12 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return false;
 
         try {
-            return _clipflowInsertPlainTextIntoTarget({
+            return _clipflowSpawnInsertRunner(
+                this._insertRunnerScript,
                 text,
-                windowId: this._lastInsertTargetWindowId || '',
-                submit,
-            });
+                this._lastInsertTargetWindowId || '',
+                submit
+            );
         } catch (_e) {
             return false;
         }
@@ -4805,7 +4704,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             const clipboard = St.Clipboard.get_default();
             clipboard.set_text(St.ClipboardType.CLIPBOARD, text);
             clipboard.set_text(St.ClipboardType.PRIMARY, text);
-            _clipflowSetSystemClipboardPlainText(text);
+            _clipflowSpawnSetClipboard(this._clipboardSetRunnerScript, text);
             const cached = typeof text === 'string' ? text.trim() : '';
             this._lastClipboardText = cached;
             this._lastPrimaryText = cached;

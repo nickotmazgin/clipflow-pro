@@ -56,7 +56,7 @@ jobs:
 
       - name: Attest release zip (Sigstore)
         continue-on-error: true
-        uses: actions/attest-build-provenance@v2
+        uses: actions/attest-build-provenance@v4
         with:
           subject-path: ${{ steps.meta.outputs.zip }}
           push-to-registry: false

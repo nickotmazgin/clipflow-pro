@@ -2,7 +2,19 @@
 set -euo pipefail
 
 ZIP="dist/clipflow-pro@nickotmazgin.github.io.shell-extension.zip"
-REQ=("metadata.json" "extension.js" "prefs.js" "stylesheet.css" "schemas/org.gnome.shell.extensions.clipflow-pro.gschema.xml" "icons/clipflow-pro-symbolic.svg")
+SOURCE_ZIP="dist/clipflow-pro-source.zip"
+REQ=(
+  "metadata.json"
+  "extension.js"
+  "prefs.js"
+  "stylesheet.css"
+  "clipboardInsert.js"
+  "history-window/history-window.js"
+  "history-window/insert-runner.js"
+  "history-window/clipboard-set-runner.js"
+  "schemas/org.gnome.shell.extensions.clipflow-pro.gschema.xml"
+  "icons/clipflow-pro-symbolic.svg"
+)
 PYTHON="${PYTHON:-python3}"
 if ! "${PYTHON}" --version >/dev/null 2>&1; then
   PYTHON="python"
@@ -29,6 +41,14 @@ done
 
 ok "Required files present"
 
+if [ -f "$SOURCE_ZIP" ]; then
+  SOURCE_ENTRIES=$(unzip -Z1 "$SOURCE_ZIP")
+  if printf '%s\n' "$SOURCE_ENTRIES" | grep -Eq '(^|/)(__pycache__|\.pytest_cache|node_modules|build|dist)(/|$)|\.py[co]$|gschemas\.compiled$'; then
+    fail "Source zip contains generated files."
+  fi
+  ok "Source zip excludes generated files"
+fi
+
 # Extract metadata.json to temp and validate JSON
 TMPDIR=$(mktemp -d)
 trap 'rm -rf "$TMPDIR"' EXIT
@@ -46,12 +66,16 @@ UUID=$("${PYTHON}" -c 'import json,sys;d=json.load(open(sys.argv[1]));print(d.ge
 
 SHELLS=$("${PYTHON}" -c 'import json,sys;d=json.load(open(sys.argv[1]));print(",".join(map(str,d.get("shell-version",[]))))' "$TMPDIR/metadata.json")
 echo "Shell versions: [$SHELLS]"
+[ "$SHELLS" = "45,46,47,48,49,50" ] || fail "Unexpected shell-version list: [$SHELLS]"
 
 VER=$("${PYTHON}" -c 'import json,sys;d=json.load(open(sys.argv[1]));print(d.get("version"))' "$TMPDIR/metadata.json")
 [[ "$VER" =~ ^[0-9]+$ ]] || fail "metadata.json version is not an integer: $VER"
 
 VNAME=$("${PYTHON}" -c 'import json,sys;d=json.load(open(sys.argv[1]));print(d.get("version-name",""))' "$TMPDIR/metadata.json")
-[ -n "$VNAME" ] || warn "metadata.json version-name missing"
+[[ "$VNAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+\ 45\.50$ ]] || fail "Unexpected version-name: $VNAME"
+
+ROOT_VNAME=$("${PYTHON}" -c 'import json;print(json.load(open("metadata.json")).get("version-name",""))')
+[ "$VNAME" = "$ROOT_VNAME" ] || fail "Packaged version-name differs from repository metadata: $VNAME != $ROOT_VNAME"
 
 ok "metadata.json passes basic checks (uuid/version/version-name/shell-version)"
 

@@ -1,4 +1,20 @@
-## 1.4.4 — 2026-06-07
+## 1.4.6 — 2026-06-08
+
+**Non-blocking insert helpers and reliable terminal paste targeting.**
+
+- Move clipboard ownership and keyboard insertion out of the GNOME Shell process
+  so a stalled external command cannot freeze the panel.
+- Resolve one live X11 target per insertion and prefer the active app at paste
+  time; the app captured before opening ClipFlow is the fallback.
+- Detect terminal applications from `WM_CLASS` via `xprop`, including kitty
+  windows whose title is Codex or another agent name.
+- Use terminal paste accelerators (`Ctrl+Shift+V`, or `Shift+Insert` for
+  xterm/rxvt-style terminals) and never send plain `Ctrl+V` to a terminal.
+- Preserve the full environment when starting helper processes and return
+  meaningful failure exit codes.
+- Add an X11 terminal insertion smoke test for kitty and GNOME Terminal.
+
+## 1.4.4 (unreleased; included in 1.4.6) — 2026-06-07
 
 **Fix paste failing after target window closes (screen recording, reopened terminals).**
 

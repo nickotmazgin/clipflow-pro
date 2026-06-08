@@ -67,7 +67,10 @@ dist: build
 		$(EXTENSION_FILES) $(EXTRA_FILES) Makefile \
 		build.sh build-modern.sh create-release-zips.sh package.sh \
 		install.sh safe-reload.sh verify_clipflow.sh \
-		$(SCHEMAS_DIR) $(LOCALE_DIR) tools --exclude "schemas/gschemas.compiled"
+		$(SCHEMAS_DIR) $(LOCALE_DIR) tools \
+		--exclude "schemas/gschemas.compiled" \
+		--exclude "tools/__pycache__" \
+		--exclude "*.py[co]"
 	@echo "Distribution packages created in $(DIST_DIR)/"
 
 # Pack using GNOME Extensions tool
@@ -130,6 +133,9 @@ test: validate install
 	sleep 5
 	kill %1 2>/dev/null || true
 
+test-terminal-insert: build
+	./tools/test-terminal-insert.sh
+
 # Package for different distribution methods
 package: dist
 	@echo "Creating distribution packages..."
@@ -164,4 +170,4 @@ version:
 bump-version:
 	@$(PYTHON) tools/version.py bump
 
-.PHONY: all build install uninstall dist pack release-validate dev validate test package clean help version bump-version
+.PHONY: all build install uninstall dist pack release-validate dev validate test test-terminal-insert package clean help version bump-version

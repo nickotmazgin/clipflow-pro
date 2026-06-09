@@ -14,7 +14,7 @@
 
 **ClipFlow Pro** is a clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.github.io`).
 
-> **Latest: v1.4.7** — Faster panel and History Window insertion, bounded clipboard reads, and backlog-free native monitoring. **Previous releases are superseded**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
+> **Latest: v1.4.8** — Journal-clean styling, hardened release validation, plus v1.4.7's faster insertion and backlog-free native monitoring. **Previous releases are superseded**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
 
 > **GNOME Shell 43–44 is no longer supported.** ClipFlow Pro now targets **GNOME 45–50 only**. Upgrade your desktop environment to GNOME **45** or newer.
 
@@ -38,7 +38,13 @@ Full combined image (download): [collage-v1.4.2-2026.jpg](screenshots/collage-v1
 
 ---
 
-## What's new in v1.4.7
+## What's new in v1.4.8
+
+- **Clean Shell journal:** removed an invalid stylesheet rule that logged a warning on every panel icon repaint (no visual change)
+- **Hardened release CI:** stylesheet and translation changes now always run the required release-validation check
+- **Credits:** new [Credits & Acknowledgements](#credits--acknowledgements) section and [CONTRIBUTORS.md](CONTRIBUTORS.md)
+
+## Also added in v1.4.7
 
 - **Faster insertion:** redundant fixed waits were removed from panel and History Window paste paths
 - **Responsive History Window:** clipboard and keyboard helpers run asynchronously outside its UI process
@@ -128,7 +134,7 @@ A dedicated **desktop window** for browsing, searching, and managing clipboard h
 2. Install:
 
 ```bash
-gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.4.7-gs45-50.zip
+gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.4.8-gs45-50.zip
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 # Alt+F2 → r → Enter
 ```

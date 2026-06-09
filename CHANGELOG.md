@@ -1,3 +1,18 @@
+## 1.4.8 — 2026-06-10
+
+**Journal-clean styling, release-validation coverage, and project credits.**
+
+- Remove the invalid `icon-size: inherit` rule from the panel-icon stylesheet;
+  GNOME Shell logged "Ignoring length property that isn't a number" on every
+  panel icon repaint. Icon size is set programmatically, so there is no visual
+  change.
+- Run the Release Validate workflow for `stylesheet.css` and `locale/**`
+  changes so files shipped in the release zip can no longer bypass the
+  required `validate` status check.
+- Add a Credits & Acknowledgements section to the README and a new
+  `CONTRIBUTORS.md` documenting the maintainer and AI-assisted development
+  (OpenAI Codex, Cursor Agent) with trademark-compliant, logo-free attribution.
+
 ## 1.4.7 — 2026-06-09
 
 **Immediate paste response and bounded native clipboard monitoring.**

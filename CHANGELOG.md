@@ -1,3 +1,28 @@
+## 1.4.7 — 2026-06-09
+
+**Immediate paste response and bounded native clipboard monitoring.**
+
+- Remove redundant panel/history-window insertion delays and reduce the
+  post-focus allowance from 220 ms to 60 ms.
+- Run History Window insertion entirely in a helper process so xclip, xdotool,
+  and target applications cannot block its interface.
+- Resolve and inspect the destination window once per insertion instead of
+  repeatedly launching xdotool and xprop for the same target.
+- Allow clipboard interfaces that provide either `get_text` or `get_content`;
+  previously the polling path incorrectly required both methods.
+- Permit only one asynchronous clipboard read per selection, preventing the
+  500 ms poller from building a callback backlog when an owner responds slowly.
+- Bound `get_text` and MIME fallback requests, ignore late callbacks safely,
+  and avoid removing GLib timeout sources after they have already fired.
+- Add a short-lived `xclip`/`wl-paste` reader helper for Shell builds whose
+  St.Clipboard API exposes no external clipboard MIME types.
+- Fix capture at the configured history limit: replacing the oldest entry no
+  longer prevents persistence or causes the same clipboard to be reprocessed.
+- Reduce history persistence debounce from one second to 100 ms and History
+  Window file-refresh debounce from 350 ms to 50 ms.
+- Restore privacy-safe operational warnings in the Shell journal without
+  logging clipboard contents or previews.
+
 ## 1.4.6 — 2026-06-08
 
 **Non-blocking insert helpers and reliable terminal paste targeting.**

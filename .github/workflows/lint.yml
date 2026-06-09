@@ -30,6 +30,7 @@ jobs:
             extension-esm.js \
             prefs-es6.js \
             tools/history-window/clipboardInsert.js \
+            tools/history-window/clipboard-read-runner.js \
             tools/history-window/clipboard-set-runner.js \
             tools/history-window/insert-runner.js \
             eslint.config.cjs

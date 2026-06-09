@@ -3225,6 +3225,12 @@ class ClipFlowIndicator extends PanelMenu.Button {
         const startFallback = () => {
             if (settled || fallbackStarted)
                 return;
+            // The extension may have been disabled while an async read was in
+            // flight; bail out through finish() so the in-flight lock clears.
+            if (!this._clipboard || generation !== this._clipboardReadGeneration || !this._isMonitoring) {
+                finish(null);
+                return;
+            }
             fallbackStarted = true;
             if (typeof this._clipboard.get_content !== 'function') {
                 if (!externalAttempted) {

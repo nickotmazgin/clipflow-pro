@@ -1,3 +1,14 @@
+## 1.4.9 — 2026-06-10
+
+**Fix disable-time race in the clipboard fallback reader.**
+
+- Guard the clipboard fallback path against the extension being disabled while
+  an asynchronous external read is still in flight. Previously a pending
+  callback could hit `this._clipboard = null` and raise
+  `TypeError: this._clipboard is null` in the Shell journal, leaving the
+  extension in an INACTIVE state until the session was restarted (seen during
+  in-session upgrades from 1.4.7 to 1.4.8).
+
 ## 1.4.8 — 2026-06-10
 
 **Journal-clean styling, release-validation coverage, and project credits.**

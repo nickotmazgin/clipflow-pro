@@ -73,9 +73,11 @@ if [[ -f "tools/history-window/history-window.js" ]]; then
     cp "tools/history-window/clipboardInsert.js" "${BUILD_DIR}/clipboardInsert.js"
     cp "tools/history-window/insert-runner.js" "${BUILD_DIR}/history-window/insert-runner.js"
     cp "tools/history-window/clipboard-set-runner.js" "${BUILD_DIR}/history-window/clipboard-set-runner.js"
+    cp "tools/history-window/clipboard-read-runner.js" "${BUILD_DIR}/history-window/clipboard-read-runner.js"
     chmod +x "${BUILD_DIR}/history-window/history-window.js"
     chmod +x "${BUILD_DIR}/history-window/insert-runner.js"
     chmod +x "${BUILD_DIR}/history-window/clipboard-set-runner.js"
+    chmod +x "${BUILD_DIR}/history-window/clipboard-read-runner.js"
 else
     echo "Warning: history-window.js not found; full history window will be unavailable." >&2
 fi

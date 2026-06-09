@@ -131,8 +131,6 @@ function resolveInsertTargetWindowId(savedWindowId) {
     if (!GLib.find_program_in_path('xdotool'))
         return resolveWindowId(savedWindowId);
 
-    _pauseMs(300);
-
     const active = _spawnRead(['xdotool', 'getactivewindow']);
     if (/^\d+$/.test(active) && isValidWindowId(active) && !isIgnoredInsertTarget(active))
         return active;
@@ -181,55 +179,56 @@ function getWindowIdentity(windowId) {
     };
 }
 
-function shouldPreferTerminalPaste(windowId) {
-    const { name, cls } = getWindowIdentity(windowId);
+function shouldPreferTerminalPaste(windowId, identity = null) {
+    const { name, cls } = identity || getWindowIdentity(windowId);
     const hay = `${name} ${cls}`.toLowerCase();
     if (!hay.trim())
         return false;
     return TERMINAL_WM_PATTERNS.some(pattern => hay.includes(pattern));
 }
 
-function shouldPreferDirectTyping(windowId) {
-    if (shouldPreferTerminalPaste(windowId))
+function shouldPreferDirectTyping(windowId, identity = null) {
+    const resolvedIdentity = identity || getWindowIdentity(windowId);
+    if (shouldPreferTerminalPaste(windowId, resolvedIdentity))
         return false;
-    const { name, cls } = getWindowIdentity(windowId);
+    const { name, cls } = resolvedIdentity;
     const hay = `${name} ${cls}`.toLowerCase();
     if (!hay.trim())
         return false;
     return DIRECT_TYPE_WM_PATTERNS.some(pattern => hay.includes(pattern));
 }
 
-function terminalPasteShortcut(windowId) {
-    const { name, cls } = getWindowIdentity(windowId);
+function terminalPasteShortcut(windowId, identity = null) {
+    const { name, cls } = identity || getWindowIdentity(windowId);
     const hay = `${name} ${cls}`.toLowerCase();
     if (hay.includes('xterm') || hay.includes('rxvt') || hay.includes('st-256color'))
         return 'shift+Insert';
     return 'ctrl+shift+v';
 }
 
-function activateWindow(windowId) {
-    const id = resolveWindowId(windowId);
+function activateWindow(windowId, knownValid = false) {
+    const id = knownValid ? String(windowId || '').trim() : resolveWindowId(windowId);
     if (!id || !GLib.find_program_in_path('xdotool'))
         return false;
     const ok = _spawnWait(['xdotool', 'windowactivate', '--sync', id]);
     if (ok)
-        _pauseMs(220);
+        _pauseMs(60);
     return ok;
 }
 
-function pasteViaKeyboard(windowId) {
-    const id = resolveWindowId(windowId);
-    if (id && !activateWindow(id))
+function pasteViaKeyboard(windowId, knownValid = false) {
+    const id = knownValid ? String(windowId || '').trim() : resolveWindowId(windowId);
+    if (id && !activateWindow(id, true))
         return false;
     return _spawnWait(['xdotool', 'key', '--clearmodifiers', 'ctrl+v'])
         || _spawnWait(['xdotool', 'key', '--clearmodifiers', 'shift+Insert']);
 }
 
-function pasteViaTerminalKeyboard(windowId, submit = false) {
-    const id = resolveWindowId(windowId);
-    if (!id || !activateWindow(id))
+function pasteViaTerminalKeyboard(windowId, submit = false, identity = null, knownValid = false) {
+    const id = knownValid ? String(windowId || '').trim() : resolveWindowId(windowId);
+    if (!id || !activateWindow(id, true))
         return false;
-    if (!_spawnWait(['xdotool', 'key', '--clearmodifiers', terminalPasteShortcut(id)]))
+    if (!_spawnWait(['xdotool', 'key', '--clearmodifiers', terminalPasteShortcut(id, identity)]))
         return false;
     if (submit)
         _spawnWait(['xdotool', 'key', '--clearmodifiers', 'Return']);
@@ -256,7 +255,7 @@ function typeText(text, windowId, submit = false, resolveTarget = true) {
     if (!GLib.find_program_in_path('xdotool'))
         return false;
 
-    if (id && !activateWindow(id))
+    if (id && !activateWindow(id, resolveTarget))
         return false;
 
     const lines = value.split('\n');
@@ -287,20 +286,21 @@ function insertPlainTextIntoTarget({ text, windowId = '', submit = false, forceD
     const wid = resolveInsertTargetWindowId(windowId);
     if (!wid)
         return false;
-    const terminal = shouldPreferTerminalPaste(wid);
+    const identity = getWindowIdentity(wid);
+    const terminal = shouldPreferTerminalPaste(wid, identity);
     const direct = !terminal && (
         forceDirectType === true
-        || (forceDirectType !== false && shouldPreferDirectTyping(wid))
+        || (forceDirectType !== false && shouldPreferDirectTyping(wid, identity))
     );
 
     if (terminal)
-        return pasteViaTerminalKeyboard(wid, submit);
+        return pasteViaTerminalKeyboard(wid, submit, identity, true);
 
     if (direct)
         return typeText(value, wid, submit, false);
 
     if (GLib.find_program_in_path('xdotool')) {
-        if (pasteViaKeyboard(wid)) {
+        if (pasteViaKeyboard(wid, true)) {
             if (submit)
                 _spawnWait(['xdotool', 'key', '--clearmodifiers', 'Return']);
             return true;

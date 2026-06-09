@@ -77,6 +77,22 @@ git push origin :refs/tags/v1.2.6
 - Source zip: `dist/clipflow-pro-source.zip`
 - Validate: `make release-validate`
 
+## Clipboard and insertion regression checks
+
+Before publishing a clipboard or paste-path change:
+
+```bash
+npx -y eslint@9 extension.js prefs-es6.js tools/history-window/*.js
+make release-validate
+make test-terminal-insert
+```
+
+Monitoring must keep at most one asynchronous read in flight per selection.
+Every timeout callback must tolerate a late Shell callback without removing an
+already-fired GLib source. Insertion helpers must remain outside the GNOME Shell
+process and should not add fixed waits unless a tested focus transition needs
+one.
+
 ## Distribution
 
 - Publish the **45–50** zip on the GitHub Releases page (via signed tag push).

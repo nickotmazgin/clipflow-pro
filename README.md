@@ -14,7 +14,7 @@
 
 **ClipFlow Pro** is a clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.github.io`).
 
-> **Latest: v1.4.6** — Non-blocking paste helpers, live active-window targeting, and terminal-aware shortcuts for kitty, GNOME/Zorin Terminal, Codex, Cursor, Warp, and other agent workflows. **Previous releases are superseded**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
+> **Latest: v1.4.7** — Faster panel and History Window insertion, bounded clipboard reads, and backlog-free native monitoring. **Previous releases are superseded**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
 
 > **GNOME Shell 43–44 is no longer supported.** ClipFlow Pro now targets **GNOME 45–50 only**. Upgrade your desktop environment to GNOME **45** or newer.
 
@@ -38,7 +38,18 @@ Full combined image (download): [collage-v1.4.2-2026.jpg](screenshots/collage-v1
 
 ---
 
-## What's new in v1.4.6
+## What's new in v1.4.7
+
+- **Faster insertion:** redundant fixed waits were removed from panel and History Window paste paths
+- **Responsive History Window:** clipboard and keyboard helpers run asynchronously outside its UI process
+- **Backlog-free monitoring:** only one native read per clipboard selection can be active at a time
+- **Bounded recovery:** stalled clipboard owners cannot leave reads pending indefinitely
+- **Zorin/X11 fallback:** a short-lived helper reads modern UTF-8 clipboard targets when St.Clipboard exposes none
+- **Faster history sync:** 100 ms persistence and 50 ms History Window refresh debounces
+- **Reliable capability detection:** `get_text`-only and `get_content`-only Shell implementations are supported
+- **Privacy-safe diagnostics:** operational failures are visible without recording clipboard contents
+
+## Also added in v1.4.6
 
 - **No GNOME Shell freeze:** clipboard ownership and keyboard insertion run in short-lived helper processes
 - **Paste follows focus:** the active app at paste time wins; the previously captured app is only a fallback
@@ -117,7 +128,7 @@ A dedicated **desktop window** for browsing, searching, and managing clipboard h
 2. Install:
 
 ```bash
-gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.4.6-gs45-50.zip
+gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.4.7-gs45-50.zip
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 # Alt+F2 → r → Enter
 ```

@@ -1,9 +1,9 @@
 /* ClipFlow Pro - GNOME Shell Styles */
 
-/* Panel Icon */
+/* Panel Icon: icon size is set programmatically; St CSS requires a numeric
+   icon-size, and `inherit` floods the journal with parser warnings. */
 .clipflow-panel-icon,
 .clipflow-pro-panel-icon {
-    icon-size: inherit;
 }
 
 /* Menu container */

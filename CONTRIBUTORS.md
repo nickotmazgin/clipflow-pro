@@ -4,11 +4,11 @@ Thank you to everyone who has helped make ClipFlow Pro better.
 
 ## Maintainer
 
-- **[Nick Otmazgin](https://github.com/nickotmazgin)** — creator, lead developer, release manager, and signer of all official releases
+- **[Nick Otmazgin](https://github.com/nickotmazgin)** — creator, sole administrator, and solo developer: code author, reviewer, lead developer, release manager, and signer of all official releases
 
 ## AI Development Assistants
 
-ClipFlow Pro's recent releases were developed with help from AI pair-programming agents. All AI-assisted work is directed, reviewed, tested, and approved by the maintainer; final responsibility for every released line of code rests with the human maintainer.
+ClipFlow Pro's recent releases were developed with help from AI pair-programming agents. As the project's sole admin and solo developer, Nick Otmazgin directs all AI-assisted work — writing and contributing code himself, reviewing every change, testing on real GNOME sessions, and personally approving, signing, and publishing each release. Final responsibility for every released line of code rests with the human maintainer.
 
 | Assistant | Role |
 |-----------|------|

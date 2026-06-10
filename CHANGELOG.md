@@ -9,7 +9,7 @@
   extension in an INACTIVE state until the session was restarted (seen during
   in-session upgrades from 1.4.7 to 1.4.8).
 
-## 1.4.8 — 2026-06-10
+## 1.4.8 (release withdrawn; changes included in 1.4.9) — 2026-06-10
 
 **Journal-clean styling, release-validation coverage, and project credits.**
 
@@ -95,7 +95,7 @@
 - **Minimum supported Shell:** GNOME **45**
 - Removed the **v1.4.2** `*-gs43-44.zip` asset from the GitHub release; legacy builds are no longer distributed
 
-## 1.4.2 — 2026-06-05
+## 1.4.2 (release page removed; superseded by later releases) — 2026-06-05
 
 **Shortcuts, bulk delete, panel delete, History Window header, About maintenance, and refreshed docs.**
 

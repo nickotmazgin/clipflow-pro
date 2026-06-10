@@ -17,6 +17,7 @@ on:
       - '.github/workflows/**'
       - '*.sh'
       - 'README.md'
+      - 'CHANGELOG.md'
   push:
     branches: [ "main" ]
     paths:
@@ -33,6 +34,7 @@ on:
       - '.github/workflows/**'
       - '*.sh'
       - 'README.md'
+      - 'CHANGELOG.md'
   workflow_dispatch:
 
 jobs:

@@ -15,6 +15,7 @@ Thumbs.db
 # IDE files
 .vscode/
 .idea/
+.playwright-mcp/
 *.swp
 *.swo
 *~

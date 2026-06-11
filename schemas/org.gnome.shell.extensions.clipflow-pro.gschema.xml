@@ -178,7 +178,7 @@
     </key>
 
     <key name="show-copied-preview" type="b">
-      <default>true</default>
+      <default>false</default>
       <summary>Show entry preview in copy toast</summary>
       <description>Include the first characters of the copied entry in notifications</description>
     </key>

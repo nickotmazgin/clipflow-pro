@@ -131,8 +131,8 @@ _filterEmpty entries
 - [x] Error handling
 - [x] Memory management
 - [x] No eval() or similar dangerous operations
-- [x] No shell command execution
-- [x] No file system access beyond config directory
+- [x] Subprocess use limited to optional auto-insert helpers (`gjs`, `xdotool`, `xclip`/`wl-copy`) — no remote code download
+- [x] File access limited to `~/.config/clipflow-pro/` and user-initiated export/import paths
 
 ### Privacy
 - [x] Clear privacy policy

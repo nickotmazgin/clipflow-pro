@@ -109,9 +109,20 @@ function insertToFocusedTargetAsync(text, submit = false, windowId = null, callb
         return false;
 
     const wid = String(windowId || loadInsertTargetWindowId() || '').trim();
-    let encoded = '';
+    const payloadPath = GLib.build_filenamev([
+        GLib.get_tmp_dir(),
+        `clipflow-insert-${GLib.random_int()}.json`,
+    ]);
     try {
-        encoded = GLib.base64_encode(ByteArray.fromString(value, 'UTF-8'));
+        GLib.file_set_contents(payloadPath, JSON.stringify({
+            text: value,
+            windowId: wid,
+            submit: !!submit,
+        }));
+        try {
+            Gio.File.new_for_path(payloadPath).set_attribute_uint32(
+                'unix::mode', 0o600, Gio.FileQueryInfoFlags.NONE, null);
+        } catch (_e) {}
     } catch (_e) {
         return false;
     }
@@ -120,9 +131,7 @@ function insertToFocusedTargetAsync(text, submit = false, windowId = null, callb
         const launcher = new Gio.SubprocessLauncher({
             flags: Gio.SubprocessFlags.STDOUT_SILENCE | Gio.SubprocessFlags.STDERR_SILENCE,
         });
-        launcher.setenv('CLIPFLOW_INSERT_B64', encoded, true);
-        launcher.setenv('CLIPFLOW_INSERT_TARGET_WID', wid, true);
-        launcher.setenv('CLIPFLOW_INSERT_SUBMIT', submit ? '1' : '0', true);
+        launcher.setenv('CLIPFLOW_INSERT_FILE', payloadPath, true);
         const process = launcher.spawnv(['gjs', INSERT_RUNNER]);
         process.wait_check_async(null, (proc, result) => {
             let ok = false;
@@ -466,6 +475,14 @@ class ClipFlowHistoryWindow extends Adw.ApplicationWindow {
         if (entries.length === 0)
             return;
         const payload = entries.map(e => e.text).join('\n');
+        if (!payload.trim()) {
+            this._status.label = 'Nothing to insert.';
+            return;
+        }
+        if (payload.length > 50000) {
+            this._status.label = 'Entry too large to auto-insert. Copy and paste manually.';
+            return;
+        }
         const windowId = this._insertTargetWindowId || loadInsertTargetWindowId();
         this.minimize();
         GLib.timeout_add(GLib.PRIORITY_DEFAULT, 80, () => {

@@ -54,20 +54,42 @@ function _clipflowSpawnAsync(argv, extraVars = null) {
     }
 }
 
+function _clipflowWriteInsertPayload(text, windowId, submit) {
+    const value = typeof text === 'string' ? text.trim() : '';
+    if (!value)
+        return '';
+    const path = GLib.build_filenamev([
+        GLib.get_tmp_dir(),
+        `clipflow-insert-${GLib.random_int()}.json`,
+    ]);
+    const payload = JSON.stringify({
+        text: value,
+        windowId: String(windowId || '').trim(),
+        submit: !!submit,
+    });
+    GLib.file_set_contents(path, payload);
+    try {
+        Gio.File.new_for_path(path).set_attribute_uint32(
+            'unix::mode', 0o600, Gio.FileQueryInfoFlags.NONE, null);
+    } catch (_e) {}
+    return path;
+}
+
 function _clipflowSpawnInsertRunner(runnerScript, text, windowId, submit) {
     if (!runnerScript || !GLib.file_test(runnerScript, GLib.FileTest.EXISTS))
         return false;
-    const value = typeof text === 'string' ? text.trim() : '';
-    if (!value)
+    let payloadPath = '';
+    try {
+        payloadPath = _clipflowWriteInsertPayload(text, windowId, submit);
+        if (!payloadPath)
+            return false;
+        return _clipflowSpawnAsync(
+            ['gjs', runnerScript],
+            { CLIPFLOW_INSERT_FILE: payloadPath }
+        );
+    } catch (_e) {
         return false;
-    return _clipflowSpawnAsync(
-        ['gjs', runnerScript],
-        {
-            CLIPFLOW_INSERT_B64: _clipflowTextToEnvB64(value),
-            CLIPFLOW_INSERT_TARGET_WID: String(windowId || '').trim(),
-            CLIPFLOW_INSERT_SUBMIT: submit ? '1' : '0',
-        }
-    );
+    }
 }
 
 function _clipflowSpawnSetClipboard(runnerScript, text) {
@@ -2179,7 +2201,13 @@ class ClipFlowIndicator extends PanelMenu.Button {
             }));
             const payload = JSON.stringify(serialised, null, 2);
             const ok = GLib.file_set_contents(path, payload);
-            if (ok) Main.notify('ClipFlow Pro', _('Exported history to %s').format(targetDir));
+            if (ok) {
+                try {
+                    Gio.File.new_for_path(path).set_attribute_uint32(
+                        'unix::mode', 0o600, Gio.FileQueryInfoFlags.NONE, null);
+                } catch (_e) {}
+                Main.notify('ClipFlow Pro', _('Exported history to %s').format(targetDir));
+            }
         } catch (e) {
             Main.notify('ClipFlow Pro', _('Export failed.'));
         }
@@ -3555,8 +3583,13 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
         const charLength = this._characterLength(cleanedText);
         const isSensitive = this._isSensitiveContent(cleanedText);
-        if (isSensitive && this._safeGetBoolean('ignore-passwords', false)) {
+        if (isSensitive && this._safeGetBoolean('ignore-passwords', true)) {
             cfpLog(`ClipFlow Pro: Text filtered out (sensitive content): "${cleanedText.substring(0, 30)}..."`);
+            return false;
+        }
+
+        if (this._isLikelyScreenshotApp()) {
+            cfpLog('ClipFlow Pro: Skipping capture while screenshot tool is focused');
             return false;
         }
 
@@ -3565,7 +3598,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             const tracker = Shell.WindowTracker.get_default();
             const app = tracker && tracker.focus_app ? tracker.focus_app : null;
             const appName = app ? ((app.get_name && app.get_name()) || (app.get_id && app.get_id()) || '') : '';
-            const ignoreRaw = this._safeGetString('ignore-apps', '');
+            const ignoreRaw = this._safeGetString('ignore-apps', 'gnome-screenshot,flameshot,shutter,ksnip,spectacle');
             if (ignoreRaw && appName) {
                 const list = ignoreRaw.split(',').map(s => s.trim().toLowerCase()).filter(Boolean);
                 const current = appName.toLowerCase();
@@ -3631,6 +3664,15 @@ class ClipFlowIndicator extends PanelMenu.Button {
         }
 
         const lower = trimmed.toLowerCase();
+        if (lower.includes('password') || lower.includes('passwd') || lower.includes('secret') || lower.includes('api_key'))
+            return true;
+        if (/^ghp_[A-Za-z0-9]{20,}$/.test(trimmed) || /^github_pat_[A-Za-z0-9_]{20,}$/.test(trimmed))
+            return true;
+        if (/^sk-[A-Za-z0-9]{20,}$/.test(trimmed) || /^xox[baprs]-[A-Za-z0-9-]{10,}$/.test(trimmed))
+            return true;
+        if (/^AKIA[0-9A-Z]{16}$/.test(trimmed))
+            return true;
+
         const looksLikePassword = /^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+$/.test(trimmed) &&
             (lower.includes('password') || lower.includes('passwd') || lower.includes('secret'));
 
@@ -4740,12 +4782,25 @@ class ClipFlowIndicator extends PanelMenu.Button {
         });
     }
 
+    _shouldAutoInsertText(text) {
+        const value = typeof text === 'string' ? text.trim() : '';
+        if (!value)
+            return false;
+        if (this._isLikelyScreenshotApp())
+            return false;
+        if (value.length > 50000)
+            return false;
+        if (/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(value))
+            return false;
+        return true;
+    }
+
     _insertClipboardIntoFocusedTarget(submit = false) {
         if (!this._safeGetBoolean('enable-xdotool-insert', true))
             return false;
 
         const text = (this._lastClipboardText || '').trim();
-        if (!text)
+        if (!text || !this._shouldAutoInsertText(text))
             return false;
 
         try {
@@ -4844,6 +4899,23 @@ class ClipFlowIndicator extends PanelMenu.Button {
         });
         this._applyContextMenuItemStyle(cleanCopyItem);
 
+        const insertItem = menu.addAction(_('Insert'), () => {
+            this._activateHistoryItem(item);
+        });
+        this._applyContextMenuItemStyle(insertItem);
+
+        const insertEnterItem = menu.addAction(_('Insert + Enter'), () => {
+            this._copyToClipboard(item.text);
+            if (this.menu && typeof this.menu.close === 'function')
+                this.menu.close();
+            GLib.timeout_add(GLib.PRIORITY_DEFAULT, 80, () => {
+                if (this._shouldAutoInsertText(item.text || ''))
+                    this._insertClipboardIntoFocusedTarget(true);
+                return GLib.SOURCE_REMOVE;
+            });
+        });
+        this._applyContextMenuItemStyle(insertEnterItem);
+
         menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         const deleteItem = menu.addAction(_('Delete'), () => {
@@ -4916,7 +4988,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
             if (showToast && wantToast && allowNotify) {
                 let message = _('Text copied to clipboard');
-                if (wantPreview) {
+                const historyItem = this._clipboardHistory.find(entry => entry.text === cached);
+                const suppressPreview = historyItem?.sensitive || this._isSensitiveContent(cached);
+                if (wantPreview && !suppressPreview) {
                     const max = Math.max(5, previewLength);
                     const cachedChars = this._getCharacterArray(cached);
                     const preview = cachedChars.length > max

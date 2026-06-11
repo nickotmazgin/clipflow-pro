@@ -40,12 +40,57 @@ const IGNORED_INSERT_WM_PATTERNS = [
     'clipflowprohistory',
 ];
 
+// Typing keystrokes is slow and breaks multiline/unicode; paste-only above this size.
+const MAX_PASTE_ONLY_CHARS = 512;
+// Never simulate typing more than this (fallback only, single-line ASCII).
+const MAX_TYPE_CHARS = 256;
+
 function normalizeText(value) {
     return typeof value === 'string' ? value.trim() : '';
 }
 
 function isWaylandSession() {
     return Boolean(GLib.getenv('WAYLAND_DISPLAY'));
+}
+
+function hasMultiline(value) {
+    return /[\r\n]/.test(value);
+}
+
+function hasProblematicChars(value) {
+    // Avoid xdotool/wtype fighting on astral unicode, control chars, or NUL.
+    for (let i = 0; i < value.length; i++) {
+        const code = value.charCodeAt(i);
+        if (code === 9 || code === 10 || code === 13)
+            continue;
+        if (code < 32 || code === 127)
+            return true;
+        if (code > 0xffff)
+            return true;
+    }
+    return false;
+}
+
+function shouldUsePasteOnly(value) {
+    if (!value)
+        return true;
+    if (value.length > MAX_PASTE_ONLY_CHARS)
+        return true;
+    if (hasMultiline(value))
+        return true;
+    if (hasProblematicChars(value))
+        return true;
+    return false;
+}
+
+function canFallbackType(value) {
+    if (!value || value.length > MAX_TYPE_CHARS)
+        return false;
+    if (hasMultiline(value))
+        return false;
+    if (hasProblematicChars(value))
+        return false;
+    return true;
 }
 
 function _pauseMs(ms) {
@@ -150,6 +195,10 @@ function setSystemClipboardPlainText(text) {
     ]);
     try {
         GLib.file_set_contents(tmp, payload);
+        try {
+            const file = Gio.File.new_for_path(tmp);
+            file.set_attribute_uint32('unix::mode', 0o600, Gio.FileQueryInfoFlags.NONE, null);
+        } catch (_e) {}
         if (isWaylandSession() && GLib.find_program_in_path('wl-copy'))
             return _spawnWaitWithInputFile(['wl-copy', '--type', 'text/plain'], tmp);
         if (GLib.find_program_in_path('xclip')) {
@@ -187,7 +236,10 @@ function shouldPreferTerminalPaste(windowId, identity = null) {
     return TERMINAL_WM_PATTERNS.some(pattern => hay.includes(pattern));
 }
 
-function shouldPreferDirectTyping(windowId, identity = null) {
+function shouldPreferDirectTyping(windowId, identity = null, text = '') {
+    // Never type into terminals or for multiline/unicode/large payloads.
+    if (shouldUsePasteOnly(text))
+        return false;
     const resolvedIdentity = identity || getWindowIdentity(windowId);
     if (shouldPreferTerminalPaste(windowId, resolvedIdentity))
         return false;
@@ -195,7 +247,10 @@ function shouldPreferDirectTyping(windowId, identity = null) {
     const hay = `${name} ${cls}`.toLowerCase();
     if (!hay.trim())
         return false;
-    return DIRECT_TYPE_WM_PATTERNS.some(pattern => hay.includes(pattern));
+    // Clipboard paste is safer for IDE/agent windows (Cursor, Codex, etc.).
+    if (DIRECT_TYPE_WM_PATTERNS.some(pattern => hay.includes(pattern)))
+        return false;
+    return false;
 }
 
 function terminalPasteShortcut(windowId, identity = null) {
@@ -237,7 +292,7 @@ function pasteViaTerminalKeyboard(windowId, submit = false, identity = null, kno
 
 function typeText(text, windowId, submit = false, resolveTarget = true) {
     const value = text == null ? '' : String(text);
-    if (!value)
+    if (!value || !canFallbackType(value))
         return false;
 
     const id = resolveTarget ? resolveInsertTargetWindowId(windowId) : resolveWindowId(windowId);
@@ -245,7 +300,7 @@ function typeText(text, windowId, submit = false, resolveTarget = true) {
     if (GLib.find_program_in_path('wtype')) {
         if (id && !activateWindow(id))
             return false;
-        if (!_spawnWait(['wtype', value]))
+        if (!_spawnWait(['wtype', '--', value]))
             return false;
         if (submit)
             _spawnWait(['wtype', '\n']);
@@ -258,18 +313,8 @@ function typeText(text, windowId, submit = false, resolveTarget = true) {
     if (id && !activateWindow(id, resolveTarget))
         return false;
 
-    const lines = value.split('\n');
-    for (let i = 0; i < lines.length; i++) {
-        const line = lines[i];
-        if (line.length > 0) {
-            if (!_spawnWait(['xdotool', 'type', '--clearmodifiers', '--delay', '12', '--', line]))
-                return false;
-        }
-        if (i < lines.length - 1) {
-            if (!_spawnWait(['xdotool', 'key', '--clearmodifiers', 'Return']))
-                return false;
-        }
-    }
+    if (!_spawnWait(['xdotool', 'type', '--clearmodifiers', '--delay', '8', '--', value]))
+        return false;
     if (submit)
         return _spawnWait(['xdotool', 'key', '--clearmodifiers', 'Return']);
     return true;
@@ -280,18 +325,20 @@ function insertPlainTextIntoTarget({ text, windowId = '', submit = false, forceD
     if (!value)
         return false;
 
-    if (!setSystemClipboardPlainText(value))
-        return typeText(value, windowId, submit);
-
+    const pasteOnly = shouldUsePasteOnly(value);
     const wid = resolveInsertTargetWindowId(windowId);
     if (!wid)
         return false;
+
+    if (!setSystemClipboardPlainText(value)) {
+        if (pasteOnly || forceDirectType !== true)
+            return false;
+        return typeText(value, wid, submit, false);
+    }
+
     const identity = getWindowIdentity(wid);
     const terminal = shouldPreferTerminalPaste(wid, identity);
-    const direct = !terminal && (
-        forceDirectType === true
-        || (forceDirectType !== false && shouldPreferDirectTyping(wid, identity))
-    );
+    const direct = !pasteOnly && !terminal && forceDirectType === true;
 
     if (terminal)
         return pasteViaTerminalKeyboard(wid, submit, identity, true);
@@ -307,6 +354,9 @@ function insertPlainTextIntoTarget({ text, windowId = '', submit = false, forceD
         }
     }
 
+    if (pasteOnly)
+        return false;
+
     return typeText(value, wid, submit, false);
 }
 
@@ -316,6 +366,7 @@ var exports = {
     getWindowIdentity,
     shouldPreferDirectTyping,
     shouldPreferTerminalPaste,
+    shouldUsePasteOnly,
     isValidWindowId,
     resolveWindowId,
     resolveInsertTargetWindowId,

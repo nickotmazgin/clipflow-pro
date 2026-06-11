@@ -1,3 +1,21 @@
+## 1.5.0 — 2026-06-11
+
+**Fix auto-insert paste bugs, harden privacy, and improve security.**
+
+- **Auto-insert:** multiline and unicode entries now paste via clipboard + Ctrl+V
+  instead of simulating keystrokes line-by-line (fixes split pastes, spurious Enter,
+  freezes on long text, and bad behavior in Cursor/Codex/IDE windows)
+- **Screenshots:** skip clipboard capture and auto-insert while screenshot tools are
+  focused; default ignore list includes common screenshot apps
+- **Privacy:** export files get mode `0600`; copy-notification previews default off
+  and skip sensitive/token-like entries; stronger secret heuristics
+- **Security:** insert IPC uses a private temp file instead of environment variables;
+  security documentation corrected for subprocess usage
+- **UI:** history right-click menu adds **Insert** and **Insert + Enter**
+
+> **Recommended upgrade** from v1.4.9 and earlier. Previous releases remain on GitHub
+> for history; use [latest](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
+
 ## 1.4.9 — 2026-06-10
 
 **Fix disable-time race in the clipboard fallback reader.**

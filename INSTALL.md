@@ -32,9 +32,14 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 # Restart GNOME Shell (Alt+F2, type 'r', press Enter)
 ```
 
-### Method 2: Automatic Install Script
+### Method 2: Automatic Install Script (or use the release ZIP — recommended)
+
+**Recommended:** download the signed release ZIP from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest) and run `gnome-extensions install --force <zip>`.
+
 ```bash
-curl -fsSL https://raw.githubusercontent.com/nickotmazgin/clipflow-pro/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/nickotmazgin/clipflow-pro/main/install.sh -o /tmp/clipflow-install.sh
+less /tmp/clipflow-install.sh   # review before running
+bash /tmp/clipflow-install.sh
 ```
 
 This script never touches system directories; everything is installed into `~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io/`, so it works even on systems where `sudo` is highly locked down.

@@ -420,7 +420,13 @@ def load_jpg_series(shots_dir: Path, names: list[str]) -> list[Image.Image]:
 def build_easehub_jpegs(shots_dir: Path) -> Image.Image:
     names = [f"m{i}.jpg" for i in range(1, 7)]
     tiles = [tile_native(im) for im in load_jpg_series(shots_dir, names)]
-    return compose_grid([tiles[0:3], tiles[3:6]], seed=22)
+    meta = PRODUCT["easehub"]
+    return compose_grid(
+        [tiles[0:3], tiles[3:6]],
+        meta["title"],
+        meta["subtitle"],
+        seed=22,
+    )
 
 
 def build_numeric_jpegs(shots_dir: Path) -> Image.Image:

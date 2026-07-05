@@ -3359,9 +3359,13 @@ class ClipFlowIndicator extends PanelMenu.Button {
         );
         if (!runnerAvailable)
             return false;
+        // Wayland-only fast path: St.Clipboard may lack external MIME types there.
+        // On X11, prefer native St.Clipboard.get_text() and only reach the
+        // external runner through startFallback() to avoid spawning gjs+xclip
+        // on every poll tick (major CPU churn on distros with xclip installed).
         if (Meta?.is_wayland_compositor?.())
             return Boolean(GLib.find_program_in_path('wl-paste'));
-        return Boolean(GLib.find_program_in_path('xclip'));
+        return false;
     }
 
     _readClipboardExternally(clipboardType, callback) {

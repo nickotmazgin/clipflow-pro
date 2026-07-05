@@ -1,3 +1,16 @@
+## 1.5.1 — 2026-07-05
+
+**Fix X11 clipboard polling CPU spike (global impact on X11 + xclip systems).**
+
+- **Performance:** on X11, stop preferring the external `gjs` + `xclip` clipboard reader on
+  every 500 ms poll when `xclip` is installed. Use native `St.Clipboard.get_text()` first,
+  with the external helper only as a fallback (matching the original v1.4.7 intent).
+- **Symptom fixed:** constant `clipboard-read-runner.js` subprocesses pegging CPU (100–800%),
+  GNOME Shell sluggishness, and pointer lag while monitoring is enabled.
+- **Wayland:** unchanged — `wl-paste` external reader remains the primary path when needed.
+
+> **Recommended upgrade** for all X11 users (Zorin, Ubuntu, Fedora X11 sessions, etc.).
+
 ## 1.5.0 — 2026-06-11
 
 **Fix auto-insert paste bugs, harden privacy, and improve security.**

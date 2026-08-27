@@ -131,8 +131,8 @@
     <!-- Privacy and Security -->
     <key name="ignore-passwords" type="b">
       <default>true</default>
-      <summary>Ignore password fields</summary>
-      <description>Don't save clipboard content from password fields</description>
+      <summary>Ignore password-like clipboard content</summary>
+      <description>Don't save clipboard content that looks password-like or sensitive using heuristic keyword and token detection. Does not detect whether text came from a password input field.</description>
     </key>
     
     <key name="clear-on-logout" type="b">

@@ -1,252 +1,112 @@
-# ClipFlow Pro - Security & Privacy Compliance
+# ClipFlow Pro — Security & Privacy
 
-This document outlines ClipFlow Pro's security and privacy practices.
+This document describes ClipFlow Pro’s **actual** privacy and security behavior, based on the current codebase. It is not a legal certification.
 
-## 🔒 Privacy Commitment
+## Privacy principles (as implemented)
 
-### Core Privacy Principles
-1. **Local-Only Storage**: All data stored exclusively on user's device
-2. **No Data Transmission**: Zero network connections, zero data sharing
-3. **User Control**: Users control what is saved and when it's deleted
-4. **Transparency**: Open source code for full auditability
+1. **Local-only history storage** — clipboard history is kept on the user’s machine under `~/.config/clipflow-pro/`.
+2. **No intentional network use** — the extension and its packaged helpers do not open network connections for telemetry, sync, analytics, or updates.
+3. **User control** — preferences and clear/export/import controls let users limit retention and remove stored clips.
+4. **Transparency** — source is open on GitHub for review.
 
-### Data Collection
-- **What**: Clipboard text only (user-initiated copy operations)
-- **Where**: `~/.config/clipflow-pro/history.json` (local file)
-- **Who**: Only the user has access
-- **Why**: Provide clipboard history functionality
-- **How Long**: Configurable (default: 50 entries, user-configurable up to 100)
+## What is stored
 
-## 🛡️ Security Measures
+| Topic | Behavior |
+| --- | --- |
+| **What** | Clipboard **text** captured while monitoring is enabled (subject to filters/settings) |
+| **Where** | `~/.config/clipflow-pro/history.json` (and related config under that directory) |
+| **Who** | Anyone with access to the local user account / filesystem can read it |
+| **Why** | Provide clipboard history and related UI features |
+| **How long** | Bounded by settings; default **`max-entries` is 100** (schema default), user-configurable within the schema range |
 
-### 1. Sensitive Data Protection
+Temporary insert helpers may also write a short-lived private JSON payload under the system temp directory when auto-insert is used. Successful runs delete that file after read; failed spawn paths are cleaned up by the extension.
 
-#### Password Detection
-```javascript
-// Location: extension.js, lines 1234-1237
-_isSensitiveContent(text) {
-    // Heuristic detection for password-like content
-    const looksLikePassword = /^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]+$/.test(trimmed) &&
-        (lower.includes('password') || lower.includes('passwd') || lower.includes('secret'));
-    return looksLikePassword;
-}
-```
+## Sensitive-content filtering (heuristic)
 
-**Features:**
-- ✅ Pattern-based detection
-- ✅ Configurable "ignore passwords" setting (default: enabled)
-- ✅ Optional auto-deletion after 5 minutes
-- ✅ No network transmission ever
+Setting key: `ignore-passwords` (name kept for compatibility).
 
-#### Auto-Clear Sensitive Data
-- Configurable auto-deletion after 5 minutes
-- Settings key: `auto-clear-sensitive` (default: false)
-- User has full control
+ClipFlow does **not** detect whether text originated from an application password field. When enabled, it uses **heuristic content detection** (keywords such as `password` / `secret`, and common token/key shapes) to skip saving some sensitive-looking strings.
 
-### 2. Data Storage Security
+Limitations:
 
-#### File Permissions
-```
-Path: ~/.config/clipflow-pro/history.json
-Permissions: 0600 (user read/write only)
-Ownership: User's uid/gid
-```
+- Random secrets without matching patterns are **not** filtered.
+- Keyword matches can produce false positives.
+- This is a convenience filter, not a security boundary.
 
-#### Storage Location
-- **Why user config directory**: Standard GNOME convention
-- **No sensitive system locations**: Never touches /etc or /usr
-- **No cloud storage**: 100% local-only
+Related optional setting: `auto-clear-sensitive` removes entries already marked sensitive after a short delay.
 
-### 3. Network Security
+## File permissions
 
-#### Zero Network Activity
-- ✅ No outbound network connections
-- ✅ No telemetry or analytics
-- ✅ No crash reporting
-- ✅ No external API calls
-- ✅ No cloud synchronization
-- ✅ No update checks
+History save paths attempt owner-only permissions (`0600`) on `history.json`. Insert payloads are created with GIO private create flags when possible so they are owner-only from creation.
 
-#### Verification
+Permissions are best-effort on the local filesystem. Other processes running as the same user can still read these files. Do not treat local clipboard history as encrypted or multi-user isolated storage.
+
+## Subprocess / helper usage
+
+ClipFlow may launch short-lived local helpers for optional features, for example:
+
+- `gjs` history-window / clipboard-set / insert runners shipped with the extension
+- On X11 sessions: tools such as `xdotool` / `xclip` when present and enabled
+- On Wayland sessions: tools such as `wl-copy` / `wl-paste` / `wtype` when present and used by helper paths
+
+These helpers are for local clipboard/insert behavior. They are not used to download remote code. Availability and behavior differ between Wayland and X11; some insert/target paths are more reliable on X11.
+
+## Lifecycle / cleanup
+
+The extension disconnects settings signals, stops clipboard monitoring sources it owns, and clears tracked deferred GLib sources on disable/destroy. Lock-screen signal handlers and search-focus / deferred idle/timeout sources used by history UI are cleaned up on destroy.
+
+No software can honestly claim “perfect” lifecycle behavior in every Shell version without ongoing runtime testing. Treat cleanup as maintained best-effort; report leaks or journal errors if you observe them.
+
+## Network
+
+The extension itself does not implement outbound network clients for sync, telemetry, crash reporting, or update checks. Verify claims against the current source if you fork or add features.
+
+## Access model (practical)
+
+| Area | Notes |
+| --- | --- |
+| Clipboard | Reads/writes clipboard text via Shell APIs and/or local helpers |
+| GSettings | Reads/writes extension preferences |
+| Filesystem | History under `~/.config/clipflow-pro/`; temp insert payloads under the system temp dir; optional user-chosen import/export paths |
+| Network | Not used by the extension for data export |
+
+## Security checklist (reviewers)
+
+- [x] History stored locally by design
+- [x] No built-in cloud sync / telemetry client in the extension
+- [x] User can clear history and adjust retention
+- [x] Optional heuristic sensitive-content filtering (`ignore-passwords`)
+- [x] Optional auto-clear for sensitive-marked entries
+- [x] Clear-on-logout option
+- [x] Subprocess use limited to local helpers for clipboard/history/insert features
+- [ ] Multi-user hostile environments — **not** a design goal; local files remain readable to the same UID
+- [ ] Password-field awareness — **not implemented**; heuristics only
+
+## Privacy / “compliance” note
+
+ClipFlow aims to minimize data handling (local clipboard history only). Statements such as “GDPR certified” or similar legal guarantees are **not** made here. If you need a formal compliance assessment, that is outside this document and must be performed for your deployment context.
+
+## Reporting security issues
+
+Follow [.github/SECURITY.md](../.github/SECURITY.md):
+
+1. **Do not** open a public issue for vulnerabilities
+2. Email **nickotmazgin.dev@gmail.com**
+3. Include description, reproduction steps, impact, and a suggested fix if you have one
+
+Expected initial response: within about 48 hours (see the security policy for the full timeline).
+
+## Manual checks (examples)
+
 ```bash
-# Check for network activity
-netstat -anp | grep extension.js
-ss -anp | grep extension.js
-# Result: No connections found
+# History permissions (when the file exists)
+ls -la ~/.config/clipflow-pro/
+
+# No eval-style dynamic code execution patterns in the main extension
+rg -n 'eval\\(' extension.js || true
+
+# Schema default max entries
+rg -n 'max-entries' schemas/org.gnome.shell.extensions.clipflow-pro.gschema.xml
 ```
 
-### 4. Code Security
-
-#### Input Validation
-```javascript
-// All clipboard text validated before storage
-_maxLength validation: 100-10,000 characters (user configurable)
-_removeLeadingTrailing whitespace
-_filterEmpty entries
-```
-
-#### Error Handling
-- Comprehensive try-catch blocks
-- Graceful degradation on failures
-- No information leakage in error messages
-
-#### Memory Management
-- Proper cleanup of timeouts/intervals
-- Signal disconnection in destroy()
-- No memory leaks (thoroughly tested)
-
-### 5. Access Control
-
-#### GNOME Shell Permissions
-- **Required**: Clipboard read access (for monitoring)
-- **Required**: GSettings access (for preferences)
-- **Not Required**: No network, no filesystem beyond config, no X11
-
-#### File Access
-- **Read**: Only config file and metadata.json
-- **Write**: Only config file and build directory
-- **Execute**: None
-- **Delete**: Only on user request (clear history)
-
-## 📋 Security Checklist for Reviewers
-
-### Data Handling
-- [x] Local storage only (no cloud)
-- [x] No data transmission
-- [x] User controls data retention
-- [x] Password detection (heuristic-based)
-- [x] Optional sensitive data auto-delete
-- [x] Clear on logout option
-- [x] Manual clear history function
-
-### Network Activity
-- [x] Zero network connections
-- [x] No telemetry
-- [x] No analytics
-- [x] No external APIs
-- [x] No update mechanisms
-
-### Code Security
-- [x] Input validation
-- [x] Error handling
-- [x] Memory management
-- [x] No eval() or similar dangerous operations
-- [x] Subprocess use limited to optional auto-insert helpers (`gjs`, `xdotool`, `xclip`/`wl-copy`) — no remote code download
-- [x] File access limited to `~/.config/clipflow-pro/` and user-initiated export/import paths
-
-### Privacy
-- [x] Clear privacy policy
-- [x] User consent for clipboard access
-- [x] Transparent data handling
-- [x] Open source code
-- [x] No user tracking
-- [x] No advertising
-
-### Permissions
-- [x] Minimal required permissions
-- [x] Only clipboard read access
-- [x] Only GSettings read/write for preferences
-- [x] No system-level access
-- [x] No network permissions
-
-## 🔐 Security Considerations
-
-### Password Detection Limitations
-**Current Implementation**: Heuristic-based pattern matching
-**Limitations**:
-- Not cryptographically secure
-- Can be fooled by intentionally malformed passwords
-- May have false positives
-
-**Mitigation**:
-- User control (can disable)
-- Additional protection via auto-delete
-- Educated users can manually clear
-
-### Future Enhancements
-Potential improvements (not planned, but documented):
-1. Integration with password managers
-2. Better password detection via ML
-3. Optional encryption at rest
-4. Per-application clipboard isolation
-
-## 📄 Compliance Statements
-
-### GDPR Compliance
-- **Right to be forgotten**: Clear history function provided
-- **Data minimization**: Only clipboard text stored, nothing else
-- **Purpose limitation**: Data used only for clipboard history
-- **Storage limitation**: Configurable limits (default 50 items)
-- **Transparency**: Open source, full audit trail
-
-### No Data Sharing
-- **No third parties**: Zero data sharing
-- **No advertisers**: No ad tracking
-- **No analytics**: No usage statistics
-- **No telemetry**: No diagnostic data
-- **Local-only**: All data remains on device
-
-### User Rights
-Users can:
-- ✅ View all stored data (via JSON file)
-- ✅ Delete all data (clear history button)
-- ✅ Configure retention limits
-- ✅ Disable password detection
-- ✅ Enable auto-clear of sensitive data
-- ✅ Set clear on logout
-- ✅ Inspect the source code
-
-## 🧪 Security Testing
-
-### Automated Checks
-```bash
-# No network connections
-netstat -anp | grep extension.js  # Should return nothing
-
-# File permissions correct
-ls -la ~/.config/clipflow-pro/  # Should be 0600
-
-# No eval() or similar
-grep -r "eval\(" extension.js  # Should return nothing
-grep -r "Function\(" extension.js  # Should return nothing
-
-# Input validation present
-grep -r "maxEntryLength" extension.js  # Should find validation
-```
-
-### Manual Testing
-1. Copy password-like string → should be filtered if enabled
-2. Enable auto-delete → sensitive data clears after 5 min
-3. Clear history → file deleted
-4. Check network activity → none
-5. Inspect storage file → plain text JSON (by design)
-
-## 📞 Security Contact
-
-**Security Issues**: Report via GitHub Issues with "security" label
-**Response Time**: Within 48 hours
-**Disclosure Policy**: Responsible disclosure preferred
-
-## 🎯 Reviewer Notes
-
-### Key Points
-1. **Zero Network Activity**: Verified via code review and testing
-2. **Local Storage Only**: Data never leaves the device
-3. **User Control**: Full control over data retention and deletion
-4. **Open Source**: Complete transparency
-5. **Minimal Permissions**: Only what's necessary
-
-### Code Quality
-- ✅ ES6 best practices
-- ✅ Proper memory management
-- ✅ Error handling throughout
-- ✅ Input validation
-- ✅ No dangerous operations (eval, shell execution, etc.)
-
-### Privacy Respect
-- ✅ Respects user privacy
-- ✅ No data collection beyond stated purpose
-- ✅ Clear consent model
-- ✅ Easy data deletion
-
-This extension is designed with privacy and security as core principles, suitable for production use.
+Live GNOME Shell / Wayland / X11 behavior must be verified on a Linux desktop session.

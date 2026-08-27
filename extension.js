@@ -67,12 +67,27 @@ function _clipflowWriteInsertPayload(text, windowId, submit) {
         windowId: String(windowId || '').trim(),
         submit: !!submit,
     });
-    GLib.file_set_contents(path, payload);
     try {
-        Gio.File.new_for_path(path).set_attribute_uint32(
-            'unix::mode', 0o600, Gio.FileQueryInfoFlags.NONE, null);
+        const file = Gio.File.new_for_path(path);
+        // PRIVATE creates the file owner-only (typically 0600) from the outset.
+        const stream = file.create(Gio.FileCreateFlags.PRIVATE, null);
+        stream.write_all(payload, null);
+        stream.close(null);
+        return path;
+    } catch (_e) {
+        try {
+            Gio.File.new_for_path(path).delete(null);
+        } catch (_del) {}
+        return '';
+    }
+}
+
+function _clipflowUnlinkInsertPayload(payloadPath) {
+    if (!payloadPath)
+        return;
+    try {
+        Gio.File.new_for_path(payloadPath).delete(null);
     } catch (_e) {}
-    return path;
 }
 
 function _clipflowSpawnInsertRunner(runnerScript, text, windowId, submit) {
@@ -83,11 +98,15 @@ function _clipflowSpawnInsertRunner(runnerScript, text, windowId, submit) {
         payloadPath = _clipflowWriteInsertPayload(text, windowId, submit);
         if (!payloadPath)
             return false;
-        return _clipflowSpawnAsync(
+        const ok = _clipflowSpawnAsync(
             ['gjs', runnerScript],
             { CLIPFLOW_INSERT_FILE: payloadPath }
         );
+        if (!ok)
+            _clipflowUnlinkInsertPayload(payloadPath);
+        return ok;
     } catch (_e) {
+        _clipflowUnlinkInsertPayload(payloadPath);
         return false;
     }
 }
@@ -440,8 +459,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._loadHistoryFromDisk();
         this._setupHistoryFileMonitor();
         if (this._safeGetBoolean('open-history-window-on-login', false)) {
-            GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 4, () => {
-                this._openHistoryWindow();
+            this._scheduleTimeout(4000, () => {
+                if (!this._destroyed)
+                    this._openHistoryWindow();
                 return GLib.SOURCE_REMOVE;
             });
         }
@@ -505,9 +525,15 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _disconnectLockSignals() {
-        if (!this._lockSignals) return;
-        for (const [obj, id] of this._lockSignals) {
-            obj.disconnect(id);
+        if (!this._lockSignals)
+            return;
+        for (const entry of this._lockSignals) {
+            try {
+                const obj = entry && entry[0];
+                const id = entry && entry[1];
+                if (obj && id && typeof obj.disconnect === 'function')
+                    obj.disconnect(id);
+            } catch (_e) {}
         }
         this._lockSignals = [];
     }
@@ -1297,7 +1323,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
                 null,
                 ['gjs', this._historyWindowScript],
                 envp,
-                GLib.SpawnFlags.SEARCH_PATH_FROM_ENVP | GLib.SpawnFlags.DO_NOT_REAP_CHILD,
+                GLib.SpawnFlags.SEARCH_PATH_FROM_ENVP,
                 null
             );
         } catch (error) {
@@ -1781,8 +1807,10 @@ class ClipFlowIndicator extends PanelMenu.Button {
     _reopenContextMenuIfNeeded() {
         if (!this._contextMenu)
             return;
-        GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
+        this._scheduleIdle(() => {
             try {
+                if (this._destroyed)
+                    return GLib.SOURCE_REMOVE;
                 if (this._contextMenu && !this._contextMenu.isOpen)
                     this._contextMenu.open(false);
             } catch (_e) {}
@@ -3963,8 +3991,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._updateIconState();
         this._invalidateFilterCache();
         // Force UI refresh - use idle to ensure it happens after current operations
-        GLib.idle_add(GLib.PRIORITY_DEFAULT, () => {
-            this._refreshHistory();
+        this._scheduleIdle(() => {
+            if (!this._destroyed)
+                this._refreshHistory();
             return GLib.SOURCE_REMOVE;
         });
     }
@@ -4780,8 +4809,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
             this.menu.close();
 
         // Copy first, close menus, then paste in a child process (never block GNOME Shell).
-        GLib.timeout_add(GLib.PRIORITY_DEFAULT, 80, () => {
-            this._insertClipboardIntoFocusedTarget(false);
+        this._scheduleTimeout(80, () => {
+            if (!this._destroyed)
+                this._insertClipboardIntoFocusedTarget(false);
             return GLib.SOURCE_REMOVE;
         });
     }
@@ -4912,7 +4942,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
             this._copyToClipboard(item.text);
             if (this.menu && typeof this.menu.close === 'function')
                 this.menu.close();
-            GLib.timeout_add(GLib.PRIORITY_DEFAULT, 80, () => {
+            this._scheduleTimeout(80, () => {
+                if (this._destroyed)
+                    return GLib.SOURCE_REMOVE;
                 if (this._shouldAutoInsertText(item.text || ''))
                     this._insertClipboardIntoFocusedTarget(true);
                 return GLib.SOURCE_REMOVE;
@@ -5087,6 +5119,17 @@ class ClipFlowIndicator extends PanelMenu.Button {
             return;
         }
         this._destroyed = true;
+
+        // Disconnect lock-screen handlers before other teardown (idempotent).
+        try {
+            this._disconnectLockSignals();
+        } catch (e) {
+            console.warn(`ClipFlow Pro: Error disconnecting lock signals: ${e.message}`);
+        }
+
+        try {
+            this._clearSearchFocusGuard();
+        } catch (_e) {}
 
         // Wrap entire destroy in try-catch to prevent crashes
         try {

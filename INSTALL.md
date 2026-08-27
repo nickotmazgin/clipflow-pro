@@ -4,58 +4,73 @@ This guide provides detailed installation instructions for ClipFlow Pro on vario
 
 > **GNOME Shell 43–44 is no longer supported.** Install only the **GNOME 45–50** zip (`*-gs45-50.zip`). GNOME Shell **45** or newer is required.
 
+> **Distribution:** ClipFlow Pro is published on **[GitHub Releases](https://github.com/nickotmazgin/clipflow-pro/releases)** only. It is **not** listed on [extensions.gnome.org](https://extensions.gnome.org), and it cannot be installed by browsing the official GNOME Extensions app catalog.
+
 ## Quick Install
 
-### Method 1: From GitHub Releases
+### Method 1: From GitHub Releases (recommended)
 
-**Via GNOME Extensions App (System Extensions Manager):**
-1. Open **GNOME Extensions** app (search for "Extensions" in your application menu or Activities overview)
-2. Click the **Browse** tab or use the search function
-3. Search for "ClipFlow Pro"
-4. Click **Install** or toggle the switch to enable
-5. The extension will be automatically installed and enabled
+1. Open the latest release: https://github.com/nickotmazgin/clipflow-pro/releases/latest
+2. Download the versioned flat extension ZIP named like:
+   `clipflow-pro@nickotmazgin.github.io-<version>-gs45-50.zip`
+   (example for 1.5.1: `clipflow-pro@nickotmazgin.github.io-1.5.1-gs45-50.zip`)
+3. Install with the GNOME Extensions CLI:
 
-**Via Web Browser:**
-1. Visit the Releases page: https://github.com/nickotmazgin/clipflow-pro/releases
-2. Click the "Install" button
-3. Follow the on-screen instructions
-4. Enable the extension in GNOME Extensions app
-
-**Via Command Line:**
 ```bash
-# Install via gnome-extensions tool (if available)
-gnome-extensions install clipflow-pro@nickotmazgin.github.io
-
-# Enable the extension
+gnome-extensions install --force ~/Downloads/clipflow-pro@nickotmazgin.github.io-<version>-gs45-50.zip
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
-
-# Restart GNOME Shell (Alt+F2, type 'r', press Enter)
 ```
 
-### Method 2: Automatic Install Script (or use the release ZIP — recommended)
+4. Restart GNOME Shell:
+   - **Wayland:** log out and back in
+   - **X11:** `Alt + F2`, type `r`, press Enter
 
-**Recommended:** download the signed release ZIP from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest) and run `gnome-extensions install --force <zip>`.
+The release ZIP is a **flat** package (metadata, `extension.js`, schemas, etc. at the archive root). It does **not** contain a UUID parent directory. Prefer `gnome-extensions install --force` over manual unzip.
+
+After install, you can enable/disable the extension in the **GNOME Extensions** app (the system extensions manager for already-installed extensions). That is different from third-party tools such as **Extension Manager**, and neither app’s “browse catalog” will find ClipFlow Pro because it is not on extensions.gnome.org.
+
+### Method 2: Automatic Install Script (from a full clone)
+
+**Recommended for most users:** use Method 1 (signed release ZIP).
+
+If you prefer building from a local clone:
+
+```bash
+git clone https://github.com/nickotmazgin/clipflow-pro.git
+cd clipflow-pro
+./install.sh
+```
+
+Alternatively, you can review the install script before running it from a clone:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/nickotmazgin/clipflow-pro/main/install.sh -o /tmp/clipflow-install.sh
 less /tmp/clipflow-install.sh   # review before running
-bash /tmp/clipflow-install.sh
 ```
+
+Note: `install.sh` expects to run from (or next to) a full repository checkout that includes `build.sh` and the extension sources. Prefer cloning the repo, then running `./install.sh` from that directory.
 
 This script never touches system directories; everything is installed into `~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io/`, so it works even on systems where `sudo` is highly locked down.
 
-### Method 3: Manual Installation
+### Method 3: Manual Installation from the release ZIP
+
 ```bash
-# Download and extract (archive already contains the UUID directory)
-wget https://github.com/nickotmazgin/clipflow-pro/releases/latest/download/clipflow-pro@nickotmazgin.github.io.zip
-unzip clipflow-pro@nickotmazgin.github.io.zip -d ~/.local/share/gnome-shell/extensions/
+# Download the versioned flat ZIP from the latest release assets page, then:
+ZIP=~/Downloads/clipflow-pro@nickotmazgin.github.io-<version>-gs45-50.zip
 
-# Restart GNOME Shell
-Alt + F2 → type 'r' → Enter
+# Preferred:
+gnome-extensions install --force "$ZIP"
 
-# Enable extension
+# Or unzip into the UUID directory yourself (ZIP contents are flat — no UUID folder inside):
+mkdir -p ~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io
+unzip -o "$ZIP" -d ~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io/
+glib-compile-schemas ~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io/schemas/
+
+# Enable
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 ```
+
+Restart GNOME Shell after installing (Wayland: log out/in; X11: `Alt+F2` → `r`).
 
 ## Rootless workflow (no sudo required)
 
@@ -74,30 +89,44 @@ cd clipflow-pro
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 ```
 
-Both scripts simply copy files under your user profile and run `glib-compile-schemas` inside that directory. No system-wide writes occur, so sudo is never invoked. If you need distro packages such as `glib2` or `gettext` but cannot use sudo, install them via a user-level toolbox/Flatpak/Nix/conda environment and run the commands inside that sandbox. Once those packages are available in `$PATH`, the rest of the workflow remains rootless.
+Both scripts copy files under your user profile. `install.sh` runs `glib-compile-schemas` inside the installed extension directory. No system-wide writes occur, so sudo is never invoked for the install itself. If you need distro packages such as `glib2` or `gettext` but cannot use sudo, install them via a user-level toolbox/Flatpak/Nix/conda environment and run the commands inside that sandbox. Once those packages are available in `$PATH`, the rest of the workflow remains rootless.
 
-### Schema compilation without admin rights
+### Schema compilation
 
-The repository ships with a precompiled `schemas/gschemas.compiled` file. During `build.sh`, `install.sh`, or `make install`, we first try to run `glib-compile-schemas` and fall back to that bundled file if the compiler is missing. That means the extension still installs even when you cannot install the GLib development utilities. If you edit `schemas/*.gschema.xml`, run `glib-compile-schemas schemas/` once (inside a Toolbox, Flatpak SDK, Nix shell, etc.), commit the updated `schemas/gschemas.compiled`, and the rest of your workflow stays rootless.
+Release and build packages ship the GSettings **XML** schema only. They do **not** ship `schemas/gschemas.compiled` (`build.sh` explicitly excludes compiled schemas).
+
+You need `glib-compile-schemas` available when installing from source (`./install.sh` / `make install`). If the compiler is missing and no compiled schema is present in the install directory, install fails with a clear error.
+
+After a manual unzip install, compile schemas yourself:
+
+```bash
+glib-compile-schemas ~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io/schemas/
+```
+
+If you edit `schemas/*.gschema.xml` during development, run `glib-compile-schemas schemas/` (or reinstall) so the installed extension picks up the change.
 
 ## Build from Source
 
 ### Prerequisites
 - Git
 - GNOME Shell **45–50**
-- GLib development tools
+- GLib development tools (including `glib-compile-schemas`)
 - Make
 
 > The commands below that start with `sudo` are only for installing missing build dependencies via your distro's package manager. The actual `make build`, `make install`, and `install.sh` steps never require elevated privileges—feel free to skip the dependency install commands if you already have the tools available or you are working inside a rootless development container.
 
 ### Create a package for distribution
 ```bash
-make dist   # Creates dist/clipflow-pro@nickotmazgin.github.io.zip
+make dist   # Creates dist/clipflow-pro@nickotmazgin.github.io.shell-extension.zip (+ source zip)
 # Or pack with the official tool from build/
 make pack
 ```
 
+GitHub release assets use the versioned name:
+`clipflow-pro@nickotmazgin.github.io-<version>-gs45-50.zip` (produced by the release packaging scripts).
+
 Note: GNOME Shell extensions are not distributed as Flatpaks.
+
 ### Ubuntu/Debian
 ```bash
 # Install dependencies
@@ -110,6 +139,8 @@ cd clipflow-pro
 make install
 ```
 
+Requires a GNOME Shell **45–50** session to run the extension.
+
 ### Fedora
 ```bash
 # Install dependencies
@@ -120,6 +151,8 @@ git clone https://github.com/nickotmazgin/clipflow-pro.git
 cd clipflow-pro
 make install
 ```
+
+Requires a GNOME Shell **45–50** session to run the extension.
 
 ### Arch Linux
 ```bash
@@ -132,6 +165,8 @@ cd clipflow-pro
 make install
 ```
 
+Requires a GNOME Shell **45–50** session to run the extension.
+
 ### openSUSE
 ```bash
 # Install dependencies
@@ -143,25 +178,21 @@ cd clipflow-pro
 make install
 ```
 
+Requires a GNOME Shell **45–50** session to run the extension.
+
 ## Post-Installation
 
 ### Enable the Extension
 
-**Via GNOME Extensions App (System Extensions Manager):**
-1. Open **GNOME Extensions** app
-2. Search for "ClipFlow Pro" in the installed extensions list
+**Via GNOME Extensions App (already-installed extensions):**
+1. Open the **GNOME Extensions** app
+2. Find **ClipFlow Pro** in the installed list
 3. Toggle the switch to **ON**
 
 **Via Command Line:**
 ```bash
-# Enable via command line
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 ```
-
-**Note:** The extension is searchable and manageable through:
-- GNOME Extensions app (system extensions manager)
-- Command line tools (`gnome-extensions`)
- 
 
 ### Restart GNOME Shell
 - **Wayland**: Log out and back in
@@ -187,6 +218,7 @@ journalctl --user -f | grep clipflow-pro
    ```bash
    gnome-shell --version
    ```
+   ClipFlow Pro requires GNOME Shell **45–50**.
 
 2. Check installation path:
    ```bash
@@ -235,7 +267,7 @@ make uninstall
 ## Advanced Installation
 
 ### System-wide Installation (Not Recommended)
-If your sudo policy is restrictive or managed by IT, skip this section—ClipFlow Pro works perfectly when installed in your home directory.
+If your sudo policy is restrictive or managed by IT, skip this section—ClipFlow Pro works when installed in your home directory.
 ```bash
 # Install for all users (requires root)
 sudo mkdir -p /usr/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io/
@@ -252,42 +284,40 @@ make dev  # Installs and watches for changes
 
 ## Distribution-Specific Notes
 
+ClipFlow Pro targets **GNOME Shell 45–50** only. Older GNOME releases (including Shell 40–44) are not supported.
+
 ### Zorin OS
-- Fully supported on Zorin OS 16+ (GNOME Shell 40+)
-- May require enabling "Extensions" app from Software center
+- Use a Zorin release that ships GNOME Shell **45–50**
+- You may need the Extensions app from Software to enable already-installed extensions
 
 ### Pop!_OS
-- Compatible with Pop!_OS 21.04+
-- Extension integrates well with Pop Shell
+- Compatible when the session runs GNOME Shell **45–50**
 
 ### Ubuntu
-- Tested on Ubuntu 20.04+ with GNOME Shell
-- May need `gnome-shell-extensions` package
+- Use an Ubuntu release with GNOME Shell **45–50**
+- You may need the `gnome-shell-extensions` package for the Extensions app / CLI
 
 ### Fedora Silverblue
 ```bash
-# Layer extension via rpm-ostree (if available)
-rpm-ostree install gnome-shell-extension-clipflow-pro
-
-# Or install user-level
+# User-level install inside a toolbox (recommended)
 toolbox create dev
 toolbox enter dev
-# Follow normal installation steps
+# Follow Method 1 or the rootless clone workflow above
 ```
 
 ## Verification
 
 After installation, you should see:
 1. ClipFlow Pro icon in the top panel
-2. Extension listed in GNOME Extensions app
-3. Preferences accessible via Extensions app or extension menu
+2. Extension listed in the GNOME Extensions app (installed list)
+3. Preferences accessible via the Extensions app or extension menu
 
 ## Support
 
 If you encounter issues:
 1. Check [GitHub Issues](https://github.com/nickotmazgin/clipflow-pro/issues)
 2. Review system logs: `journalctl --user -f`
-3. Verify GNOME Shell compatibility
+3. Verify GNOME Shell compatibility (**45–50**)
 4. Join the discussion in GitHub Discussions
 
 ## Next Steps

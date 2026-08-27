@@ -47,8 +47,18 @@ When reporting a bug, please include:
    - What actually happened
 
 3. **Logs**
-   - Enable debug logging in extension settings
-   - Check `journalctl /usr/bin/gnome-shell -f`
+   - Optional verbose debug logs (no preferences toggle today) via gsettings:
+     ```bash
+     gsettings set org.gnome.shell.extensions.clipflow-pro enable-debug-logs true
+     ```
+   - Then check the Shell journal:
+     ```bash
+     journalctl /usr/bin/gnome-shell -f
+     ```
+   - Turn debug logs off again when finished:
+     ```bash
+     gsettings set org.gnome.shell.extensions.clipflow-pro enable-debug-logs false
+     ```
 
 ## 💡 Feature Requests
 

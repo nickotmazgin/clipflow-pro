@@ -6,7 +6,8 @@ We actively support the following versions with security updates:
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.4.x   | :white_check_mark: |
+| 1.5.x   | :white_check_mark: |
+| 1.4.x   | :x:                |
 | < 1.4   | :x:                |
 
 ## Reporting a Vulnerability
@@ -39,11 +40,11 @@ When reporting security issues, please:
 ClipFlow Pro implements the following security measures:
 
 - Local-only storage (no cloud sync)
-- No network connections
-- Password detection and filtering
-- Secure file permissions (`0o600` / `0o700`)
-- Sensitive data auto-clearing
-- No data transmission
-- Privacy-first design
+- No network connections from the extension
+- Heuristic filtering of password-like / sensitive-looking clipboard content (optional)
+- Secure file permissions for history storage (`0o600` / `0o700` where applied)
+- Optional sensitive-entry auto-clearing
+- No clipboard data transmission off-device
+- Privacy-first, open-source design
 
 For more details, see [docs/SECURITY_PRIVACY.md](../docs/SECURITY_PRIVACY.md).

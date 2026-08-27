@@ -28,8 +28,8 @@ Please check these resources first:
 - Get help from community
 
 **GitHub Issues**
-- Report bugs: https://github.com/nickotmazgin/clipflow-pro/issues/new?template=bug_report.md
-- Request features: https://github.com/nickotmazgin/clipflow-pro/issues/new?template=feature_request.md
+- Report bugs: https://github.com/nickotmazgin/clipflow-pro/issues/new
+- Request features: https://github.com/nickotmazgin/clipflow-pro/issues/new
 
 ## 🐛 Reporting Bugs
 
@@ -47,25 +47,20 @@ When reporting a bug, please include:
    - What actually happened
 
 3. **Logs**
-   - Optional verbose debug logs (no preferences toggle today) via gsettings:
+   - Check the Shell journal for operational warnings/errors:
      ```bash
-     gsettings set org.gnome.shell.extensions.clipflow-pro enable-debug-logs true
+     journalctl /usr/bin/gnome-shell -b --no-pager | rg -i clipflow
      ```
-   - Then check the Shell journal:
-     ```bash
-     journalctl /usr/bin/gnome-shell -f
-     ```
-   - Turn debug logs off again when finished:
-     ```bash
-     gsettings set org.gnome.shell.extensions.clipflow-pro enable-debug-logs false
-     ```
+   - Note: `enable-debug-logs` does **not** currently enable verbose clipboard tracing.
+     Verbose `cfpLog` calls are intentionally a no-op so clipboard contents cannot leak into logs.
+     Prefer content-safe journal messages and reproduction steps when filing issues.
 
 ## 💡 Feature Requests
 
 Have an idea? We'd love to hear it!
 
-- Request a feature: https://github.com/nickotmazgin/clipflow-pro/issues/new?template=feature_request.md
-- Check [ENHANCEMENT_PROPOSALS.md](../docs/ENHANCEMENT_PROPOSALS.md) for planned features
+- Request a feature: https://github.com/nickotmazgin/clipflow-pro/issues/new
+- Optionally browse [ENHANCEMENT_PROPOSALS.md](../docs/ENHANCEMENT_PROPOSALS.md) for informal ideas (not a commitment or roadmap)
 
 ## 🛠️ Troubleshooting
 
@@ -77,8 +72,8 @@ Have an idea? We'd love to hear it!
    ```
 
 2. Restart GNOME Shell:
-   - Press `Alt+F2`
-   - Type `r` and press Enter
+   - **Wayland:** log out and back in
+   - **X11 only:** `Alt+F2`, type `r`, press Enter
 
 ### Settings Not Working
 
@@ -87,7 +82,7 @@ Have an idea? We'd love to hear it!
    glib-compile-schemas ~/.local/share/gnome-shell/extensions/clipflow-pro@nickotmazgin.github.io/schemas/
    ```
 
-2. Restart GNOME Shell
+2. Restart GNOME Shell (Wayland: log out/in; X11: `Alt+F2` → `r`)
 
 ### Keyboard Shortcuts Not Working
 

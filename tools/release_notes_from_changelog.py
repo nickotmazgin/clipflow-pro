@@ -11,7 +11,7 @@ CHANGELOG = REPO_ROOT / "CHANGELOG.md"
 
 FOOTER = """
 ## Install
-Download the **`clipflow-pro@nickotmazgin.github.io-*-gs45-50.zip`** asset (GNOME Shell **45–50**), install with `gnome-extensions install --force`, enable, then Alt+F2 → r → Enter.
+Download the **`clipflow-pro@nickotmazgin.github.io-*-gs45-50.zip`** asset (GNOME Shell **45–50**), install with `gnome-extensions install --force`, enable, then restart the Shell (Wayland: log out/in; X11: Alt+F2 → r → Enter).
 
 ## GNOME 43–44 — discontinued
 ClipFlow Pro **no longer supports GNOME Shell 43–44**. Use GNOME **45** or newer.

@@ -58,28 +58,48 @@ function _clipflowWriteInsertPayload(text, windowId, submit) {
     const value = typeof text === 'string' ? text.trim() : '';
     if (!value)
         return '';
-    const path = GLib.build_filenamev([
-        GLib.get_tmp_dir(),
-        `clipflow-insert-${GLib.random_int()}.json`,
-    ]);
     const payload = JSON.stringify({
         text: value,
         windowId: String(windowId || '').trim(),
         submit: !!submit,
     });
-    try {
-        const file = Gio.File.new_for_path(path);
-        // PRIVATE creates the file owner-only (typically 0600) from the outset.
-        const stream = file.create(Gio.FileCreateFlags.PRIVATE, null);
-        stream.write_all(payload, null);
-        stream.close(null);
-        return path;
-    } catch (_e) {
+
+    // Retry on create collision. Only delete files this invocation created.
+    const maxAttempts = 8;
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const path = GLib.build_filenamev([
+            GLib.get_tmp_dir(),
+            `clipflow-insert-${GLib.random_int()}.json`,
+        ]);
+        let createdByUs = false;
+        let stream = null;
         try {
-            Gio.File.new_for_path(path).delete(null);
-        } catch (_del) {}
-        return '';
+            const file = Gio.File.new_for_path(path);
+            // PRIVATE creates the file owner-only (typically 0600) from the outset.
+            // create() fails if the path already exists (no overwrite).
+            stream = file.create(Gio.FileCreateFlags.PRIVATE, null);
+            createdByUs = true;
+            stream.write_all(payload, null);
+            stream.close(null);
+            stream = null;
+            return path;
+        } catch (_e) {
+            // Close any partially opened stream before cleanup.
+            if (stream) {
+                try {
+                    stream.close(null);
+                } catch (_close) {}
+                stream = null;
+            }
+            // Never delete a pre-existing collided path we did not create.
+            if (createdByUs) {
+                try {
+                    Gio.File.new_for_path(path).delete(null);
+                } catch (_del) {}
+            }
+        }
     }
+    return '';
 }
 
 function _clipflowUnlinkInsertPayload(payloadPath) {
@@ -940,11 +960,16 @@ class ClipFlowIndicator extends PanelMenu.Button {
         }
     }
 
+    // One-shot helpers: always SOURCE_REMOVE so destroy-time tracking cannot be
+    // lost if a callback mistakenly returns SOURCE_CONTINUE.
     _scheduleIdle(callback, priority = GLib.PRIORITY_DEFAULT_IDLE) {
         let sourceId = 0;
         sourceId = GLib.idle_add(priority, () => {
             this._deferredSourceIds.delete(sourceId);
-            return callback();
+            try {
+                callback();
+            } catch (_e) {}
+            return GLib.SOURCE_REMOVE;
         });
         if (sourceId) {
             this._deferredSourceIds.add(sourceId);
@@ -956,7 +981,10 @@ class ClipFlowIndicator extends PanelMenu.Button {
         let sourceId = 0;
         sourceId = GLib.timeout_add(priority, delayMs, () => {
             this._deferredSourceIds.delete(sourceId);
-            return callback();
+            try {
+                callback();
+            } catch (_e) {}
+            return GLib.SOURCE_REMOVE;
         });
         if (sourceId) {
             this._deferredSourceIds.add(sourceId);

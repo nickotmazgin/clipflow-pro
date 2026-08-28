@@ -38,6 +38,12 @@ jobs:
         run: |
           python3 tools/release_notes_from_changelog.py "${{ steps.meta.outputs.version }}" > /tmp/release-notes.md
 
+      - name: Attest release zip (Sigstore)
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: ${{ steps.meta.outputs.zip }}
+          push-to-registry: false
+
       - name: Publish GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -53,10 +59,3 @@ jobs:
           else
             gh release create "$TAG" "$ZIP" --title "$TITLE" --notes-file /tmp/release-notes.md
           fi
-
-      - name: Attest release zip (Sigstore)
-        continue-on-error: true
-        uses: actions/attest-build-provenance@v4
-        with:
-          subject-path: ${{ steps.meta.outputs.zip }}
-          push-to-registry: false

@@ -1,3 +1,29 @@
+## 1.5.2 — 2026-08-28
+
+**Maintenance, lifecycle reliability, and privacy hardening.**
+
+### Fixed
+
+- Lifecycle enable/disable cleanup (lock-screen signals, GLib sources, panel handlers)
+- History-window child reaping (`DO_NOT_REAP_CHILD` removed; zombies no longer accumulate)
+- Collision-safe temporary insert payload creation with owner-private mode from creation
+- Temp payload cleanup on spawn/write failure (never delete collided paths we did not create)
+- Corrected GitHub Releases installation docs, flat ZIP layout, and Wayland/X11 restart guidance
+
+### Security / Privacy
+
+- Insert payloads created with `Gio.FileCreateFlags.PRIVATE` (typically mode `0600`)
+- Safer failure cleanup for insert IPC temp files
+- Accurate heuristic sensitive-content wording (does not claim password-field detection)
+- Content-safe logging and support guidance
+
+### Documentation
+
+- Corrected security, support, and privacy documentation
+- Current GNOME Shell **45–50** support statements (no GNOME 51 claim)
+
+> **GNOME Shell 45–50.** Runtime tested on Zorin OS 18.1 / GNOME Shell 46 / X11.
+
 ## 1.5.1 — 2026-07-05
 
 **Fix X11 clipboard polling CPU spike (global impact on X11 + xclip systems).**

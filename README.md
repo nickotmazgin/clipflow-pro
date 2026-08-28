@@ -14,7 +14,7 @@
 
 **ClipFlow Pro** is a clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.github.io`).
 
-> **Latest: v1.5.1** — Fixes X11 clipboard polling CPU spike (native St.Clipboard first; no more `gjs`+`xclip` on every poll). **Previous releases are kept for history**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
+> **Latest: v1.5.2** — Maintenance, lifecycle reliability, and privacy hardening. **Previous releases are kept for history**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
 
 > **GNOME Shell 43–44 is no longer supported.** ClipFlow Pro now targets **GNOME 45–50 only**. Upgrade your desktop environment to GNOME **45** or newer.
 
@@ -38,7 +38,14 @@ Full combined image (download): [collage-v1.4.2-2026.jpg](screenshots/collage-v1
 
 ---
 
-## What's new in v1.5.1
+## What's new in v1.5.2
+
+- **Lifecycle cleanup:** lock-screen signals, GLib timers, and panel handlers tear down cleanly on disable/destroy
+- **Child process reaping:** history-window children no longer become zombies after repeated open/close
+- **Private insert payloads:** collision-safe temp files created owner-only (`0600`) with cleanup on failure
+- **Docs:** corrected GitHub Releases install path, flat ZIP layout, Wayland/X11 restart, and privacy wording
+
+## Also in v1.5.1
 
 - **X11 CPU fix:** clipboard monitoring no longer spawns `clipboard-read-runner.js` + `xclip` every 500 ms when `xclip` is installed; native `St.Clipboard` is used first
 - **System responsiveness:** fixes Shell lag and pointer delay caused by constant GJS subprocess churn on X11 desktops
@@ -150,7 +157,7 @@ A dedicated **desktop window** for browsing, searching, and managing clipboard h
 2. Install:
 
 ```bash
-gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.5.1-gs45-50.zip
+gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.5.2-gs45-50.zip
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 # Wayland: log out/in · X11 only: Alt+F2 → r → Enter
 ```

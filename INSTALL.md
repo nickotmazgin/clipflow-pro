@@ -13,7 +13,7 @@ This guide provides detailed installation instructions for ClipFlow Pro on vario
 1. Open the latest release: https://github.com/nickotmazgin/clipflow-pro/releases/latest
 2. Download the versioned flat extension ZIP named like:
    `clipflow-pro@nickotmazgin.github.io-<version>-gs45-50.zip`
-   (example for 1.5.1: `clipflow-pro@nickotmazgin.github.io-1.5.1-gs45-50.zip`)
+   (example for 1.5.2: `clipflow-pro@nickotmazgin.github.io-1.5.2-gs45-50.zip`)
 3. Install with the GNOME Extensions CLI:
 
 ```bash

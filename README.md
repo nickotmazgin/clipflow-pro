@@ -45,93 +45,31 @@ Full combined image (download): [collage-v1.4.2-2026.jpg](screenshots/collage-v1
 - **Private insert payloads:** collision-safe temp files created owner-only (`0600`) with cleanup on failure
 - **Docs:** corrected GitHub Releases install path, flat ZIP layout, Wayland/X11 restart, and privacy wording
 
-## Also in v1.5.1
+## Recent releases
 
-- **X11 CPU fix:** clipboard monitoring no longer spawns `clipboard-read-runner.js` + `xclip` every 500 ms when `xclip` is installed; native `St.Clipboard` is used first
-- **System responsiveness:** fixes Shell lag and pointer delay caused by constant GJS subprocess churn on X11 desktops
+Seven tagged releases on [GitHub](https://github.com/nickotmazgin/clipflow-pro/releases) (GNOME 45–50):
 
-## Also in v1.5.0
+| Version | Highlights |
+|---------|------------|
+| **1.5.2** | Lifecycle cleanup, private insert payloads, documentation & privacy hardening |
+| **1.5.1** | X11 CPU fix — native `St.Clipboard` first; no `xclip` subprocess on every poll |
+| **1.5.0** | Reliable auto-insert, screenshot-safe capture, privacy defaults, Insert menu actions |
+| **1.4.9** | Safe disable/upgrade — no `this._clipboard is null` race during in-flight reads |
+| **1.4.7** | Faster paste, backlog-free monitoring, bounded recovery, Zorin/X11 UTF-8 fallback |
+| **1.4.6** | Clipboard/insert helpers off the Shell thread; terminal-aware paste |
+| **1.4.3** | Reliable paste into agent terminals; history-window insert matches panel behavior |
 
-- **Reliable auto-insert:** multiline, emoji, and long clips paste as one block via clipboard (not keystroke simulation)
-- **Screenshot-safe:** ignores clipboard churn while screenshot tools are focused
-- **Privacy:** export files `0600`, notification previews off by default, better token detection
-- **Context menu:** **Insert** and **Insert + Enter** on history rows
+<details>
+<summary><strong>Full changelog & older release notes</strong></summary>
 
-## Also in v1.4.9
+Version-by-version notes (including withdrawn **1.4.8** and pre-1.4.3 history) live in **[CHANGELOG.md](CHANGELOG.md)**.
 
-- **Safe disable/upgrade:** an in-flight clipboard read can no longer throw `TypeError: this._clipboard is null` when the extension is disabled mid-read, which previously left the extension INACTIVE until the session restarted
+Highlights from earlier milestones:
 
-## Also in v1.4.8
+- **1.4.2** — History Window Settings/About header, multi-select delete, panel Delete row, shortcut additions
+- **1.4.1** — History Window (left-click panel icon, Super+Shift+H), enhanced menu rendering, GNOME 46 settings layout
 
-- **Clean Shell journal:** removed an invalid stylesheet rule that logged a warning on every panel icon repaint (no visual change)
-- **Hardened release CI:** stylesheet and translation changes now always run the required release-validation check
-- **Credits:** new [Credits & Acknowledgements](#credits--acknowledgements) section and [CONTRIBUTORS.md](CONTRIBUTORS.md)
-
-## Also added in v1.4.7
-
-- **Faster insertion:** redundant fixed waits were removed from panel and History Window paste paths
-- **Responsive History Window:** clipboard and keyboard helpers run asynchronously outside its UI process
-- **Backlog-free monitoring:** only one native read per clipboard selection can be active at a time
-- **Bounded recovery:** stalled clipboard owners cannot leave reads pending indefinitely
-- **Zorin/X11 fallback:** a short-lived helper reads modern UTF-8 clipboard targets when St.Clipboard exposes none
-- **Faster history sync:** 100 ms persistence and 50 ms History Window refresh debounces
-- **Reliable capability detection:** `get_text`-only and `get_content`-only Shell implementations are supported
-- **Privacy-safe diagnostics:** operational failures are visible without recording clipboard contents
-
-## Also added in v1.4.6
-
-- **No GNOME Shell freeze:** clipboard ownership and keyboard insertion run in short-lived helper processes
-- **Paste follows focus:** the active app at paste time wins; the previously captured app is only a fallback
-- **Terminal-aware paste:** kitty, GNOME/Zorin Terminal, Ghostty, WezTerm, and other terminals use `Ctrl+Shift+V` or `Shift+Insert`, never raw `Ctrl+V`
-- **Stale target repair:** closed or replaced windows are rejected before insertion
-- **Test coverage:** X11 integration smoke tests exercise real kitty and GNOME Terminal windows
-
-## Also added in v1.4.3
-
-- **Reliable paste into agent terminals** (Codex, Cursor Agents, etc.): plain-text clipboard via `xclip`/`wl-copy` plus direct keystroke typing when Ctrl+V is treated as image paste
-- **History window insert** captures and restores the target app window; panel menu and history window now behave the same
-- **ESM-safe** paste helpers (no broken `imports` load in GNOME Shell)
-
-## What's new in v1.4.2
-
-- **History Window header:** labeled **Settings** and **About** buttons (opens preferences on the right tab)
-- **About → Maintenance:** confirm dialog before **Reset to Defaults**, with success toast
-- **History Window:** multi-select checkbox delete removes all selected entries
-- **Panel menu:** **Delete** row under each recent clip (right-click panel icon)
-- **Shortcuts:** Open Recent Clips Menu, Paste Latest, Paste Previous, Classic filters/toggles
-- **README / screenshots:** refreshed 2026 collage and highlight gallery
-
-## What's new in v1.4.1 (important)
-
-### History Window + insert workflow upgrades
-
-A dedicated **desktop window** for browsing, searching, and managing clipboard history:
-
-- **Left-click** the panel icon → opens the History Window (default)
-- **Super+Shift+H** → same window
-- Search, scroll, timestamps, pin/star markers
-- **Copy**, **Insert**, **Insert + Enter**, **Pin**, **Star**, **Delete**, **Clear all**, **Refresh**
-- Stays **in sync** with the panel menu via `~/.config/clipflow-pro/history.json`
-- Requires **gjs** (GNOME JavaScript) — included on Zorin/Ubuntu/Fedora GNOME
-
-### Panel interactions
-
-| Action | Result |
-|--------|--------|
-| **Left-click** | History Window (full list) |
-| **Right-click** | Recent clips menu with **Show more / Show less** paging |
-
-### Also in v1.4.1
-
-- GNOME 46 settings window: proper **close button** and Adw layout
-- Rendering mode consolidated under **General → Menu & Rendering** (Auto / Classic)
-- Right-click recent-clip menu now applies full **copy + insert** behavior
-- Added **Enable Auto Insert (xdotool / wtype)** setting for copy-only fallback
-- Show more/less no longer closes the menu unexpectedly
-- Removed deprecated **Super+Shift+V** quick-menu shortcut path
-- Numeric-style fixes: ESM-safe extension paths, scrollable enhanced menu on GNOME 45+
-
-[Full changelog](CHANGELOG.md)
+</details>
 
 ---
 

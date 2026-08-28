@@ -38,7 +38,7 @@ Thank you for your interest in contributing to ClipFlow Pro! This guide will hel
 
 ### Prerequisites
 - Git
-- GNOME Shell 45–50 (for testing)
+- GNOME Shell 45–50 on **Wayland or X11/Xorg** (for testing)
 - Basic knowledge of JavaScript/GJS
 - Text editor or IDE of your choice
 

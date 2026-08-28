@@ -56,7 +56,7 @@ if command -v gnome-extensions >/dev/null 2>&1; then
     echo "Attempting to enable the extension..."
     if gnome-extensions enable "${EXTENSION_UUID}"; then
         echo "Extension enabled successfully!"
-        echo "Restart GNOME Shell (Alt+F2 → r → Enter) if the indicator does not appear immediately."
+        echo "Restart GNOME Shell if the indicator does not appear immediately (Wayland: log out/in; X11: Alt+F2 → r → Enter)."
     else
         echo "Extension could not be enabled automatically."
         echo "Enable manually via GNOME Extensions, or run:"

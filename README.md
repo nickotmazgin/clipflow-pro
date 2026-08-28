@@ -152,14 +152,14 @@ A dedicated **desktop window** for browsing, searching, and managing clipboard h
 ```bash
 gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.5.1-gs45-50.zip
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
-# Alt+F2 → r → Enter
+# Wayland: log out/in · X11 only: Alt+F2 → r → Enter
 ```
 
 ### Local build
 
 ```bash
 ./build.sh && ./install.sh
-# Alt+F2 → r → Enter
+# Wayland: log out/in · X11 only: Alt+F2 → r → Enter
 ```
 
 ---

@@ -5,20 +5,20 @@
 [![Downloads](https://img.shields.io/github/downloads/nickotmazgin/clipflow-pro/total?label=downloads&color=success)](https://github.com/nickotmazgin/clipflow-pro/releases)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue)](LICENSE)
 [![GNOME 45–50](https://img.shields.io/badge/GNOME-45%E2%80%9350-4A86CF?logo=gnome&logoColor=white)](#compatibility)
-[![ESM](https://img.shields.io/badge/ESM-GJS%20modules-orange)](#compatibility)
 [![Wayland](https://img.shields.io/badge/Wayland-ready-0078D4)](#compatibility)
+[![X11 / Xorg](https://img.shields.io/badge/X11%20%2F%20Xorg-ready-555555)](#compatibility)
+[![ESM](https://img.shields.io/badge/ESM-GJS%20modules-orange)](#compatibility)
 
 [![Issues](https://img.shields.io/github/issues/nickotmazgin/clipflow-pro)](https://github.com/nickotmazgin/clipflow-pro/issues)
 [![Discussions](https://img.shields.io/github/discussions/nickotmazgin/clipflow-pro?label=discussions&color=8B5CF6)](https://github.com/nickotmazgin/clipflow-pro/discussions)
-[![PayPal](https://img.shields.io/badge/Donate-PayPal-0070BA?logo=paypal&logoColor=white)](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)
 
-**ClipFlow Pro** is a clipboard history manager for GNOME Shell (UUID `clipflow-pro@nickotmazgin.github.io`).
+**ClipFlow Pro** is a clipboard history manager for **GNOME Shell 45–50** on **Wayland and X11/Xorg** sessions (UUID `clipflow-pro@nickotmazgin.github.io`).
 
 > **Latest: v1.5.2** — Maintenance, lifecycle reliability, and privacy hardening. **Previous releases are kept for history**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
 
 > **GNOME Shell 43–44 is no longer supported.** ClipFlow Pro now targets **GNOME 45–50 only**. Upgrade your desktop environment to GNOME **45** or newer.
 
-> **Keywords:** GNOME clipboard manager · Linux clipboard history · Wayland clipboard · history window · copy paste · productivity · privacy · open source
+> **Keywords:** GNOME clipboard manager · Linux clipboard history · Wayland · X11 · Xorg · history window · copy paste · productivity · privacy · open source
 
 ---
 
@@ -80,7 +80,12 @@ Highlights from earlier milestones:
 | **45–50** | **Supported** | History Window, ESM, enhanced panel menu — use `*-gs45-50.zip` |
 | **43–44** | **Discontinued** | No longer built, distributed, or maintained |
 
-**Minimum requirement:** GNOME Shell **45** or newer.
+| Session | Status | Notes |
+|---------|--------|-------|
+| **Wayland** | **Supported** | Native GNOME clipboard; `wl-paste` helper when needed; log out/in after install |
+| **X11 / Xorg** | **Supported** | Native `St.Clipboard` first on X11; `Alt+F2` → `r` to reload Shell after install |
+
+**Minimum requirement:** GNOME Shell **45** or newer on a **Wayland or X11/Xorg** session.
 
 - Panel icon position: **left / center / right** on the GNOME **top bar** (not bottom/side docks)
 - Distribution: **GitHub Releases only** (no extensions.gnome.org)

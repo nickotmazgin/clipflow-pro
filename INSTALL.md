@@ -1,6 +1,6 @@
 # Installation Guide - ClipFlow Pro
 
-This guide provides detailed installation instructions for ClipFlow Pro on various Linux distributions.
+This guide provides detailed installation instructions for ClipFlow Pro on **GNOME Shell 45–50** under **Wayland or X11/Xorg** sessions.
 
 > **GNOME Shell 43–44 is no longer supported.** Install only the **GNOME 45–50** zip (`*-gs45-50.zip`). GNOME Shell **45** or newer is required.
 

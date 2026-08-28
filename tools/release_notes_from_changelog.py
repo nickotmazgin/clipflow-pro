@@ -12,7 +12,8 @@ CHANGELOG = REPO_ROOT / "CHANGELOG.md"
 FOOTER = """
 ## Compatibility
 
-- **GNOME Shell 45–50** on **Wayland** and **X11/Xorg** sessions
+- **GNOME Shell 45–50** — Wayland and X11/Xorg session types supported
+- **Maintainer runtime-tested (when noted in changelog):** X11/Xorg only unless a release explicitly states otherwise
 
 ## Install
 

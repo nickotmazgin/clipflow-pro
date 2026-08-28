@@ -21,9 +21,9 @@
 
 - Corrected security, support, and privacy documentation
 - Current GNOME Shell **45–50** support statements (no GNOME 51 claim)
-- README, About, topics, and support docs now state **Wayland and X11/Xorg** session support
+- README, About, topics, and support docs now distinguish **X11/Xorg (validated)** from **Wayland (supported, not maintainer-tested this cycle)**
 
-> **GNOME Shell 45–50 · Wayland & X11/Xorg.** Runtime tested on Zorin OS 18.1 / GNOME Shell 46 / X11.
+> **GNOME Shell 45–50.** **X11/Xorg validated** on Zorin OS 18.1 / GNOME Shell 46. Wayland supported in code; not maintainer runtime-tested for v1.5.2.
 
 ## 1.5.1 — 2026-07-05
 

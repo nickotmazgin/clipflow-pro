@@ -5,8 +5,8 @@
 [![Downloads](https://img.shields.io/github/downloads/nickotmazgin/clipflow-pro/total?label=downloads&color=success)](https://github.com/nickotmazgin/clipflow-pro/releases)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue)](LICENSE)
 [![GNOME 45–50](https://img.shields.io/badge/GNOME-45%E2%80%9350-4A86CF?logo=gnome&logoColor=white)](#compatibility)
-[![Wayland](https://img.shields.io/badge/Wayland-ready-0078D4)](#compatibility)
-[![X11 / Xorg](https://img.shields.io/badge/X11%20%2F%20Xorg-ready-555555)](#compatibility)
+[![Wayland](https://img.shields.io/badge/Wayland-supported-0078D4)](#compatibility)
+[![X11 / Xorg](https://img.shields.io/badge/X11%20%2F%20Xorg-validated-555555)](#compatibility)
 [![ESM](https://img.shields.io/badge/ESM-GJS%20modules-orange)](#compatibility)
 
 [![Issues](https://img.shields.io/github/issues/nickotmazgin/clipflow-pro)](https://github.com/nickotmazgin/clipflow-pro/issues)
@@ -82,10 +82,12 @@ Highlights from earlier milestones:
 
 | Session | Status | Notes |
 |---------|--------|-------|
-| **Wayland** | **Supported** | Native GNOME clipboard; `wl-paste` helper when needed; log out/in after install |
-| **X11 / Xorg** | **Supported** | Native `St.Clipboard` first on X11; `Alt+F2` → `r` to reload Shell after install |
+| **X11 / Xorg** | **Supported · validated** | **v1.5.2** runtime-tested on Zorin OS 18.1 / GNOME Shell 46 / X11; native `St.Clipboard` first; `Alt+F2` → `r` after install |
+| **Wayland** | **Supported** | Code paths + install docs; not maintainer runtime-tested on v1.5.2 — reports welcome |
 
 **Minimum requirement:** GNOME Shell **45** or newer on a **Wayland or X11/Xorg** session.
+
+> **Validation scope (v1.5.2):** maintainer confidence is highest on **X11/Xorg** (local Zorin setup). **Wayland** is supported by design and community use; older release notes were not retroactively re-labeled.
 
 - Panel icon position: **left / center / right** on the GNOME **top bar** (not bottom/side docks)
 - Distribution: **GitHub Releases only** (no extensions.gnome.org)

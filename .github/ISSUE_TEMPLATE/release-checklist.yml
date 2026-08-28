@@ -34,7 +34,7 @@ body:
       options:
         - label: "make dist (flat extension zip + source zip)"
         - label: "make release-validate passes"
-        - label: "Local install test (make install; journalctl clean)"
+        - label: "Local install test on Wayland and/or X11/Xorg (make install; journalctl clean)"
   - type: checkboxes
     id: publish
     attributes:

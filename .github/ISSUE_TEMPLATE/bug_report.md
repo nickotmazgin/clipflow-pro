@@ -27,9 +27,10 @@ If applicable, add screenshots to help explain your problem.
 
 ## Environment
 - **GNOME Shell Version**: [e.g., 46.0]
-- **Extension Version**: [e.g., 1.1.0]
-- **OS**: [e.g., Ubuntu 24.04, Fedora 40]
-- **Distribution**: [e.g., Ubuntu, Fedora, Arch]
+- **Session**: [Wayland / X11 / Xorg — e.g. `echo $XDG_SESSION_TYPE`]
+- **Extension Version**: [e.g., 1.5.2]
+- **OS**: [e.g., Ubuntu 24.04, Zorin OS 18.1, Fedora 40]
+- **Distribution**: [e.g., Ubuntu, Zorin, Fedora, Arch]
 
 ## Logs
 If applicable, add relevant logs from:

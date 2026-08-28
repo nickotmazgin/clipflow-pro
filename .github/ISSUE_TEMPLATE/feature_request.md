@@ -23,3 +23,5 @@ Describe any alternative solutions or features you've considered.
 
 ## Additional Context
 Add any other context, mockups, or screenshots about the feature request here.
+
+If relevant, note your **GNOME Shell version** and **session type** (Wayland / X11 / Xorg).

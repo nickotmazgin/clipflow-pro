@@ -1,6 +1,6 @@
 {
   "name": "ClipFlow Pro",
-  "description": "GNOME clipboard manager with a full history window, panel menu, search, pin/star, and privacy controls. Left-click opens the CopyQ-style browser; right-click shows recent clips.",
+  "description": "GNOME Shell 45–50 clipboard manager for Wayland and X11/Xorg. Full history window, panel menu, search, pin/star, and privacy controls. Left-click opens the CopyQ-style browser; right-click shows recent clips.",
   "uuid": "clipflow-pro@nickotmazgin.github.io",
   "shell-version": [
     "45",

@@ -1,6 +1,6 @@
 # ClipFlow Pro
 
-[![Release](https://img.shields.io/github/v/release/nickotmazgin/clipflow-pro?display_name=tag)](https://github.com/nickotmazgin/clipflow-pro/releases/latest)
+[![Release](https://img.shields.io/github/v/release/nickotmazgin/clipflow-pro?color=blue)](https://github.com/nickotmazgin/clipflow-pro/releases/latest)
 [![CI](https://img.shields.io/github/actions/workflow/status/nickotmazgin/clipflow-pro/release-validate.yml?branch=main&label=CI)](https://github.com/nickotmazgin/clipflow-pro/actions)
 [![Downloads](https://img.shields.io/github/downloads/nickotmazgin/clipflow-pro/total?label=downloads&color=success)](https://github.com/nickotmazgin/clipflow-pro/releases)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue)](LICENSE)

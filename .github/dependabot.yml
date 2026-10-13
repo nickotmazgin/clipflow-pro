@@ -4,3 +4,8 @@ updates:
     directory: "/"
     schedule:
       interval: weekly
+    groups:
+      # init/autobuild/analyze must share one version, so bump them together
+      codeql-action:
+        patterns:
+          - "github/codeql-action*"

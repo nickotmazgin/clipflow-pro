@@ -1,0 +1,11 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discussions (questions, ideas)
+    url: https://github.com/nickotmazgin/clipflow-pro/discussions
+    about: Use Discussions for Q&A, ideas, and feedback.
+  - name: Security vulnerability
+    url: https://github.com/nickotmazgin/clipflow-pro/security/advisories/new
+    about: Report security issues privately (do not file a public issue).
+  - name: Install and troubleshooting guide
+    url: https://github.com/nickotmazgin/clipflow-pro/blob/main/INSTALL.md
+    about: Install from Releases, Wayland/X11 restart steps, and common fixes.

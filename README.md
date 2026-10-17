@@ -14,7 +14,7 @@
 
 **ClipFlow Pro** is a clipboard history manager for **GNOME Shell 45–50** on **Wayland and X11/Xorg** sessions (UUID `clipflow-pro@nickotmazgin.github.io`).
 
-> **Latest: v1.5.2** — Maintenance, lifecycle reliability, and privacy hardening. **Previous releases are kept for history**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
+> **Latest: v1.5.3** — Privacy hardening, safer history import, and code cleanup. **Previous releases are kept for history**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
 
 > **GNOME Shell 43–44 is no longer supported.** ClipFlow Pro now targets **GNOME 45–50 only**. Upgrade your desktop environment to GNOME **45** or newer.
 
@@ -38,12 +38,13 @@ Full combined image (download): [collage-v1.4.2-2026.jpg](screenshots/collage-v1
 
 ---
 
-## What's new in v1.5.2
+## What's new in v1.5.3
 
-- **Lifecycle cleanup:** lock-screen signals, GLib timers, and panel handlers tear down cleanly on disable/destroy
-- **Child process reaping:** history-window children no longer become zombies after repeated open/close
-- **Private insert payloads:** collision-safe temp files created owner-only (`0600`) with cleanup on failure
-- **Docs:** corrected GitHub Releases install path, flat ZIP layout, Wayland/X11 restart, and privacy wording
+- **Clipboard text stays private:** the history window passes text to `wl-copy` / `xclip` / `wtype` / `xdotool` on stdin, never via `/tmp` files or process arguments
+- **Owner-only files from creation:** history, history-window saves, and exports are written `0600` atomically; insert payloads live in `$XDG_RUNTIME_DIR`
+- **Safer import:** importing history merges by timestamp and no longer pushes out your newest entries
+- **Clean disable:** clipboard read timeouts are removed when the extension is turned off
+- **Housekeeping:** dead code removed, stricter linting in CI, full GPL-3.0 license text restored
 
 ## Recent releases
 
@@ -51,13 +52,13 @@ Seven tagged releases on [GitHub](https://github.com/nickotmazgin/clipflow-pro/r
 
 | Version | Highlights |
 |---------|------------|
+| **1.5.3** | Privacy hardening (stdin IPC, 0600 files), safer import, dead-code cleanup |
 | **1.5.2** | Lifecycle cleanup, private insert payloads, documentation & privacy hardening |
 | **1.5.1** | X11 CPU fix — native `St.Clipboard` first; no `xclip` subprocess on every poll |
 | **1.5.0** | Reliable auto-insert, screenshot-safe capture, privacy defaults, Insert menu actions |
 | **1.4.9** | Safe disable/upgrade — no `this._clipboard is null` race during in-flight reads |
 | **1.4.7** | Faster paste, backlog-free monitoring, bounded recovery, Zorin/X11 UTF-8 fallback |
 | **1.4.6** | Clipboard/insert helpers off the Shell thread; terminal-aware paste |
-| **1.4.3** | Reliable paste into agent terminals; history-window insert matches panel behavior |
 
 <details>
 <summary><strong>Full changelog & older release notes</strong></summary>
@@ -82,12 +83,12 @@ Highlights from earlier milestones:
 
 | Session | Status | Notes |
 |---------|--------|-------|
-| **X11 / Xorg** | **Supported · validated** | **v1.5.2** runtime-tested on Zorin OS 18.1 / GNOME Shell 46 / X11; native `St.Clipboard` first; `Alt+F2` → `r` after install |
-| **Wayland** | **Supported** | Code paths + install docs; not maintainer runtime-tested on v1.5.2 — reports welcome |
+| **X11 / Xorg** | **Supported · validated** | **v1.5.3** runtime-tested on Zorin OS 18.1 / GNOME Shell 46 / X11; native `St.Clipboard` first; `Alt+F2` → `r` after install |
+| **Wayland** | **Supported** | Code paths + install docs; not maintainer runtime-tested on v1.5.3 — reports welcome |
 
 **Minimum requirement:** GNOME Shell **45** or newer on a **Wayland or X11/Xorg** session.
 
-> **Validation scope (v1.5.2):** maintainer confidence is highest on **X11/Xorg** (local Zorin setup). **Wayland** is supported by design and community use; older release notes were not retroactively re-labeled.
+> **Validation scope (v1.5.3):** maintainer confidence is highest on **X11/Xorg** (local Zorin setup). **Wayland** is supported by design and community use; older release notes were not retroactively re-labeled.
 
 - Panel icon position: **left / center / right** on the GNOME **top bar** (not bottom/side docks)
 - Distribution: **GitHub Releases only** (no extensions.gnome.org)
@@ -102,7 +103,7 @@ Highlights from earlier milestones:
 2. Install:
 
 ```bash
-gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.5.2-gs45-50.zip
+gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.5.3-gs45-50.zip
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 # Wayland: log out/in · X11 only: Alt+F2 → r → Enter
 ```
@@ -151,15 +152,25 @@ ClipFlow Pro is created, maintained, signed, and released by **[Nick Otmazgin](h
 
 [![AI assisted — OpenAI Codex](https://img.shields.io/badge/AI%20assisted-OpenAI%20Codex-10A37F)](https://openai.com/codex/)
 [![AI assisted — Cursor Agent](https://img.shields.io/badge/AI%20assisted-Cursor%20Agent-1A1A1A)](https://cursor.com)
+[![AI assisted — Claude Code](https://img.shields.io/badge/AI%20assisted-Claude%20Code-D97757)](https://claude.com/claude-code)
 
 Recent releases were built with help from AI pair-programming agents, operated under the maintainer's direction and review:
 
 - **OpenAI Codex** — clipboard capture/persistence performance work, terminal paste reliability, release engineering, signing, and validation
 - **Cursor (Agent)** — code review, debugging, automated testing workflows, and documentation
+- **Claude Code (Anthropic)** — v1.5.3 audit, privacy hardening, history-import fix, cleanup, and release preparation
 
 Every AI-assisted change is human-reviewed, tested on real GNOME sessions, and approved by the maintainer before release. See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the full credits.
 
-> OpenAI and Codex are trademarks of OpenAI. Cursor is a trademark of Anysphere, Inc. These names are used here solely for factual attribution. ClipFlow Pro is an independent project and is **not** affiliated with, sponsored, or endorsed by OpenAI or Anysphere/Cursor.
+> OpenAI and Codex are trademarks of OpenAI. Cursor is a trademark of Anysphere, Inc. Claude and Claude Code are trademarks of Anthropic, PBC. These names are used here solely for factual attribution. ClipFlow Pro is an independent project and is **not** affiliated with, sponsored, or endorsed by OpenAI, Anysphere/Cursor, or Anthropic.
+
+---
+
+## License
+
+Copyright (C) 2025–2026 Nick Otmazgin.
+
+ClipFlow Pro is free software: you can redistribute it and/or modify it under the terms of the [GNU General Public License v3.0](LICENSE) or (at your option) any later version. It is distributed WITHOUT ANY WARRANTY; see the license for details.
 
 ---
 

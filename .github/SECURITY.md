@@ -10,7 +10,7 @@ We actively support the following versions with security updates:
 | 1.4.x   | :x:                |
 | < 1.4   | :x:                |
 
-**Platforms:** GNOME Shell **45–50** on **Wayland** (supported) and **X11/Xorg** (supported; **v1.5.2 validated** on maintainer X11 setup). See [README](../README.md#compatibility).
+**Platforms:** GNOME Shell **45–50** on **Wayland** (supported) and **X11/Xorg** (supported; **v1.5.3 validated** on maintainer X11 setup). See [README](../README.md#compatibility).
 
 ## Reporting a Vulnerability
 

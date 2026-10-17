@@ -28,7 +28,7 @@ If applicable, add screenshots to help explain your problem.
 ## Environment
 - **GNOME Shell Version**: [e.g., 46.0]
 - **Session**: [Wayland / X11 / Xorg — e.g. `echo $XDG_SESSION_TYPE`]
-- **Extension Version**: [e.g., 1.5.2]
+- **Extension Version**: [e.g., 1.5.3]
 - **OS**: [e.g., Ubuntu 24.04, Zorin OS 18.1, Fedora 40]
 - **Distribution**: [e.g., Ubuntu, Zorin, Fedora, Arch]
 

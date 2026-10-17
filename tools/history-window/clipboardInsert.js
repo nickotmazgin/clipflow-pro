@@ -120,10 +120,22 @@ function _spawnWait(argv) {
     }
 }
 
-function _spawnWaitWithInputFile(argv, inputPath) {
-    const q = String(inputPath).replace(/'/g, `'\\''`);
-    const cmd = argv.map(arg => `'${String(arg).replace(/'/g, `'\\''`)}'`).join(' ');
-    return _spawnWait(['sh', '-c', `${cmd} < '${q}'`]);
+// Feed text on stdin so clipboard contents never hit argv (visible in
+// /proc/*/cmdline) or a temp file.
+function _spawnWaitWithStdin(argv, text) {
+    try {
+        const proc = Gio.Subprocess.new(
+            _withTimeout(argv),
+            Gio.SubprocessFlags.SEARCH_PATH_FROM_ENVP
+                | Gio.SubprocessFlags.STDIN_PIPE
+                | Gio.SubprocessFlags.STDOUT_SILENCE
+                | Gio.SubprocessFlags.STDERR_SILENCE
+        );
+        proc.communicate_utf8(text == null ? '' : String(text), null);
+        return proc.get_successful();
+    } catch (_e) {
+        return false;
+    }
 }
 
 function _spawnRead(argv) {
@@ -189,30 +201,15 @@ function resolveInsertTargetWindowId(savedWindowId) {
 
 function setSystemClipboardPlainText(text) {
     const payload = text == null ? '' : String(text);
-    const tmp = GLib.build_filenamev([
-        GLib.get_tmp_dir(),
-        `clipflow-clip-${GLib.random_int()}.txt`,
-    ]);
-    try {
-        GLib.file_set_contents(tmp, payload);
-        try {
-            const file = Gio.File.new_for_path(tmp);
-            file.set_attribute_uint32('unix::mode', 0o600, Gio.FileQueryInfoFlags.NONE, null);
-        } catch (_e) {}
-        if (isWaylandSession() && GLib.find_program_in_path('wl-copy'))
-            return _spawnWaitWithInputFile(['wl-copy', '--type', 'text/plain'], tmp);
-        if (GLib.find_program_in_path('xclip')) {
-            if (!_spawnWaitWithInputFile(['xclip', '-selection', 'clipboard'], tmp))
-                return false;
-            _spawnWaitWithInputFile(['xclip', '-selection', 'primary'], tmp);
-            return true;
-        }
-        return false;
-    } finally {
-        try {
-            GLib.unlink(tmp);
-        } catch (_e) {}
+    if (isWaylandSession() && GLib.find_program_in_path('wl-copy'))
+        return _spawnWaitWithStdin(['wl-copy', '--type', 'text/plain'], payload);
+    if (GLib.find_program_in_path('xclip')) {
+        if (!_spawnWaitWithStdin(['xclip', '-selection', 'clipboard'], payload))
+            return false;
+        _spawnWaitWithStdin(['xclip', '-selection', 'primary'], payload);
+        return true;
     }
+    return false;
 }
 
 function getWindowIdentity(windowId) {
@@ -300,7 +297,7 @@ function typeText(text, windowId, submit = false, resolveTarget = true) {
     if (GLib.find_program_in_path('wtype')) {
         if (id && !activateWindow(id))
             return false;
-        if (!_spawnWait(['wtype', '--', value]))
+        if (!_spawnWaitWithStdin(['wtype', '-'], value))
             return false;
         if (submit)
             _spawnWait(['wtype', '\n']);
@@ -313,7 +310,7 @@ function typeText(text, windowId, submit = false, resolveTarget = true) {
     if (id && !activateWindow(id, resolveTarget))
         return false;
 
-    if (!_spawnWait(['xdotool', 'type', '--clearmodifiers', '--delay', '8', '--', value]))
+    if (!_spawnWaitWithStdin(['xdotool', 'type', '--clearmodifiers', '--delay', '8', '--file', '-'], value))
         return false;
     if (submit)
         return _spawnWait(['xdotool', 'key', '--clearmodifiers', 'Return']);

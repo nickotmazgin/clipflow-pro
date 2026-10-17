@@ -1,0 +1,41 @@
+name: Feature Request
+description: Suggest an idea for ClipFlow Pro
+title: "[FEATURE] "
+labels: ["enhancement"]
+assignees:
+  - nickotmazgin
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check the [backlog](https://github.com/nickotmazgin/clipflow-pro/blob/main/docs/ENHANCEMENT_PROPOSALS.md) first — your idea may already be planned.
+        Open-ended ideas also fit well in [Discussions → Ideas](https://github.com/nickotmazgin/clipflow-pro/discussions/categories/ideas).
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem it would solve
+      description: What are you trying to do, and what gets in the way today?
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: dropdown
+    id: session
+    attributes:
+      label: Session type (if relevant)
+      options:
+        - Both / not session-specific
+        - X11 / Xorg
+        - Wayland
+  - type: textarea
+    id: extra
+    attributes:
+      label: Mockups / additional context

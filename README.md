@@ -157,8 +157,8 @@ ClipFlow Pro is created, maintained, signed, and released by **[Nick Otmazgin](h
 Recent releases were built with help from AI pair-programming agents, operated under the maintainer's direction and review:
 
 - **OpenAI Codex** — clipboard capture/persistence performance work, terminal paste reliability, release engineering, signing, and validation
-- **Cursor (Agent)** — code review, debugging, automated testing workflows, and documentation
-- **Claude Code (Anthropic)** — v1.5.3 audit, privacy hardening, history-import fix, cleanup, and release preparation
+- **Cursor Agent** ([@cursoragent](https://github.com/cursoragent)) — code review, debugging, automated testing workflows, and documentation
+- **Claude** by Anthropic ([@claude](https://github.com/claude), via [Claude Code](https://claude.com/claude-code)) — v1.5.3 audit, privacy hardening, history-import fix, cleanup, and release preparation
 
 Every AI-assisted change is human-reviewed, tested on real GNOME sessions, and approved by the maintainer before release. See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the full credits.
 

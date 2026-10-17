@@ -1,3 +1,10 @@
+## Unreleased
+
+### Docs
+
+- README: demo video section (2-minute tour), matching the v1.5.4 announcement
+- New GitHub social preview, built by `tools/media/make_social_preview.py` from the release screenshots
+
 ## 1.5.4 — 2026-10-17
 
 **Panel popup menu fix for GNOME 45–47, and a refreshed gallery.**

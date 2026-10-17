@@ -22,6 +22,14 @@
 
 ---
 
+## Demo video
+
+*A 2-minute tour of ClipFlow Pro ([announcement](https://github.com/nickotmazgin/clipflow-pro/discussions/170)): copying text, a link, code, JSON, numbers, symbols, emoji and several languages (including right-to-left); the right-click recent clips menu; the panel menu with the ⋮ clip menu and Actions; instant search in the history window; and every settings tab.*
+
+https://github.com/user-attachments/assets/51a91025-fe7f-4e90-9b95-575931f92c8e
+
+---
+
 ## Screenshots
 
 ### Main collage

@@ -34,6 +34,12 @@ import * as PanelMenu from 'resource:///org/gnome/shell/ui/panelMenu.js';
 import * as PopupMenu from 'resource:///org/gnome/shell/ui/popupMenu.js';
 
 let _extension = null;
+
+// St.BoxLayout gained 'orientation' in GNOME 48 (where 'vertical' is deprecated);
+// GNOME 45-47 only have 'vertical'. Pick whichever this Shell supports.
+const _BOX_HAS_ORIENTATION = Boolean(GObject.Object.find_property.call(St.BoxLayout, 'orientation'));
+const _BOX_VERTICAL = _BOX_HAS_ORIENTATION ? {orientation: Clutter.Orientation.VERTICAL} : {vertical: true};
+const _BOX_HORIZONTAL = _BOX_HAS_ORIENTATION ? {orientation: Clutter.Orientation.HORIZONTAL} : {vertical: false};
 """
 
 LEGACY_SETTINGS = "_settings = ExtensionUtils.getSettings();"
@@ -68,13 +74,16 @@ def convert_legacy_to_esm(source: str) -> str:
     if LEGACY_HEADER not in source:
         raise SystemExit("legacy extension header did not match expected imports block")
 
-    converted = source.replace(LEGACY_HEADER, ESM_HEADER, 1)
+    # Hard-coding 'orientation' broke every St.BoxLayout on GNOME 45-47
+    # ("No property orientation on StBoxLayout"); resolve it at runtime instead.
+    # Done before the header swap so the header's own helper is left intact.
+    converted = source.replace(LEGACY_VERTICAL, "..._BOX_VERTICAL")
+    converted = converted.replace(LEGACY_HORIZONTAL, "..._BOX_HORIZONTAL")
+    converted = converted.replace(LEGACY_HEADER, ESM_HEADER, 1)
     if LEGACY_SETTINGS not in converted:
         raise SystemExit("legacy settings lookup did not match expected statement")
 
     converted = converted.replace(LEGACY_SETTINGS, ESM_SETTINGS, 1)
-    converted = converted.replace(LEGACY_VERTICAL, "orientation: Clutter.Orientation.VERTICAL")
-    converted = converted.replace(LEGACY_HORIZONTAL, "orientation: Clutter.Orientation.HORIZONTAL")
     # ESM runtime has no ExtensionUtils — extension dir comes from module _extension only
     converted = converted.replace(
         "    try {\n"

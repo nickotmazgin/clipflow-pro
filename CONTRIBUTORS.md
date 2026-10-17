@@ -14,6 +14,7 @@ ClipFlow Pro's recent releases were developed with help from AI pair-programming
 |-----------|------|
 | **[OpenAI Codex](https://openai.com/codex/)** | Clipboard capture and persistence performance (v1.4.7), terminal paste reliability (v1.4.3–v1.4.6), release engineering, signed-tag workflows, release validation |
 | **[Cursor (Agent)](https://cursor.com)** | Code review, debugging, X11/Wayland test automation, CI workflow hardening, documentation |
+| **[Claude Code](https://claude.com/claude-code)** ([Anthropic](https://github.com/anthropics)) | v1.5.3 repository audit, privacy hardening (stdin IPC, owner-only files), history-import fix, dead-code removal, lint/CI tightening, license restoration, release preparation |
 
 ## Community
 
@@ -24,4 +25,4 @@ Want to be on this list? See [CONTRIBUTING.md](CONTRIBUTING.md).
 
 ---
 
-*OpenAI and Codex are trademarks of OpenAI. Cursor is a trademark of Anysphere, Inc. Names are used for factual attribution only; this project is not affiliated with, sponsored, or endorsed by either company.*
+*OpenAI and Codex are trademarks of OpenAI. Cursor is a trademark of Anysphere, Inc. Claude and Claude Code are trademarks of Anthropic, PBC. Names are used for factual attribution only; this project is not affiliated with, sponsored, or endorsed by any of these companies.*

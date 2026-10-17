@@ -1,4 +1,6 @@
-## Unreleased
+## 1.5.3 — 2026-10-17
+
+**Privacy hardening, safer history import, and code cleanup.**
 
 ### Security / Privacy
 

@@ -6,7 +6,6 @@ on:
     paths:
       - 'metadata.json'
       - 'extension.js'
-      - 'extension-esm.js'
       - 'prefs-es6.js'
       - 'stylesheet.css'
       - 'Makefile'
@@ -24,7 +23,6 @@ on:
     paths:
       - 'metadata.json'
       - 'extension.js'
-      - 'extension-esm.js'
       - 'prefs-es6.js'
       - 'stylesheet.css'
       - 'Makefile'

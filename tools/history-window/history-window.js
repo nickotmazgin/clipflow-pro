@@ -63,14 +63,16 @@ function loadHistory() {
     }
 }
 
+// Owner-only (0600) from creation; no window where the file is world-readable.
+function _writePrivateFile(path, text) {
+    Gio.File.new_for_path(path).replace_contents(
+        new TextEncoder().encode(text), null, false,
+        Gio.FileCreateFlags.PRIVATE | Gio.FileCreateFlags.REPLACE_DESTINATION, null);
+}
+
 function saveHistory(entries) {
     GLib.mkdir_with_parents(HISTORY_DIR, 0o700);
-    const payload = JSON.stringify(sortEntries(entries), null, 2);
-    GLib.file_set_contents(HISTORY_FILE, payload);
-    try {
-        const file = Gio.File.new_for_path(HISTORY_FILE);
-        file.set_attribute_uint32('unix::mode', 0o600, Gio.FileQueryInfoFlags.NONE, null);
-    } catch (_e) {}
+    _writePrivateFile(HISTORY_FILE, JSON.stringify(sortEntries(entries), null, 2));
 }
 
 function formatTs(unix) {
@@ -110,20 +112,26 @@ function insertToFocusedTargetAsync(text, submit = false, windowId = null, callb
 
     const wid = String(windowId || loadInsertTargetWindowId() || '').trim();
     const payloadPath = GLib.build_filenamev([
-        GLib.get_tmp_dir(),
+        GLib.get_user_runtime_dir(),
         `clipflow-insert-${GLib.random_int()}.json`,
     ]);
+    const payloadFile = Gio.File.new_for_path(payloadPath);
+    let created = false;
     try {
-        GLib.file_set_contents(payloadPath, JSON.stringify({
+        const stream = payloadFile.create(Gio.FileCreateFlags.PRIVATE, null);
+        created = true;
+        stream.write_all(JSON.stringify({
             text: value,
             windowId: wid,
             submit: !!submit,
-        }));
-        try {
-            Gio.File.new_for_path(payloadPath).set_attribute_uint32(
-                'unix::mode', 0o600, Gio.FileQueryInfoFlags.NONE, null);
-        } catch (_e) {}
+        }), null);
+        stream.close(null);
     } catch (_e) {
+        if (created) {
+            try {
+                payloadFile.delete(null);
+            } catch (_del) {}
+        }
         return false;
     }
 

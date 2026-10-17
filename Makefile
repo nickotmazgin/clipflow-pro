@@ -20,7 +20,6 @@ INSTALL_PATH = ~/.local/share/gnome-shell/extensions/$(EXTENSION_UUID)
 # Files to include in distribution
 EXTENSION_FILES = \
 	extension.js \
-	extension-esm.js \
 	prefs-es6.js \
 	metadata.json \
 	stylesheet.css \

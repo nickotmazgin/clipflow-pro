@@ -1,3 +1,9 @@
+## Unreleased
+
+### Fixed
+
+- GNOME 45–47: the panel popup menu (Settings → Panel Icon Left-Click → quick panel popup menu) failed to build with `No property orientation on StBoxLayout`, so left-click did nothing in that mode. The GNOME 45+ build now uses `orientation` only where St supports it (GNOME 48+) and `vertical` on 45–47.
+
 ## 1.5.3 — 2026-10-17
 
 **Privacy hardening, safer history import, and code cleanup.**

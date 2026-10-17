@@ -694,12 +694,56 @@ def take_screenshots(session, outdir, collage=True):
 
 # ---------------------------------------------------------------- video
 
+TOOLS_DIR = Path(os.environ.get('CLIPFLOW_MEDIA_TOOLS', Path.home() / '.cache' / 'clipflow-pro-media-tools'))
+
+
+class Voice:
+    """Narration clips from Kokoro, cached by voice, speed and text."""
+
+    def __init__(self):
+        from narration import NARRATION, SPEED, VOICE
+        self.lines, self.voice, self.speed = NARRATION, VOICE, SPEED
+        self.dir = TOOLS_DIR / 'tts-cache' / f'{VOICE}-{SPEED}'
+        self.files, self.lengths = {}, {}
+
+    @staticmethod
+    def available():
+        py = TOOLS_DIR / 'venv' / 'bin' / 'python'
+        return py.exists() and (TOOLS_DIR / 'kokoro-v1.0.onnx').exists()
+
+    def prepare(self):
+        import hashlib
+        self.dir.mkdir(parents=True, exist_ok=True)
+        todo = {}
+        for key, text in self.lines.items():
+            h = hashlib.sha1(text.encode()).hexdigest()[:12]
+            self.files[key] = self.dir / f'{h}.wav'
+            if not self.files[key].exists():
+                todo[h] = text
+        if todo:
+            log(f'speaking {len(todo)} narration line(s) with Kokoro ({self.voice}); this takes a few minutes')
+            lines = self.dir / 'todo.json'
+            lines.write_text(json.dumps(todo), encoding='utf-8')
+            run(str(TOOLS_DIR / 'venv' / 'bin' / 'python'), str(MEDIA_DIR / 'tts_kokoro.py'),
+                str(lines), str(self.dir), self.voice, str(self.speed))
+            lines.unlink()
+        for key, path in self.files.items():
+            info = out('ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', str(path))
+            self.lengths[key] = float(info)
+
+    def length(self, key):
+        return self.lengths.get(key, 0.0)
+
+
 class Recorder:
     def __init__(self, raw_path):
         self.raw = raw_path
         self.proc = None
         self.t0 = None
         self.captions = []
+        self.voice = None
+        self.voice_events = []
+        self.voice_end = 0.0
 
     def start(self):
         sw, sh = screen_size()
@@ -711,16 +755,33 @@ class Recorder:
         time.sleep(1.0)
         self.t0 = time.monotonic()
 
-    def caption(self, text, seconds):
+    def caption(self, text, seconds, say=None):
+        """Show a caption; with `say`, also speak that narration line.
+
+        Waits for the previous line to finish first, so voices never overlap,
+        and keeps the caption up for at least as long as its line.
+        """
+        self.settle()
         start = time.monotonic() - self.t0
-        self.captions.append((start, start + seconds, text))
+        length = self.voice.length(say) if self.voice and say else 0
+        if length:
+            self.voice_events.append((start, say))
+            self.voice_end = start + length
+        self.captions.append((start, start + max(seconds, length + 0.3), text))
+
+    def settle(self, pad=0.35):
+        """Hold the current scene until its narration line has finished."""
+        if self.voice_end:
+            wait = self.voice_end + pad - (time.monotonic() - self.t0)
+            if wait > 0:
+                time.sleep(wait)
 
     def stop(self):
         if self.proc and self.proc.poll() is None:
             self.proc.communicate(b'q', timeout=30)
 
 
-def make_video(session, out_mp4):
+def make_video(session, out_mp4, voice=None):
     cap = Capturer(session)
     workdir = Path(tempfile.mkdtemp(prefix='clipflow-video-'))
     raw = workdir / 'raw.mp4'
@@ -733,35 +794,40 @@ def make_video(session, out_mp4):
     time.sleep(0.8)
 
     rec = Recorder(raw)
+    rec.voice = voice
     rec.start()
     try:
-        rec.caption(f'ClipFlow Pro {version()} — clipboard history for GNOME Shell 45–50', 4)
+        rec.caption(f'ClipFlow Pro {version()} — clipboard history for GNOME Shell 45–50', 4, 'title')
         time.sleep(4)
 
         interval = 2200
-        rec.caption('Copy anything: text, links, code, numbers, symbols, any language, emoji', len(DEMO_ENTRIES) * interval / 1000 + 2)
+        rec.caption('Copy anything: text, links, code, numbers, symbols, any language, emoji', len(DEMO_ENTRIES) * interval / 1000 + 2, 'copy')
         session.spawn('gjs', '-m', str(MEDIA_DIR / 'demo_source_window.js'), str(entries_json), str(interval), '1200')
         src = find_window('Demo — text to copy', timeout=10)
         place_window(src, 720, 820)
         time.sleep(len(DEMO_ENTRIES) * interval / 1000 + 2.5)
+        rec.settle()
         run('wmctrl', '-i', '-c', src, check=False)
         window_closed(src)
         time.sleep(0.8)
 
-        rec.caption('Right-click the panel icon: recent clips', 4)
+        rec.caption('Right-click the panel icon: recent clips', 4, 'recent')
         cap.open_recent_menu()
         time.sleep(3.5)
+        rec.settle()
         cap.close_menu()
         time.sleep(0.6)
 
-        rec.caption('Panel menu: pinned, starred and recent clips', 4)
+        rec.caption('Panel menu: pinned, starred and recent clips', 4, 'panel')
         menu = cap.open_panel_menu()
         time.sleep(3)
+        rec.settle()
         if menu:
             box = cap.menu_box(menu)
-            rec.caption('⋮ on any clip: pin, star, copy cleaned, insert, delete', 4)
+            rec.caption('⋮ on any clip: pin, star, copy cleaned, insert, delete', 4, 'row')
             cap.open_row_menu(box)
             time.sleep(3.5)
+            rec.settle()
             key('Escape')
             time.sleep(0.6)
             if not cap.menu_open(box):
@@ -769,7 +835,7 @@ def make_video(session, out_mp4):
                 box = cap.menu_box(menu) if menu else None
                 time.sleep(0.8)
             if box:
-                rec.caption('Actions: filter, sort, export / import, purge duplicates, pin top', 5)
+                rec.caption('Actions: filter, sort, export / import, purge duplicates, pin top', 5, 'actions')
                 grown = cap.expand_actions(box)
                 time.sleep(1)
                 # Glide down the actions so each one is seen.
@@ -777,14 +843,15 @@ def make_video(session, out_mp4):
                     run('xdotool', 'mousemove', str(box[0] + 120), str(y), check=False)
                     time.sleep(0.15)
                 time.sleep(2.5)
+                rec.settle()
         cap.close_menu()
         time.sleep(0.6)
 
-        rec.caption('Full history window — left-click the panel icon', 3.5)
+        rec.caption('Full history window — left-click the panel icon', 3.5, 'history')
         wid = cap.open_history_window()
         time.sleep(2.5)
         pts = cap.history_points(wid)
-        rec.caption('Instant search in any language', 9)
+        rec.caption('Instant search in any language', 9, 'search')
         run('xdotool', 'mousemove', *map(str, pts['search']), 'click', '1', check=False)
         for query in ('hola', 'git', 'invoice'):
             type_text(query, 140)
@@ -792,31 +859,35 @@ def make_video(session, out_mp4):
             key('ctrl+a')
             key('BackSpace')
             time.sleep(0.6)
-        rec.caption('Copy · Insert · Pin · Star · Delete', 4)
+        rec.caption('Copy · Insert · Pin · Star · Delete', 4, 'row_actions')
         run('xdotool', 'mousemove', *map(str, pts['row2']), check=False)
         time.sleep(0.6)
         run('xdotool', 'click', '3', check=False)
         time.sleep(3)
+        rec.settle()
         key('Escape')
         time.sleep(0.5)
         run('wmctrl', '-i', '-c', wid, check=False)
         window_closed(wid)
 
         for tab in PREFS_TABS:
-            rec.caption(f'Settings — {tab.capitalize()}', 3.2)
+            rec.caption(f'Settings — {tab.capitalize()}', 3.2, tab)
             pw = cap.open_prefs(tab)
             time.sleep(2.0)
             scroll_to_bottom(pw)
             time.sleep(1.0)
+            rec.settle()
             run('wmctrl', '-i', '-c', pw, check=False)
             window_closed(pw)
 
-        rec.caption('Free & open source · github.com/nickotmazgin/clipflow-pro', 4)
+        rec.caption('Free & open source · github.com/nickotmazgin/clipflow-pro', 4, 'end')
         time.sleep(4)
+        rec.settle(pad=1.5)
     finally:
         rec.stop()
 
     render_video(raw, out_mp4, rec.captions, cap, workdir)
+    add_audio(out_mp4, rec, workdir)
     shutil.rmtree(workdir, ignore_errors=True)
 
 
@@ -852,6 +923,66 @@ def render_video(raw, out_mp4, captions, cap, workdir):
     log(f'saved {out_mp4}')
 
 
+MUSIC_GAIN = 0.045  # music bed well under the voice (about -27 dB)
+
+
+def add_audio(mp4, rec, workdir):
+    """Keep the silent picture and voice timings next to the video, then mix."""
+    silent = mp4.with_name(mp4.stem + '.video-only.mp4')
+    shutil.copy2(mp4, silent)
+    events = [(start, str(rec.voice.files[k])) for start, k in rec.voice_events] if rec.voice else []
+    mp4.with_name(mp4.stem + '.voice.json').write_text(json.dumps(events))
+    mix_audio(silent, events, mp4, workdir)
+
+
+def mix_audio(silent, events, mp4, workdir):
+    """Narration over the original music bed, ducked under speech, at -14 LUFS."""
+    length = float(out('ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', str(silent)))
+    music = Path(workdir) / 'music.wav'
+    run(sys.executable, str(MEDIA_DIR / 'make_music.py'), str(music), f'{length:.2f}')
+    inputs = ['-i', str(silent), '-i', str(music)]
+    chains = [f'[1:a]volume={MUSIC_GAIN}[bed]']
+    voices = []
+    for i, (start, wav) in enumerate(events):
+        inputs += ['-i', wav]
+        ms = int(start * 1000)
+        chains.append(f'[{i + 2}:a]aresample=44100,aformat=channel_layouts=stereo,adelay={ms}|{ms}[v{i}]')
+        voices.append(f'[v{i}]')
+    if voices:
+        chains.append(f"{''.join(voices)}amix=inputs={len(voices)}:normalize=0,asplit=2[vo][sc]")
+        chains.append('[bed][sc]sidechaincompress=threshold=0.015:ratio=8:attack=20:release=450[duck]')
+        chains.append('[duck][vo]amix=inputs=2:normalize=0[mix]')
+    else:
+        chains.append('[bed]volume=3[mix]')
+    chains.append('[mix]anull[a]')
+    mixed = Path(workdir) / 'mix.wav'
+    run('ffmpeg', '-y', '-loglevel', 'error', *inputs, '-filter_complex', ';'.join(chains),
+        '-map', '[a]', '-t', f'{length:.2f}', str(mixed))
+    # Two-pass loudness normalisation to -14 LUFS (YouTube / LinkedIn), -1.5 dBTP.
+    target = 'I=-14:TP=-1.5:LRA=11'
+    probe = subprocess.run(['ffmpeg', '-hide_banner', '-i', str(mixed), '-af',
+                            f'loudnorm={target}:print_format=json', '-f', 'null', '-'],
+                           capture_output=True, text=True).stderr
+    m = json.loads(probe[probe.rindex('{'):probe.rindex('}') + 1])
+    norm = (f"loudnorm={target}:measured_I={m['input_i']}:measured_TP={m['input_tp']}:"
+            f"measured_LRA={m['input_lra']}:measured_thresh={m['input_thresh']}:"
+            f"offset={m['target_offset']}:linear=true,aresample=48000")
+    tmp = mp4.with_name(mp4.stem + '.tmp.mp4')
+    run('ffmpeg', '-y', '-loglevel', 'error', '-i', str(silent), '-i', str(mixed), '-af', norm,
+        '-map', '0:v', '-map', '1:a', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k',
+        '-shortest', '-movflags', '+faststart', str(tmp))
+    tmp.replace(mp4)
+    log(f'mixed narration ({len(voices)} lines) and music into {mp4.name}')
+
+
+def remix(mp4):
+    """Re-mix the audio of an existing video without recording it again."""
+    silent = mp4.with_name(mp4.stem + '.video-only.mp4')
+    events = json.loads(mp4.with_name(mp4.stem + '.voice.json').read_text())
+    with tempfile.TemporaryDirectory() as work:
+        mix_audio(silent, events, mp4, work)
+
+
 # ---------------------------------------------------------------- main
 
 def preflight():
@@ -867,7 +998,7 @@ def preflight():
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument('command', choices=['screenshots', 'video', 'all', 'restore'])
+    ap.add_argument('command', choices=['screenshots', 'video', 'all', 'restore', 'remix'])
     ap.add_argument('--out', type=Path, help='screenshot folder (default screenshots/v<version>)')
     ap.add_argument('--video-out', type=Path, help='video path (default dist/media/clipflow-pro-v<version>-demo.mp4)')
     ap.add_argument('--no-collage', action='store_true')
@@ -877,12 +1008,24 @@ def main():
     if args.command == 'restore':
         Session.restore_from(BACKUP_ROOT / 'latest')
         return
+    if args.command == 'remix':
+        remix(args.video_out or REPO / 'dist' / 'media' / f'clipflow-pro-v{version()}-demo.mp4')
+        return
 
     preflight()
     if args.command in ('video', 'all') and not shutil.which('ffmpeg'):
         sys.exit('Missing tool: ffmpeg')
     shots_dir = args.out or REPO / 'screenshots' / f'v{version()}'
     video_out = args.video_out or REPO / 'dist' / 'media' / f'clipflow-pro-v{version()}-demo.mp4'
+
+    voice = None
+    if args.command in ('video', 'all'):
+        # Speak the narration first (slow on CPU), before touching the desktop.
+        if Voice.available():
+            voice = Voice()
+            voice.prepare()
+        else:
+            log('Kokoro is not installed; the video will have music but no narration (see tools/media/README.md)')
 
     for n in range(args.countdown, 0, -1):
         print(f'Starting in {n}… hands off the mouse and keyboard (Ctrl+C to abort)', flush=True)
@@ -898,7 +1041,7 @@ def main():
             session.cleanup_windows()
         if args.command in ('video', 'all'):
             session.enter_demo(seed=False)
-            make_video(session, video_out)
+            make_video(session, video_out, voice)
             session.cleanup_windows()
     finally:
         session.cleanup_windows()

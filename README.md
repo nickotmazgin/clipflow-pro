@@ -11,6 +11,9 @@
 
 [![Issues](https://img.shields.io/github/issues/nickotmazgin/clipflow-pro)](https://github.com/nickotmazgin/clipflow-pro/issues)
 [![Discussions](https://img.shields.io/github/discussions/nickotmazgin/clipflow-pro?label=discussions&color=8B5CF6)](https://github.com/nickotmazgin/clipflow-pro/discussions)
+[![Stars](https://img.shields.io/github/stars/nickotmazgin/clipflow-pro?style=flat&color=yellow)](https://github.com/nickotmazgin/clipflow-pro/stargazers)
+
+> If ClipFlow Pro saves you time, a ⭐ on GitHub helps other GNOME users find it.
 
 **ClipFlow Pro** is a clipboard history manager for **GNOME Shell 45–50** on **Wayland and X11/Xorg** sessions (UUID `clipflow-pro@nickotmazgin.github.io`).
 
@@ -24,9 +27,9 @@
 
 ## Demo video
 
-*A 2-minute tour of ClipFlow Pro ([announcement](https://github.com/nickotmazgin/clipflow-pro/discussions/170)): copying text, a link, code, JSON, numbers, symbols, emoji and several languages (including right-to-left); the right-click recent clips menu; the panel menu with the ⋮ clip menu and Actions; instant search in the history window; and every settings tab.*
+*A 2-minute narrated tour of ClipFlow Pro (turn the sound on; [announcement](https://github.com/nickotmazgin/clipflow-pro/discussions/170)): copying text, a link, code, JSON, numbers, symbols, emoji and several languages (including right-to-left); the right-click recent clips menu; the panel menu with the ⋮ clip menu and Actions; instant search in the history window; and every settings tab.*
 
-https://github.com/user-attachments/assets/51a91025-fe7f-4e90-9b95-575931f92c8e
+https://github.com/user-attachments/assets/7620ff29-6f1b-4ad2-a2e1-fe57f8f2e120
 
 ---
 
@@ -158,6 +161,22 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 - Export / Import, purge duplicates, password filtering
 - Pause monitoring, clear on lock/logout
 - Keyboard shortcuts (Settings → Shortcuts)
+
+### Keyboard shortcuts
+
+Set or change any of these in **Settings → Shortcuts** (click the button, press your keys).
+
+| Action | Default |
+|---|---|
+| Open the history window | <kbd>Super</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd> |
+| Enhanced copy (add the selection or clipboard to history) | <kbd>Super</kbd>+<kbd>C</kbd> |
+| Open the recent clips menu | not set |
+| Paste latest entry into the focused app | not set |
+| Paste the entry before it | not set |
+| Enhanced paste (clean the text, then paste) | not set |
+| Classic menu: filter all / pinned / starred, toggle pin / star on the top entry | not set |
+
+In the history window: **double-click** an entry to insert it, **right-click** for copy, insert, pin, star and delete, and type in the search box to filter. In the panel menu, **Enter** or **Space** copies the highlighted clip.
 
 ---
 

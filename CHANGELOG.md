@@ -4,6 +4,8 @@
 
 - README: demo video section (2-minute tour), matching the v1.5.4 announcement
 - New GitHub social preview, built by `tools/media/make_social_preview.py` from the release screenshots
+- README: keyboard shortcuts table and a stars badge
+- Demo video now has a natural voice-over (Kokoro-82M, Apache-2.0, run locally) and original synthesised music, mixed to -14 LUFS; `tools/media/clipflow_media.py remix` re-mixes the audio without recording again
 
 ## 1.5.4 — 2026-10-17
 

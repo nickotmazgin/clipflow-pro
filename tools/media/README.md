@@ -7,6 +7,7 @@ video of ClipFlow Pro on a real GNOME session (X11).
 python3 tools/media/clipflow_media.py screenshots   # screenshots/v<version>/ + collage
 python3 tools/media/clipflow_media.py video         # dist/media/clipflow-pro-v<version>-demo.mp4
 python3 tools/media/clipflow_media.py all           # both
+python3 tools/media/clipflow_media.py remix         # re-mix voice + music of the last video (no recording)
 python3 tools/media/clipflow_media.py restore       # put your state back by hand if a run was killed
 ```
 
@@ -31,6 +32,29 @@ then walks through the menus, the history window and every settings tab,
 scrolling each tab to the bottom. Captions are added with ffmpeg.
 
 Edit the demo entries in [`demo_entries.py`](demo_entries.py).
+
+## Narration and music
+
+The video gets a natural English voice-over and an upbeat music bed, mixed to
+-14 LUFS for YouTube and LinkedIn. Both are free to use anywhere:
+
+- **Voice:** [Kokoro-82M](https://huggingface.co/hexgrad/Kokoro-82M) (Apache-2.0 model and voices) via
+  [kokoro-onnx](https://github.com/thewh1teagle/kokoro-onnx) (MIT), run locally. Edit the lines,
+  voice (`af_heart` by default; try `bm_george`) and speed in [`narration.py`](narration.py).
+  Each scene waits for its line to finish; spoken lines are cached.
+- **Music:** [`make_music.py`](make_music.py) synthesises an original track from scratch (no samples,
+  no third-party audio), so there is nothing to license or credit. It ducks under the voice.
+
+One-time setup (about 350 MB, kept in `~/.cache/clipflow-pro-media-tools`):
+
+```bash
+D=~/.cache/clipflow-pro-media-tools; mkdir -p "$D" && cd "$D"
+python3 -m venv venv && ./venv/bin/pip install kokoro-onnx soundfile
+curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/kokoro-v1.0.onnx
+curl -LO https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin
+```
+
+Without it, the video is still made, with music but no narration.
 
 The GitHub social preview (1280×640) is built from the screenshots:
 

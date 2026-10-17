@@ -1,8 +1,16 @@
-## Unreleased
+## 1.5.4 — 2026-10-17
+
+**Panel popup menu fix for GNOME 45–47, and a refreshed gallery.**
 
 ### Fixed
 
 - GNOME 45–47: the panel popup menu (Settings → Panel Icon Left-Click → quick panel popup menu) failed to build with `No property orientation on StBoxLayout`, so left-click did nothing in that mode. The GNOME 45+ build now uses `orientation` only where St supports it (GNOME 48+) and `vertical` on 45–47.
+
+### Docs / Maintenance
+
+- New v1.5.3 gallery and collage: history window, every panel menu (recent clips, panel menu, the ⋮ clip menu, Actions) and every settings tab
+- `tools/media/` captures the gallery screenshots and records an HD demo video for future releases, backing up and restoring the user's history, settings and clipboard and keeping other apps out of frame
+- The collage builder now keeps every screenshot instead of the first ten
 
 ## 1.5.3 — 2026-10-17
 

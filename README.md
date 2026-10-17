@@ -14,7 +14,7 @@
 
 **ClipFlow Pro** is a clipboard history manager for **GNOME Shell 45–50** on **Wayland and X11/Xorg** sessions (UUID `clipflow-pro@nickotmazgin.github.io`).
 
-> **Latest: v1.5.3** — Privacy hardening, safer history import, and code cleanup. **Previous releases are kept for history**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
+> **Latest: v1.5.4** — Panel popup menu fix for GNOME 45–47, plus a refreshed gallery and demo video. **Previous releases are kept for history**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
 
 > **GNOME Shell 43–44 is no longer supported.** ClipFlow Pro now targets **GNOME 45–50 only**. Upgrade your desktop environment to GNOME **45** or newer.
 
@@ -52,7 +52,12 @@ Full combined image (download): [collage-v1.5.3.png](screenshots/collage-v1.5.3.
 
 ---
 
-## What's new in v1.5.3
+## What's new in v1.5.4
+
+- **Panel popup menu works on GNOME 45–47:** with *Panel Icon Left-Click* set to the quick panel menu, left-click now opens it (it failed with `No property orientation on StBoxLayout`)
+- **New gallery and demo video** covering the history window, every panel menu and every settings tab
+
+### v1.5.3
 
 - **Clipboard text stays private:** the history window passes text to `wl-copy` / `xclip` / `wtype` / `xdotool` on stdin, never via `/tmp` files or process arguments
 - **Owner-only files from creation:** history, history-window saves, and exports are written `0600` atomically; insert payloads live in `$XDG_RUNTIME_DIR`
@@ -62,10 +67,11 @@ Full combined image (download): [collage-v1.5.3.png](screenshots/collage-v1.5.3.
 
 ## Recent releases
 
-Seven tagged releases on [GitHub](https://github.com/nickotmazgin/clipflow-pro/releases) (GNOME 45–50):
+Eight tagged releases on [GitHub](https://github.com/nickotmazgin/clipflow-pro/releases) (GNOME 45–50):
 
 | Version | Highlights |
 |---------|------------|
+| **1.5.4** | Panel popup menu fix on GNOME 45–47, new gallery and demo video |
 | **1.5.3** | Privacy hardening (stdin IPC, 0600 files), safer import, dead-code cleanup |
 | **1.5.2** | Lifecycle cleanup, private insert payloads, documentation & privacy hardening |
 | **1.5.1** | X11 CPU fix — native `St.Clipboard` first; no `xclip` subprocess on every poll |
@@ -97,12 +103,12 @@ Highlights from earlier milestones:
 
 | Session | Status | Notes |
 |---------|--------|-------|
-| **X11 / Xorg** | **Supported · validated** | **v1.5.3** runtime-tested on Zorin OS 18.1 / GNOME Shell 46 / X11; native `St.Clipboard` first; `Alt+F2` → `r` after install |
-| **Wayland** | **Supported** | Code paths + install docs; not maintainer runtime-tested on v1.5.3 — reports welcome |
+| **X11 / Xorg** | **Supported · validated** | **v1.5.4** runtime-tested on Zorin OS 18.1 / GNOME Shell 46 / X11; native `St.Clipboard` first; `Alt+F2` → `r` after install |
+| **Wayland** | **Supported** | Code paths + install docs; not maintainer runtime-tested on v1.5.4 — reports welcome |
 
 **Minimum requirement:** GNOME Shell **45** or newer on a **Wayland or X11/Xorg** session.
 
-> **Validation scope (v1.5.3):** maintainer confidence is highest on **X11/Xorg** (local Zorin setup). **Wayland** is supported by design and community use; older release notes were not retroactively re-labeled.
+> **Validation scope (v1.5.4):** maintainer confidence is highest on **X11/Xorg** (local Zorin setup). **Wayland** is supported by design and community use; older release notes were not retroactively re-labeled.
 
 - Panel icon position: **left / center / right** on the GNOME **top bar** (not bottom/side docks)
 - Distribution: **GitHub Releases only** (no extensions.gnome.org)
@@ -117,7 +123,7 @@ Highlights from earlier milestones:
 2. Install:
 
 ```bash
-gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.5.3-gs45-50.zip
+gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.5.4-gs45-50.zip
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 # Wayland: log out/in · X11 only: Alt+F2 → r → Enter
 ```

@@ -387,7 +387,9 @@ def build_clipflow(src: Path) -> Image.Image:
     elif n == 8:
         rows = [tiles[0:4], tiles[4:8]]
     else:
-        rows = [tiles[0:5], tiles[5:10]]
+        # Up to 5 per row, balanced, and never drop an image.
+        per = math.ceil(n / math.ceil(n / 5))
+        rows = [tiles[i:i + per] for i in range(0, n, per)]
     return compose_grid(rows, meta["title"], meta["subtitle"], seed=11)
 
 

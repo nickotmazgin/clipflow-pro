@@ -26,15 +26,29 @@
 
 ### Main collage
 
-![ClipFlow Pro v1.4.2 — overview and highlights (2026)](screenshots/collage-v1.4.2-2026.jpg)
+![ClipFlow Pro v1.5.3 — history window, panel menus and settings](screenshots/collage-v1.5.3.png)
 
-### v1.4.2 highlights
+### v1.5.3 gallery
 
-| History window | Panel / recent clips | Settings → Behavior | Settings → Shortcuts | About → Maintenance |
+**History window**
+
+| History window | Search | Row actions (right-click) |
+|:---:|:---:|:---:|
+| ![History window](screenshots/v1.5.3/01-history-window.png) | ![Search](screenshots/v1.5.3/02-history-search.png) | ![Row actions (right-click)](screenshots/v1.5.3/03-history-row-actions.png) |
+
+**Panel icon menus**
+
+| Recent clips (right-click) | Panel menu | ⋮ clip menu | Actions |
+|:---:|:---:|:---:|:---:|
+| ![Recent clips (right-click)](screenshots/v1.5.3/04-panel-recent-menu.png) | ![Panel menu](screenshots/v1.5.3/05-panel-menu.png) | ![⋮ clip menu](screenshots/v1.5.3/06-panel-row-menu.png) | ![Actions](screenshots/v1.5.3/07-panel-actions.png) |
+
+**Settings**
+
+| General | Behavior | Appearance | Shortcuts | About |
 |:---:|:---:|:---:|:---:|:---:|
-| ![History window](screenshots/v1.4.2/1c.jpg) | ![Panel menu](screenshots/v1.4.2/2c.jpg) | ![Settings Behavior tab](screenshots/v1.4.2/3.jpg) | ![Settings Shortcuts tab](screenshots/v1.4.2/3c.jpg) | ![About Maintenance](screenshots/v1.4.2/4c.jpg) |
+| ![General](screenshots/v1.5.3/08-settings-general.png) | ![Behavior](screenshots/v1.5.3/09-settings-behavior.png) | ![Appearance](screenshots/v1.5.3/10-settings-appearance.png) | ![Shortcuts](screenshots/v1.5.3/11-settings-shortcuts.png) | ![About](screenshots/v1.5.3/12-settings-about.png) |
 
-Full combined image (download): [collage-v1.4.2-2026.jpg](screenshots/collage-v1.4.2-2026.jpg)
+Full combined image (download): [collage-v1.5.3.png](screenshots/collage-v1.5.3.png) · Screenshots and the demo video are made with [`tools/media`](tools/media/README.md).
 
 ---
 

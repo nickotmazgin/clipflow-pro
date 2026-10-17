@@ -32,6 +32,14 @@ scrolling each tab to the bottom. Captions are added with ffmpeg.
 
 Edit the demo entries in [`demo_entries.py`](demo_entries.py).
 
+The GitHub social preview (1280×640) is built from the screenshots:
+
+```bash
+python3 tools/media/make_social_preview.py screenshots/v<version> screenshots/social-preview-v<version>.png <version>
+```
+
+Upload it under **Settings → General → Social preview**.
+
 ## Privacy and safety
 
 - Your history, ClipFlow settings and clipboard are backed up to

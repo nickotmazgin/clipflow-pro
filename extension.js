@@ -2120,11 +2120,12 @@ class ClipFlowIndicator extends PanelMenu.Button {
                     if (!jsonText) { Main.notify('ClipFlow Pro', _('Import failed.')); return; }
                     const parsed = JSON.parse(jsonText);
                     if (!Array.isArray(parsed)) { Main.notify('ClipFlow Pro', _('Invalid history file.')); return; }
-                    // Merge unique by text (newest first)
+                    // Merge unique by text, then order by time so trimming drops
+                    // the oldest entries rather than whatever was imported last.
                     const seen = new Map(this._clipboardHistory.map(i => [i.text, i]));
-                    let added = 0;
+                    const imported = [];
                     for (const e of parsed) {
-                        if (!e || typeof e.text !== 'string') continue;
+                        if (!e || typeof e.text !== 'string' || !e.text.trim()) continue;
                         const existing = seen.get(e.text);
                         if (existing) {
                             // Upgrade flags on existing item
@@ -2132,18 +2133,28 @@ class ClipFlowIndicator extends PanelMenu.Button {
                             if (e.starred) existing.starred = true;
                             continue;
                         }
-                        this._addToHistory(e.text, {
+                        const item = this._buildHistoryItem(e.text, {
                             sensitive: !!e.sensitive,
                             pinned: !!e.pinned,
                             starred: !!e.starred,
                             timestampUnix: (typeof e.timestampUnix === 'number' ? e.timestampUnix : undefined)
                         });
-                        added++;
+                        seen.set(e.text, item);
+                        imported.push(item);
                     }
-                    if (added > 0) {
+                    if (imported.length > 0) {
+                        this._clipboardHistory.push(...imported);
+                        this._clipboardHistory.sort((a, b) => (b.timestampUnix || 0) - (a.timestampUnix || 0));
+                        this._currentPage = 0;
+                        this._trimHistory(true);
+                        const kept = new Set(this._clipboardHistory);
+                        const added = imported.filter(item => kept.has(item));
+                        added.forEach(item => this._scheduleAutoClear(item));
+                        this._invalidateFilterCache();
+                        this._updateIconState();
                         this._queueHistorySave();
                         this._refreshHistory();
-                        Main.notify('ClipFlow Pro', _('Imported %d entries.').format(added));
+                        Main.notify('ClipFlow Pro', _('Imported %d entries.').format(added.length));
                     } else {
                         Main.notify('ClipFlow Pro', _('Nothing to import.'));
                     }
@@ -3701,6 +3712,23 @@ class ClipFlowIndicator extends PanelMenu.Button {
     }
 
     _addToHistory(text, options = {}) {
+        const historyItem = this._buildHistoryItem(text, options);
+        this._clipboardHistory.unshift(historyItem);
+        this._currentPage = 0;
+        this._trimHistory();
+        this._scheduleAutoClear(historyItem);
+        this._queueHistorySave();
+        this._updateIconState();
+        this._invalidateFilterCache();
+        // Force UI refresh - use idle to ensure it happens after current operations
+        this._scheduleIdle(() => {
+            if (!this._destroyed)
+                this._refreshHistory();
+            return GLib.SOURCE_REMOVE;
+        });
+    }
+
+    _buildHistoryItem(text, options = {}) {
         // Validate text length
         const maxLength = this._settings.get_int('max-entry-length');
         let charLength = this._characterLength(text);
@@ -3731,20 +3759,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
             sensitive: Boolean(options.sensitive),
             contentType: contentType
         };
-        
-        this._clipboardHistory.unshift(historyItem);
-        this._currentPage = 0;
-        this._trimHistory();
-        this._scheduleAutoClear(historyItem);
-        this._queueHistorySave();
-        this._updateIconState();
-        this._invalidateFilterCache();
-        // Force UI refresh - use idle to ensure it happens after current operations
-        this._scheduleIdle(() => {
-            if (!this._destroyed)
-                this._refreshHistory();
-            return GLib.SOURCE_REMOVE;
-        });
+        return historyItem;
     }
     
     _trimHistory(skipSave = false) {

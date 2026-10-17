@@ -8,6 +8,9 @@
 
 ### Fixed
 
+- Importing history no longer reverses order or trims away your newest entries: imports are merged by timestamp, de-duplicated within the file, and trimmed once
+- `LICENSE` now contains the complete GPL-3.0 text (it was truncated after the preamble, so GitHub reported the license as "Other")
+- `install.sh` always rebuilds before installing, so a stale `build/` is never installed over newer sources
 - Clipboard read timeouts are now tracked and removed on disable, so none can fire after the extension is turned off
 - Removed unreachable code paths, including one that would have thrown `ReferenceError: spacer is not defined`
 

@@ -21,10 +21,9 @@ if [[ -z "${CURRENT_DESKTOP}" || "${CURRENT_DESKTOP}" != *"GNOME"* ]]; then
     echo ""
 fi
 
-if [[ ! -d "${BUILD_DIR}" ]] || ! compgen -G "${BUILD_DIR}/*" >/dev/null; then
-    echo "Build artifacts not found. Running build.sh first..."
-    "${SCRIPT_DIR}/build.sh"
-fi
+# Always rebuild so a stale build/ never gets installed over newer sources.
+echo "Building from current sources..."
+"${SCRIPT_DIR}/build.sh"
 
 echo "Installing ClipFlow Pro to: ${TARGET_DIR}"
 rm -rf "${TARGET_DIR}"

@@ -163,6 +163,14 @@ Every AI-assisted change is human-reviewed, tested on real GNOME sessions, and a
 
 ---
 
+## License
+
+Copyright (C) 2025–2026 Nick Otmazgin.
+
+ClipFlow Pro is free software: you can redistribute it and/or modify it under the terms of the [GNU General Public License v3.0](LICENSE) or (at your option) any later version. It is distributed WITHOUT ANY WARRANTY; see the license for details.
+
+---
+
 ## Support
 
 [![PayPal](https://img.shields.io/badge/Donate-PayPal-0070BA?logo=paypal&logoColor=white)](https://www.paypal.com/donate/?hosted_button_id=4HM44VH47LSMW)

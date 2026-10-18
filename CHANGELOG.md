@@ -7,6 +7,12 @@
 - README: keyboard shortcuts table and a stars badge
 - Demo video now has a natural voice-over (Kokoro-82M, Apache-2.0, run locally) and original synthesised music, mixed to -14 LUFS; `tools/media/clipflow_media.py remix` re-mixes the audio without recording again
 
+## Unreleased
+
+### Docs
+
+- Social preview refreshed for v1.5.5 (GNOME Shell 45–51)
+
 ## 1.5.5 — 2026-10-18
 
 **GNOME Shell 51 support.**

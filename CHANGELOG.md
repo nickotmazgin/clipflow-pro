@@ -1,3 +1,18 @@
+## 1.5.7 — 2026-10-18
+
+**Respects password managers.**
+
+### Added
+
+- Password managers (KeePassXC and others) put an `x-kde-passwordManagerHint` = `secret` marker next to a copied password. ClipFlow Pro now reads it on every clipboard path (X11, the MIME fallback and Wayland) and treats the clip as sensitive: with *Ignore Password-like Content* on (the default) it is not saved; with it off, it is saved and flagged sensitive
+- When the password manager closes, GNOME re-offers the same text without the marker. ClipFlow Pro keeps a SHA-256 hash (never the text) of up to 32 recent marked clips in memory, so that copy is skipped too. An unreadable marker counts as secret
+- The keyword and API-token check is unchanged
+
+### Docs
+
+- README links the demo video and the DEV article; older "what's new" sections trimmed (they remain in this changelog)
+- Removed the unused v1.4.2 collage and screenshots and the old June social preview
+
 ## 1.5.6 — 2026-10-18
 
 **extensions.gnome.org review compliance.**

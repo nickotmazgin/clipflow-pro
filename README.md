@@ -27,7 +27,7 @@
 
 ## Demo video
 
-*A 2-minute narrated tour of ClipFlow Pro (turn the sound on; [announcement](https://github.com/nickotmazgin/clipflow-pro/discussions/170)): copying text, a link, code, JSON, numbers, symbols, emoji and several languages (including right-to-left); the right-click recent clips menu; the panel menu with the ⋮ clip menu and Actions; instant search in the history window; and every settings tab.*
+*A 2-minute narrated tour of ClipFlow Pro ([also on YouTube](https://youtu.be/Cao9ljjI5JI); turn the sound on; [announcement](https://github.com/nickotmazgin/clipflow-pro/discussions/170)): copying text, a link, code, JSON, numbers, symbols, emoji and several languages (including right-to-left); the right-click recent clips menu; the panel menu with the ⋮ clip menu and Actions; instant search in the history window; and every settings tab.*
 
 https://github.com/user-attachments/assets/7620ff29-6f1b-4ad2-a2e1-fe57f8f2e120
 

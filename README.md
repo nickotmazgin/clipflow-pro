@@ -170,7 +170,7 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 ### Features
 
 - Pinned / Starred sections, content-type detection
-- Export / Import, purge duplicates, password filtering
+- Export / Import, purge duplicates, password filtering (respects the password-manager hint KeePassXC and others put on the clipboard, plus keyword/token detection)
 - Pause monitoring, clear on lock/logout
 - Keyboard shortcuts (Settings → Shortcuts)
 

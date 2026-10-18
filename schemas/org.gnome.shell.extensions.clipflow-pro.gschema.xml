@@ -132,7 +132,7 @@
     <key name="ignore-passwords" type="b">
       <default>true</default>
       <summary>Ignore password-like clipboard content</summary>
-      <description>Don't save clipboard content that looks password-like or sensitive using heuristic keyword and token detection. Does not detect whether text came from a password input field.</description>
+      <description>Don't save clipboard content that a password manager marks as secret (the x-kde-passwordManagerHint clipboard type, set by KeePassXC and others) or that looks password-like using heuristic keyword and token detection. Does not detect whether text came from a password input field.</description>
     </key>
     
     <key name="clear-on-logout" type="b">

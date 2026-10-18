@@ -448,6 +448,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
         }));
         this._settingsSignalIds.push(this._settings.connect('changed::disable-css', () => {
             this._disableCss = this._safeGetBoolean('disable-css', false);
+            if (this._contextMenu)
+                this._setStyleClass(this._contextMenu, 'clipflow-context-menu', !this._disableCss);
             this._buildMenu();
         }));
         [
@@ -639,6 +641,16 @@ class ClipFlowIndicator extends PanelMenu.Button {
         if (actor && actor.add_style_class_name) {
             actor.add_style_class_name(className);
         }
+    }
+
+    _setStyleClass(target, className, enabled) {
+        const actor = this._resolveActor(target);
+        if (!actor)
+            return;
+        if (enabled && actor.add_style_class_name)
+            actor.add_style_class_name(className);
+        else if (!enabled && actor.remove_style_class_name)
+            actor.remove_style_class_name(className);
     }
 
     _addActorToUiGroup(target) {
@@ -1154,8 +1166,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this.menu.removeAll();
         
         // Add ClipFlow-specific style class to menu to scope CSS properly
-        if (!this._disableCss)
-            this._addStyleClass(this.menu, 'clipflow-menu');
+        this._setStyleClass(this.menu, 'clipflow-menu', !this._disableCss);
         
         // Header removed to avoid duplicate title rows and reduce clutter
 
@@ -1620,7 +1631,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
 
         this._contextMenu = new PopupMenu.PopupMenu(this, 0.5, St.Side.TOP);
         const contextMenuActor = this._addActorToUiGroup(this._contextMenu);
-        this._addStyleClass(contextMenuActor, 'clipflow-context-menu');
+        this._setStyleClass(contextMenuActor, 'clipflow-context-menu', !this._disableCss);
         this._hideActor(contextMenuActor);
         this._contextMenuManager.addMenu(this._contextMenu);
 
@@ -4301,7 +4312,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
                     y_expand: false
                 });
                 // Defensive: ensure visible text on themes with low-contrast defaults
-                try { textLabel.set_style('color: #f7f9ff;'); } catch (_e) {}
+                if (!this._disableCss) {
+                    try { textLabel.set_style('color: #f7f9ff;'); } catch (_e) {}
+                }
                 if (textLabel.clutter_text) {
                     textLabel.clutter_text.set_single_line_mode(true);
                     textLabel.clutter_text.set_ellipsize(Pango.EllipsizeMode.END);
@@ -4314,7 +4327,9 @@ class ClipFlowIndicator extends PanelMenu.Button {
             if (showTimestamps) {
                 const tsLabel = this._createTimestampLabel(item);
                 if (tsLabel) {
-                    try { tsLabel.set_style('color: rgba(235,240,255,0.8);'); } catch (_e) {}
+                    if (!this._disableCss) {
+                        try { tsLabel.set_style('color: rgba(235,240,255,0.8);'); } catch (_e) {}
+                    }
                     contentBox.add_child(tsLabel);
                 }
             }

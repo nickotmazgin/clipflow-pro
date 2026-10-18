@@ -17,7 +17,7 @@
 
 **ClipFlow Pro** is a clipboard history manager for **GNOME Shell 45–51** on **Wayland and X11/Xorg** sessions (UUID `clipflow-pro@nickotmazgin.github.io`).
 
-> **Latest: v1.5.7** — respects password managers: text that KeePassXC and others mark as secret is not saved. **Previous releases are kept for history**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
+> **Latest: v1.5.8** — the right-click recent clips menu is readable on light shell themes; v1.5.7 added password-manager support. **Previous releases are kept for history**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
 
 > **GNOME Shell 43–44 is no longer supported.** ClipFlow Pro now targets **GNOME 45–51 only**. Upgrade your desktop environment to GNOME **45** or newer.
 
@@ -63,9 +63,14 @@ Full combined image (download): [collage-v1.5.3.png](screenshots/collage-v1.5.3.
 
 ---
 
-## What's new in v1.5.7
+## What's new in v1.5.8
 
-- **Respects password managers:** when KeePassXC or another password manager marks a copied password as secret, ClipFlow Pro doesn't save it (Settings → *Ignore Password-like Content*, on by default). This also covers the copy GNOME keeps after the password manager closes. Tested with KeePassXC 2.7.6. The keyword and API-token check still runs as before
+- **Readable on light themes:** the right-click recent clips menu now has the same dark surface as the panel menu, so it stays readable when your shell theme is light (it showed white text on a light background before). Tested with Zorin's light and Catppuccin dark shell themes
+- **"Disable Extension Stylesheet" works for both menus:** turning it on now hands both menus back to your shell theme's own colors
+
+### v1.5.7
+
+- **Respects password managers:** when KeePassXC or another password manager marks a copied password as secret, ClipFlow Pro doesn't save it (Settings → *Ignore Password-like Content*, on by default). This also covers the copy GNOME keeps after the password manager closes. Tested with KeePassXC 2.7.6
 - Older release notes: see the table below and [CHANGELOG.md](CHANGELOG.md)
 
 ## Recent releases
@@ -74,6 +79,7 @@ Recent tagged releases on [GitHub](https://github.com/nickotmazgin/clipflow-pro/
 
 | Version | Highlights |
 |---------|------------|
+| **1.5.8** | Recent clips menu readable on light shell themes |
 | **1.5.7** | Respects the password-manager "secret" clipboard hint |
 | **1.5.6** | No default clipboard shortcuts, clearer clipboard notice |
 | **1.5.5** | GNOME Shell 51 support |
@@ -109,12 +115,12 @@ Highlights from earlier milestones:
 
 | Session | Status | Notes |
 |---------|--------|-------|
-| **X11 / Xorg** | **Supported · validated** | **v1.5.7** runtime-tested on Zorin OS 18.1 / GNOME Shell 46 / X11, including KeePassXC 2.7.6; native `St.Clipboard` first; `Alt+F2` → `r` after install |
-| **Wayland** | **Supported** | Code paths + install docs; not maintainer runtime-tested on v1.5.7 — reports welcome |
+| **X11 / Xorg** | **Supported · validated** | **v1.5.8** runtime-tested on Zorin OS 18.1 / GNOME Shell 46 / X11 with light and dark shell themes (password-manager hint tested with KeePassXC 2.7.6 on 1.5.7); native `St.Clipboard` first; `Alt+F2` → `r` after install |
+| **Wayland** | **Supported** | Code paths + install docs; not maintainer runtime-tested on v1.5.8 — reports welcome |
 
 **Minimum requirement:** GNOME Shell **45** or newer on a **Wayland or X11/Xorg** session.
 
-> **Validation scope (v1.5.7):** maintainer confidence is highest on **X11/Xorg** (local Zorin setup). **Wayland** is supported by design and community use; older release notes were not retroactively re-labeled.
+> **Validation scope (v1.5.8):** maintainer confidence is highest on **X11/Xorg** (local Zorin setup). **Wayland** is supported by design and community use; older release notes were not retroactively re-labeled.
 
 - Panel icon position: **left / center / right** on the GNOME **top bar** (not bottom/side docks)
 - Distribution: **GitHub Releases only** (no extensions.gnome.org)
@@ -129,7 +135,7 @@ Highlights from earlier milestones:
 2. Install:
 
 ```bash
-gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.5.7-gs45-51.zip
+gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.5.8-gs45-51.zip
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 # Wayland: log out/in · X11 only: Alt+F2 → r → Enter
 ```

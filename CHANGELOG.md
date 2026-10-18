@@ -1,3 +1,16 @@
+## 1.5.8 — 2026-10-18
+
+**Readable on light shell themes.**
+
+### Fixed
+
+- The right-click recent clips menu showed white text on a light background with light shell themes (for example Zorin Light), so it was nearly unreadable. It now uses the same self-contained dark surface as the panel menu, with matching hover and focus colors
+- *Disable Extension Stylesheet* only affected the panel menu, and white text rules still applied. All ClipFlow menu styles are now scoped to the two menus, so the option hands both back to the shell theme's own colors; inline label colors are skipped too
+
+### Verified
+
+- On Zorin OS 18.1 / GNOME Shell 46 / X11 with the ZorinBlue-Light and Catppuccin Mocha (dark) shell themes: recent clips menu, panel menu, Actions, history window and every settings tab are readable in both
+
 ## 1.5.7 — 2026-10-18
 
 **Respects password managers.**

@@ -21,15 +21,23 @@ This document describes ClipFlow Pro’s **actual** privacy and security behavio
 
 Temporary insert helpers may also write a short-lived private JSON payload under the system temp directory when auto-insert is used. Successful runs delete that file after read; failed spawn paths are cleaned up by the extension.
 
-## Sensitive-content filtering (heuristic)
+## Sensitive-content filtering
 
-Setting key: `ignore-passwords` (name kept for compatibility).
+Setting key: `ignore-passwords` (name kept for compatibility; on by default).
 
-ClipFlow does **not** detect whether text originated from an application password field. When enabled, it uses **heuristic content detection** (keywords such as `password` / `secret`, and common token/key shapes) to skip saving some sensitive-looking strings.
+ClipFlow skips saving a clip in two cases:
+
+1. **Password-manager hint (since 1.5.7).** Password managers such as KeePassXC put an `x-kde-passwordManagerHint` = `secret` marker next to a copied password. ClipFlow reads it on every clipboard path (X11, the MIME fallback and Wayland). When GNOME re-offers the same text without the marker after the password manager quits, a SHA-256 hash of recent marked clips (never the text, at most 32, in memory only) catches that copy too. An unreadable marker counts as secret.
+2. **Heuristic content detection.** Keywords such as `password` / `secret`, and common token/key shapes (GitHub, Slack, AWS, `sk-` keys).
+
+With the setting off, marked clips are saved but flagged sensitive (see `auto-clear-sensitive` below).
+
+Verified on 1.5.7 (2026-10-18, Zorin OS 18.1 / GNOME Shell 46 / X11) with **KeePassXC 2.7.6**: a 20-character random password copied with Ctrl+C offered `x-kde-passwordManagerHint` = `secret` and was **not** saved; a normal clip copied right after **was** saved; quitting KeePassXC (which clears the clipboard) left nothing in history.
 
 Limitations:
 
-- Random secrets without matching patterns are **not** filtered.
+- ClipFlow does **not** detect whether text came from a password input field in other apps.
+- A password copied from an app that sets no marker, with no matching pattern, is **not** filtered. Pause monitoring first for those.
 - Keyword matches can produce false positives.
 - This is a convenience filter, not a security boundary.
 
@@ -75,12 +83,13 @@ The extension itself does not implement outbound network clients for sync, telem
 - [x] History stored locally by design
 - [x] No built-in cloud sync / telemetry client in the extension
 - [x] User can clear history and adjust retention
+- [x] Password-manager hint respected (`x-kde-passwordManagerHint`, verified with KeePassXC 2.7.6)
 - [x] Optional heuristic sensitive-content filtering (`ignore-passwords`)
 - [x] Optional auto-clear for sensitive-marked entries
 - [x] Clear-on-logout option
 - [x] Subprocess use limited to local helpers for clipboard/history/insert features
 - [ ] Multi-user hostile environments — **not** a design goal; local files remain readable to the same UID
-- [ ] Password-field awareness — **not implemented**; heuristics only
+- [ ] Password-field awareness in other apps — **not implemented**; password-manager hint and heuristics only
 
 ## Privacy / “compliance” note
 

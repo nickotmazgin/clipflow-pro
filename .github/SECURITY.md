@@ -43,7 +43,7 @@ ClipFlow Pro implements the following security measures:
 
 - Local-only storage (no cloud sync)
 - No network connections from the extension
-- Heuristic filtering of password-like / sensitive-looking clipboard content (optional)
+- Clips a password manager marks as secret (KeePassXC and others) are not saved, plus heuristic filtering of password-like / sensitive-looking content (on by default)
 - Secure file permissions for history storage (`0o600` / `0o700` where applied)
 - Optional sensitive-entry auto-clearing
 - No clipboard data transmission off-device

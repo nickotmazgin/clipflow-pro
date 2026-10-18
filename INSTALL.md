@@ -13,7 +13,7 @@ This guide provides detailed installation instructions for ClipFlow Pro on **GNO
 1. Open the latest release: https://github.com/nickotmazgin/clipflow-pro/releases/latest
 2. Download the versioned flat extension ZIP named like:
    `clipflow-pro@nickotmazgin.github.io-<version>-gs45-51.zip`
-   (example for 1.5.5: `clipflow-pro@nickotmazgin.github.io-1.5.5-gs45-51.zip`)
+   (example for 1.5.6: `clipflow-pro@nickotmazgin.github.io-1.5.6-gs45-51.zip`)
 3. Install with the GNOME Extensions CLI:
 
 ```bash

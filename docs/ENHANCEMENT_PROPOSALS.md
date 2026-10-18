@@ -1,6 +1,6 @@
 # ClipFlow Pro - Enhancement Proposals
 
-Status of the original proposal list as of **v1.5.5** (GNOME Shell 45–51), split into what has shipped and what is still open.
+Status of the original proposal list as of **v1.5.6** (GNOME Shell 45–51), split into what has shipped and what is still open.
 
 ## Shipped
 

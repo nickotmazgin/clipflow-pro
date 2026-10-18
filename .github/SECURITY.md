@@ -2,16 +2,16 @@
 
 ## Supported Versions
 
-Security fixes go into the **latest release only** (currently **1.5.7**). Older releases stay on GitHub for history; please upgrade to the latest.
+Security fixes go into the **latest release only** (currently **1.5.8**). Older releases stay on GitHub for history; please upgrade to the latest.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| Latest 1.5.x (1.5.7) | :white_check_mark: |
+| Latest 1.5.x (1.5.8) | :white_check_mark: |
 | Older 1.5.x | :x: upgrade to latest |
 | 1.4.x   | :x:                |
 | < 1.4   | :x:                |
 
-**Platforms:** GNOME Shell **45–51** on **Wayland** (supported) and **X11/Xorg** (supported; **v1.5.7 validated** on maintainer X11 setup). See [README](../README.md#compatibility).
+**Platforms:** GNOME Shell **45–51** on **Wayland** (supported) and **X11/Xorg** (supported; **v1.5.8 validated** on maintainer X11 setup). See [README](../README.md#compatibility).
 
 ## Reporting a Vulnerability
 

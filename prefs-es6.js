@@ -584,7 +584,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
             styleFrame.set_child(styleBox);
 
             const themeInfo = new Gtk.Label({
-                label: _('ClipFlow Pro automatically adapts to your GNOME theme.\nThe menu will match your system\'s dark/light mode preference.'),
+                label: _('ClipFlow Pro menus use their own dark surface, so they stay readable\non both light and dark shell themes.'),
                 wrap: true,
                 wrap_mode: Pango.WrapMode.WORD
             });
@@ -611,7 +611,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
 
             const disableCssToggle = this._createSwitchRow(
                 _('Disable Extension Stylesheet'),
-                _('Turn off ClipFlow CSS if the quick menu looks wrong with your theme.'),
+                _('Turn off ClipFlow CSS so both menus use your shell theme\'s own colors.'),
                 'disable-css'
             );
             advBox.append(disableCssToggle);

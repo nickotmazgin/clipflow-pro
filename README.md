@@ -2,7 +2,7 @@
 
 [![Release](https://img.shields.io/github/v/release/nickotmazgin/clipflow-pro?color=blue)](https://github.com/nickotmazgin/clipflow-pro/releases/latest)
 [![CI](https://img.shields.io/github/actions/workflow/status/nickotmazgin/clipflow-pro/release-validate.yml?branch=main&label=CI)](https://github.com/nickotmazgin/clipflow-pro/actions)
-[![Downloads](https://img.shields.io/github/downloads/nickotmazgin/clipflow-pro/total?label=downloads&color=success)](https://github.com/nickotmazgin/clipflow-pro/releases)
+[![Downloads](https://img.shields.io/github/downloads/nickotmazgin/clipflow-pro/total?label=downloads&color=brightgreen&cacheSeconds=3600)](https://github.com/nickotmazgin/clipflow-pro/releases)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue)](LICENSE)
 [![GNOME 45–51](https://img.shields.io/badge/GNOME-45%E2%80%9351-4A86CF?logo=gnome&logoColor=white)](#compatibility)
 [![Wayland](https://img.shields.io/badge/Wayland-supported-0078D4)](#compatibility)
@@ -197,6 +197,58 @@ ClipFlow Pro is created, maintained, signed, and released by **[Nick Otmazgin](h
 [![AI assisted — OpenAI Codex](https://img.shields.io/badge/AI%20assisted-OpenAI%20Codex-10A37F)](https://openai.com/codex/)
 [![AI assisted — Cursor Agent](https://img.shields.io/badge/AI%20assisted-Cursor%20Agent-1A1A1A)](https://cursor.com)
 [![AI assisted — Claude Code](https://img.shields.io/badge/AI%20assisted-Claude%20Code-D97757)](https://claude.com/claude-code)
+
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="25%">
+        <a href="https://github.com/nickotmazgin">
+          <img src="https://avatars.githubusercontent.com/u/227995249?v=4" width="80px" height="80px" style="border-radius: 50%;" alt="Nick Otmazgin"/>
+          <br />
+          <sub><b>Nick Otmazgin</b></sub>
+        </a>
+        <br />
+        <sub>Creator &amp; Solo Maintainer</sub>
+        <br />
+        <sub>💻 🎨 📦 🚀 📖</sub>
+      </td>
+      <td align="center" valign="top" width="25%">
+        <a href="https://github.com/cursoragent">
+          <img src="https://avatars.githubusercontent.com/u/199161495?v=4" width="80px" height="80px" style="border-radius: 50%;" alt="Cursor Agent"/>
+          <br />
+          <sub><b>Cursor Agent</b></sub>
+        </a>
+        <br />
+        <sub>AI Pair-Programming Co-Pilot</sub>
+        <br />
+        <sub>💻 🐛 🧪 📖</sub>
+      </td>
+      <td align="center" valign="top" width="25%">
+        <a href="https://github.com/claude">
+          <img src="https://avatars.githubusercontent.com/u/81847?v=4" width="80px" height="80px" style="border-radius: 50%;" alt="Claude"/>
+          <br />
+          <sub><b>Claude (Anthropic)</b></sub>
+        </a>
+        <br />
+        <sub>AI Coding Agent · Claude Code</sub>
+        <br />
+        <sub>💻 🐛 🛡️ 🚀</sub>
+      </td>
+      <td align="center" valign="top" width="25%">
+        <a href="https://openai.com/codex/">
+          <img src="https://avatars.githubusercontent.com/u/14957082?v=4" width="80px" height="80px" style="border-radius: 50%;" alt="OpenAI Codex"/>
+          <br />
+          <sub><b>OpenAI Codex</b></sub>
+        </a>
+        <br />
+        <sub>AI Coding Agent</sub>
+        <br />
+        <sub>⚡ 💻 🚀</sub>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
 
 Recent releases were built with help from AI pair-programming agents, operated under the maintainer's direction and review:
 

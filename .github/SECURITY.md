@@ -2,11 +2,12 @@
 
 ## Supported Versions
 
-We actively support the following versions with security updates:
+Security fixes go into the **latest release only** (currently **1.5.7**). Older releases stay on GitHub for history; please upgrade to the latest.
 
 | Version | Supported          |
 | ------- | ------------------ |
-| 1.5.x   | :white_check_mark: |
+| Latest 1.5.x (1.5.7) | :white_check_mark: |
+| Older 1.5.x | :x: upgrade to latest |
 | 1.4.x   | :x:                |
 | < 1.4   | :x:                |
 

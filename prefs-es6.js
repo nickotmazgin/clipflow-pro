@@ -288,10 +288,10 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
         });
         privacyFrame.set_child(privacyBox);
 
-        // Ignore password-like / sensitive-looking clipboard content (heuristic)
+        // Ignore password-manager-marked or sensitive-looking clipboard content
         const ignorePasswordsBox = this._createSwitchRow(
             _('Ignore Password-like Content'),
-            _("Don't save clipboard content that looks password-like or sensitive. Uses heuristic keyword and token detection (for example strings containing 'password' or common API-token shapes). Does not detect whether text came from a password input field."),
+            _("Don't save clipboard content that a password manager marks as secret (KeePassXC and others set this hint) or that looks password-like or sensitive. Also uses heuristic keyword and token detection (for example strings containing 'password' or common API-token shapes). Does not detect whether text came from a password input field."),
             'ignore-passwords'
         );
         privacyBox.append(ignorePasswordsBox);

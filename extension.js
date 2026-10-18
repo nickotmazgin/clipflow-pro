@@ -205,6 +205,7 @@ const console = cfpLogger;
 
 const HISTORY_LIMIT_MIN = 10;
 const HISTORY_LIMIT_MAX = 100;
+const PASSWORD_MANAGER_HINT_MIME = 'x-kde-passwordManagerHint';
 
 // UUID constant used for opening prefs
 const UUID = 'clipflow-pro@nickotmazgin.github.io';
@@ -351,6 +352,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
         this._insertFocusTrackId = 0;
         this._lastClipboardText = '';
         this._lastPrimaryText = '';
+        // SHA-256 of texts a password manager flagged as secret (never the text itself)
+        this._passwordManagerSecretHashes = new Set();
         this._monitoringResumeTimeoutId = 0;
         this._settingsSignalIds = [];
         this._searchDebounceTimeout = 0;
@@ -3057,14 +3060,20 @@ class ClipFlowIndicator extends PanelMenu.Button {
         };
 
         const handleResult = text => {
-            if (text && typeof text === 'string' && text.trim().length > 0) {
+            if (!text || typeof text !== 'string' || text.trim().length === 0)
+                return;
+            // Every read path (get_text, MIME fallback, Wayland runner) lands
+            // here, so the password-manager hint is checked once for all.
+            this._checkPasswordManagerHint(clipboardType, isSecret => {
+                if (generation !== this._clipboardReadGeneration || !this._isMonitoring)
+                    return;
                 try {
-                    this._handleClipboardText(text, sourceLabel);
+                    this._handleClipboardText(text, sourceLabel, { passwordManagerSecret: isSecret });
                 } catch (error) {
                     console.error(`ClipFlow Pro: Error in _handleClipboardText: ${error.message}`);
                     console.error(`ClipFlow Pro: Stack: ${error.stack}`);
                 }
-            }
+            });
         };
 
         const finish = text => {
@@ -3329,6 +3338,60 @@ class ClipFlowIndicator extends PanelMenu.Button {
         }
     }
 
+    // Password managers (KeePassXC, KeePass, Bitwarden desktop, ...) offer
+    // x-kde-passwordManagerHint=secret alongside the text so clipboard
+    // managers can skip it. Calls back with true when that hint is present.
+    _checkPasswordManagerHint(clipboardType, callback) {
+        let mimetypes = [];
+        try {
+            if (this._clipboard && typeof this._clipboard.get_mimetypes === 'function')
+                mimetypes = this._clipboard.get_mimetypes(clipboardType) || [];
+        } catch (_e) {
+            mimetypes = [];
+        }
+        if (!mimetypes.includes(PASSWORD_MANAGER_HINT_MIME) || typeof this._clipboard.get_content !== 'function') {
+            callback(false);
+            return;
+        }
+
+        // The hint is only ever offered by password managers, so if its value
+        // can't be read in time, err on the side of treating the clip as secret.
+        let done = false;
+        let timeoutId = this._scheduleTimeout(300, () => {
+            timeoutId = 0;
+            if (!done) {
+                done = true;
+                callback(true);
+            }
+            return GLib.SOURCE_REMOVE;
+        });
+        const settle = isSecret => {
+            if (done)
+                return;
+            done = true;
+            if (timeoutId > 0) {
+                this._cancelTimeout(timeoutId);
+                timeoutId = 0;
+            }
+            callback(isSecret);
+        };
+
+        try {
+            this._clipboard.get_content(clipboardType, PASSWORD_MANAGER_HINT_MIME, (_clip, bytes) => {
+                let value = '';
+                try {
+                    if (bytes && bytes.get_size && bytes.get_size() > 0)
+                        value = new TextDecoder('utf-8').decode(new Uint8Array(bytes.get_data()));
+                } catch (_e) {
+                    value = '';
+                }
+                settle(!value || value.replace(/\0/g, '').trim().toLowerCase() === 'secret');
+            });
+        } catch (_e) {
+            settle(true);
+        }
+    }
+
     _isLikelyScreenshotApp() {
         const tracker = Shell.WindowTracker.get_default();
         const app = tracker ? tracker.focus_app : null;
@@ -3337,7 +3400,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         return nid.includes('screenshot') || nid.includes('flameshot') || nid.includes('shutter') || nid.includes('ksnip');
     }
 
-    _handleClipboardText(rawText, source = 'owner-change') {
+    _handleClipboardText(rawText, source = 'owner-change', options = {}) {
         
         const text = this._normalizeClipboardText(rawText);
         if (!text || typeof text !== 'string') {
@@ -3364,7 +3427,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         
         // Process first, update cache only if successfully added
         // We'll update the cache in _addToHistory after confirmation
-        const accepted = this._processClipboardText(trimmedText, source);
+        const accepted = this._processClipboardText(trimmedText, source, options);
 
         if (accepted) {
             if (source === 'clipboard') {
@@ -3375,7 +3438,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         }
     }
 
-    _processClipboardText(text, source = 'clipboard') {
+    _processClipboardText(text, source = 'clipboard', options = {}) {
         if (!text) {
             return false;
         }
@@ -3386,7 +3449,8 @@ class ClipFlowIndicator extends PanelMenu.Button {
         }
 
         const charLength = this._characterLength(cleanedText);
-        const isSensitive = this._isSensitiveContent(cleanedText);
+        const isSensitive = this._isPasswordManagerSecret(cleanedText, Boolean(options.passwordManagerSecret)) ||
+            this._isSensitiveContent(cleanedText);
         if (isSensitive && this._safeGetBoolean('ignore-passwords', true)) {
             return false;
         }
@@ -3451,6 +3515,25 @@ class ClipFlowIndicator extends PanelMenu.Button {
         return true;
     }
     
+    // When the app that set the hint exits, Mutter's clipboard manager takes
+    // over the selection and re-offers the same text without the hint. Keep a
+    // hash of flagged texts so that second copy is still treated as secret.
+    _isPasswordManagerSecret(text, hinted) {
+        if (!this._passwordManagerSecretHashes)
+            this._passwordManagerSecretHashes = new Set();
+        const hash = GLib.compute_checksum_for_string(GLib.ChecksumType.SHA256, text, -1);
+        if (!hinted)
+            return this._passwordManagerSecretHashes.has(hash);
+
+        this._passwordManagerSecretHashes.delete(hash);
+        this._passwordManagerSecretHashes.add(hash);
+        while (this._passwordManagerSecretHashes.size > 32) {
+            const oldest = this._passwordManagerSecretHashes.values().next().value;
+            this._passwordManagerSecretHashes.delete(oldest);
+        }
+        return true;
+    }
+
     _isSensitiveContent(text) {
         if (!text) {
             return false;
@@ -4890,6 +4973,7 @@ class ClipFlowIndicator extends PanelMenu.Button {
         
         // Clear pointers
         this._lastClipboardText = '';
+        this._passwordManagerSecretHashes?.clear();
         this._skipCleanupOnDestroy = false;
         
         try {

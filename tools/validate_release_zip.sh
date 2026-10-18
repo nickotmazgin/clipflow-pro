@@ -66,13 +66,13 @@ UUID=$("${PYTHON}" -c 'import json,sys;d=json.load(open(sys.argv[1]));print(d.ge
 
 SHELLS=$("${PYTHON}" -c 'import json,sys;d=json.load(open(sys.argv[1]));print(",".join(map(str,d.get("shell-version",[]))))' "$TMPDIR/metadata.json")
 echo "Shell versions: [$SHELLS]"
-[ "$SHELLS" = "45,46,47,48,49,50" ] || fail "Unexpected shell-version list: [$SHELLS]"
+[ "$SHELLS" = "45,46,47,48,49,50,51" ] || fail "Unexpected shell-version list: [$SHELLS]"
 
 VER=$("${PYTHON}" -c 'import json,sys;d=json.load(open(sys.argv[1]));print(d.get("version"))' "$TMPDIR/metadata.json")
 [[ "$VER" =~ ^[0-9]+$ ]] || fail "metadata.json version is not an integer: $VER"
 
 VNAME=$("${PYTHON}" -c 'import json,sys;d=json.load(open(sys.argv[1]));print(d.get("version-name",""))' "$TMPDIR/metadata.json")
-[[ "$VNAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+\ 45\.50$ ]] || fail "Unexpected version-name: $VNAME"
+[[ "$VNAME" =~ ^[0-9]+\.[0-9]+\.[0-9]+\ 45\.51$ ]] || fail "Unexpected version-name: $VNAME"
 
 ROOT_VNAME=$("${PYTHON}" -c 'import json;print(json.load(open("metadata.json")).get("version-name",""))')
 [ "$VNAME" = "$ROOT_VNAME" ] || fail "Packaged version-name differs from repository metadata: $VNAME != $ROOT_VNAME"

@@ -7,6 +7,19 @@
 - README: keyboard shortcuts table and a stars badge
 - Demo video now has a natural voice-over (Kokoro-82M, Apache-2.0, run locally) and original synthesised music, mixed to -14 LUFS; `tools/media/clipflow_media.py remix` re-mixes the audio without recording again
 
+## 1.5.5 — 2026-10-18
+
+**GNOME Shell 51 support.**
+
+### Added
+
+- GNOME Shell **51** in `shell-version` (now 45–51). The extension already avoids everything GNOME 51 removed or changed (`St` `vertical`, async `disable()`, `ui/pointerWatcher.js`, `Shell.GLSLEffect`, `Clutter.get_default_backend()`), per the official porting guide
+- Release zips and tags are now named `*-gs45-51.zip` / `v*-gnome45-51`
+
+### Verified
+
+- Settings → About → Maintenance → *Reset to Defaults* is the only reset-all control and resets all 50 settings (history is kept)
+
 ## 1.5.4 — 2026-10-17
 
 **Panel popup menu fix for GNOME 45–47, and a refreshed gallery.**

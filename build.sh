@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ClipFlow Pro - Build Script (GNOME 45-50)
+# ClipFlow Pro - Build Script (GNOME 45-51)
 # Prepares the ES module extension assets in ./build for installation or packaging.
 
 set -euo pipefail
@@ -18,7 +18,7 @@ SCHEMAS_DIR="schemas"
 LOCALE_DIR="locale"
 ICON_DIR="icons"
 
-echo "Building ClipFlow Pro extension (GNOME 45-50)..."
+echo "Building ClipFlow Pro extension (GNOME 45-51)..."
 
 echo "Resetting build directory..."
 rm -rf "${BUILD_DIR}"
@@ -46,7 +46,7 @@ else
     exit 1
 fi
 
-echo "Stamping GNOME 45-50 metadata..."
+echo "Stamping GNOME 45-51 metadata..."
 "${PYTHON}" - <<'PY'
 import json
 from pathlib import Path
@@ -54,8 +54,8 @@ from pathlib import Path
 path = Path('build/metadata.json')
 metadata = json.loads(path.read_text(encoding='utf-8'))
 base = metadata.get('version-name', '').split()[0] if metadata.get('version-name') else '1.3.9'
-metadata['shell-version'] = ['45', '46', '47', '48', '49', '50']
-metadata['version-name'] = f'{base} 45.50'
+metadata['shell-version'] = ['45', '46', '47', '48', '49', '50', '51']
+metadata['version-name'] = f'{base} 45.51'
 path.write_text(json.dumps(metadata, ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 PY
 

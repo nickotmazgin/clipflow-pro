@@ -26,8 +26,8 @@ echo "=== Build + validate ==="
 make release-validate
 
 VERSION=$(python3 -c "import json; m=json.load(open('metadata.json')); print((m.get('version-name') or '').split()[0])")
-TAG="v${VERSION}-gnome45-50"
-ZIP="dist/clipflow-pro@nickotmazgin.github.io-${VERSION}-gs45-50.zip"
+TAG="v${VERSION}-gnome45-51"
+ZIP="dist/clipflow-pro@nickotmazgin.github.io-${VERSION}-gs45-51.zip"
 
 if [[ ! -f "$ZIP" ]]; then
   echo "Missing zip: $ZIP"

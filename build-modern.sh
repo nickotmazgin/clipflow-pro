@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# ClipFlow Pro - Build Script (GNOME 45-50)
+# ClipFlow Pro - Build Script (GNOME 45-51)
 # Compatibility wrapper around build.sh.
 
 set -euo pipefail

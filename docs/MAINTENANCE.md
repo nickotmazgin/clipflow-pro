@@ -52,7 +52,7 @@ Repo-local git config (set by the setup script):
 3. Confirm on GitHub Releases:
    - Tag shows **Verified**
    - Release shows **Immutable** (enabled for this repo)
-   - Zip built by Actions matches `dist/*-gs45-50.zip`
+   - Zip built by Actions matches `dist/*-gs45-51.zip`
 
 Non-interactive republish (e.g. retag same version):
 
@@ -60,7 +60,7 @@ Non-interactive republish (e.g. retag same version):
 CLIPFLOW_RELEASE_YES=1 ./tools/release-publish.sh
 ```
 
-Workflow: `.github/workflows/release-publish.yml` (trigger: `v*-gnome45-50` tags).
+Workflow: `.github/workflows/release-publish.yml` (trigger: `v*-gnome45-51` tags).
 
 ### Delete broken releases
 
@@ -73,7 +73,7 @@ git push origin :refs/tags/v1.2.6
 ## Packaging
 
 - Flat zip: `make pack` or `make dist` → `dist/clipflow-pro@nickotmazgin.github.io.shell-extension.zip`
-- Release zip: `./create-release-zips.sh` → `dist/*-gs45-50.zip` (GNOME 45–50 only)
+- Release zip: `./create-release-zips.sh` → `dist/*-gs45-51.zip` (GNOME 45–51 only)
 - Source zip: `dist/clipflow-pro-source.zip`
 - Validate: `make release-validate`
 
@@ -95,6 +95,6 @@ one.
 
 ## Distribution
 
-- Publish the **45–50** zip on the GitHub Releases page (via signed tag push).
+- Publish the **45–51** zip on the GitHub Releases page (via signed tag push).
 - GNOME Shell **43–44** is discontinued; do not rebuild or advertise legacy packages.
 - Release notes are generated from `CHANGELOG.md` (`tools/release_notes_from_changelog.py`).

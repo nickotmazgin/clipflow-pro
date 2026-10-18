@@ -12,12 +12,12 @@ CHANGELOG = REPO_ROOT / "CHANGELOG.md"
 FOOTER = """
 ## Compatibility
 
-- **GNOME Shell 45–50** — Wayland and X11/Xorg session types supported
+- **GNOME Shell 45–51** — Wayland and X11/Xorg session types supported
 - **Maintainer runtime-tested (when noted in changelog):** X11/Xorg only unless a release explicitly states otherwise
 
 ## Install
 
-Download the **`clipflow-pro@nickotmazgin.github.io-*-gs45-50.zip`** asset (GNOME Shell **45–50**), install with `gnome-extensions install --force`, enable, then restart the Shell:
+Download the **`clipflow-pro@nickotmazgin.github.io-*-gs45-51.zip`** asset (GNOME Shell **45–51**), install with `gnome-extensions install --force`, enable, then restart the Shell:
 
 - **Wayland:** log out and back in
 - **X11 / Xorg:** `Alt+F2` → `r` → Enter

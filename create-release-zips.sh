@@ -23,15 +23,15 @@ PYEOF
 
 mkdir -p "${DIST_DIR}"
 
-echo "Building GNOME 45-50 package tree..."
+echo "Building GNOME 45-51 package tree..."
 "${ROOT_DIR}/build.sh"
 
-echo "Creating GNOME 45-50 zip..."
+echo "Creating GNOME 45-51 zip..."
 "${PYTHON}" "${ROOT_DIR}/tools/zip_dir.py" \
   "${ROOT_DIR}/build" \
-  "${DIST_DIR}/${UUID}-${VERSION_BASE}-gs45-50.zip" \
+  "${DIST_DIR}/${UUID}-${VERSION_BASE}-gs45-51.zip" \
   . \
   --exclude "schemas/gschemas.compiled"
 
 echo "Done! Created:"
-echo "  - ${DIST_DIR}/${UUID}-${VERSION_BASE}-gs45-50.zip"
+echo "  - ${DIST_DIR}/${UUID}-${VERSION_BASE}-gs45-51.zip"

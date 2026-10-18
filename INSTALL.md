@@ -1,8 +1,8 @@
 # Installation Guide - ClipFlow Pro
 
-This guide provides detailed installation instructions for ClipFlow Pro on **GNOME Shell 45–50** under **Wayland or X11/Xorg** sessions.
+This guide provides detailed installation instructions for ClipFlow Pro on **GNOME Shell 45–51** under **Wayland or X11/Xorg** sessions.
 
-> **GNOME Shell 43–44 is no longer supported.** Install only the **GNOME 45–50** zip (`*-gs45-50.zip`). GNOME Shell **45** or newer is required.
+> **GNOME Shell 43–44 is no longer supported.** Install only the **GNOME 45–51** zip (`*-gs45-51.zip`). GNOME Shell **45** or newer is required.
 
 > **Distribution:** ClipFlow Pro is published on **[GitHub Releases](https://github.com/nickotmazgin/clipflow-pro/releases)** only. It is **not** listed on [extensions.gnome.org](https://extensions.gnome.org), and it cannot be installed by browsing the official GNOME Extensions app catalog.
 
@@ -12,12 +12,12 @@ This guide provides detailed installation instructions for ClipFlow Pro on **GNO
 
 1. Open the latest release: https://github.com/nickotmazgin/clipflow-pro/releases/latest
 2. Download the versioned flat extension ZIP named like:
-   `clipflow-pro@nickotmazgin.github.io-<version>-gs45-50.zip`
-   (example for 1.5.4: `clipflow-pro@nickotmazgin.github.io-1.5.4-gs45-50.zip`)
+   `clipflow-pro@nickotmazgin.github.io-<version>-gs45-51.zip`
+   (example for 1.5.5: `clipflow-pro@nickotmazgin.github.io-1.5.5-gs45-51.zip`)
 3. Install with the GNOME Extensions CLI:
 
 ```bash
-gnome-extensions install --force ~/Downloads/clipflow-pro@nickotmazgin.github.io-<version>-gs45-50.zip
+gnome-extensions install --force ~/Downloads/clipflow-pro@nickotmazgin.github.io-<version>-gs45-51.zip
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 ```
 
@@ -56,7 +56,7 @@ This script never touches system directories; everything is installed into `~/.l
 
 ```bash
 # Download the versioned flat ZIP from the latest release assets page, then:
-ZIP=~/Downloads/clipflow-pro@nickotmazgin.github.io-<version>-gs45-50.zip
+ZIP=~/Downloads/clipflow-pro@nickotmazgin.github.io-<version>-gs45-51.zip
 
 # Preferred:
 gnome-extensions install --force "$ZIP"
@@ -109,7 +109,7 @@ If you edit `schemas/*.gschema.xml` during development, run `glib-compile-schema
 
 ### Prerequisites
 - Git
-- GNOME Shell **45–50**
+- GNOME Shell **45–51**
 - GLib development tools (including `glib-compile-schemas`)
 - Make
 
@@ -123,7 +123,7 @@ make pack
 ```
 
 GitHub release assets use the versioned name:
-`clipflow-pro@nickotmazgin.github.io-<version>-gs45-50.zip` (produced by the release packaging scripts).
+`clipflow-pro@nickotmazgin.github.io-<version>-gs45-51.zip` (produced by the release packaging scripts).
 
 Note: GNOME Shell extensions are not distributed as Flatpaks.
 
@@ -139,7 +139,7 @@ cd clipflow-pro
 make install
 ```
 
-Requires a GNOME Shell **45–50** session to run the extension.
+Requires a GNOME Shell **45–51** session to run the extension.
 
 ### Fedora
 ```bash
@@ -152,7 +152,7 @@ cd clipflow-pro
 make install
 ```
 
-Requires a GNOME Shell **45–50** session to run the extension.
+Requires a GNOME Shell **45–51** session to run the extension.
 
 ### Arch Linux
 ```bash
@@ -165,7 +165,7 @@ cd clipflow-pro
 make install
 ```
 
-Requires a GNOME Shell **45–50** session to run the extension.
+Requires a GNOME Shell **45–51** session to run the extension.
 
 ### openSUSE
 ```bash
@@ -178,7 +178,7 @@ cd clipflow-pro
 make install
 ```
 
-Requires a GNOME Shell **45–50** session to run the extension.
+Requires a GNOME Shell **45–51** session to run the extension.
 
 ## Post-Installation
 
@@ -218,7 +218,7 @@ journalctl --user -f | grep clipflow-pro
    ```bash
    gnome-shell --version
    ```
-   ClipFlow Pro requires GNOME Shell **45–50**.
+   ClipFlow Pro requires GNOME Shell **45–51**.
 
 2. Check installation path:
    ```bash
@@ -284,17 +284,17 @@ make dev  # Installs and watches for changes
 
 ## Distribution-Specific Notes
 
-ClipFlow Pro targets **GNOME Shell 45–50** only. Older GNOME releases (including Shell 40–44) are not supported.
+ClipFlow Pro targets **GNOME Shell 45–51** only. Older GNOME releases (including Shell 40–44) are not supported.
 
 ### Zorin OS
-- Use a Zorin release that ships GNOME Shell **45–50**
+- Use a Zorin release that ships GNOME Shell **45–51**
 - You may need the Extensions app from Software to enable already-installed extensions
 
 ### Pop!_OS
-- Compatible when the session runs GNOME Shell **45–50**
+- Compatible when the session runs GNOME Shell **45–51**
 
 ### Ubuntu
-- Use an Ubuntu release with GNOME Shell **45–50**
+- Use an Ubuntu release with GNOME Shell **45–51**
 - You may need the `gnome-shell-extensions` package for the Extensions app / CLI
 
 ### Fedora Silverblue
@@ -317,7 +317,7 @@ After installation, you should see:
 If you encounter issues:
 1. Check [GitHub Issues](https://github.com/nickotmazgin/clipflow-pro/issues)
 2. Review system logs: `journalctl --user -f`
-3. Verify GNOME Shell compatibility (**45–50**)
+3. Verify GNOME Shell compatibility (**45–51**)
 4. Join the discussion in GitHub Discussions
 
 ## Next Steps

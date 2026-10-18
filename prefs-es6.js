@@ -152,7 +152,7 @@ class ClipFlowProPrefsWidget extends Gtk.Box {
             return Number.isFinite(n) && n >= 45;
         }))
             return true;
-        // GNOME Extensions prefs often omit shell-version in metadata — this package is 45–50 only.
+        // GNOME Extensions prefs often omit shell-version in metadata — this package is 45–51 only.
         if (shells.length === 0)
             return true;
         return false;

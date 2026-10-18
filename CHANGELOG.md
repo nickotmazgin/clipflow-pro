@@ -11,7 +11,7 @@
 ### Docs
 
 - README links the demo video and the DEV article; older "what's new" sections trimmed (they remain in this changelog)
-- Removed the unused v1.4.2 collage and screenshots
+- Removed the unused v1.4.2 collage and screenshots and the old June social preview
 
 ## 1.5.6 — 2026-10-18
 

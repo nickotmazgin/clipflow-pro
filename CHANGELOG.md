@@ -1,8 +1,16 @@
-## Unreleased
+## 1.5.6 — 2026-10-18
+
+**extensions.gnome.org review compliance.**
+
+### Changed
+
+- No default keyboard shortcuts for clipboard actions, as the extensions.gnome.org review guidelines require: `enhanced-copy-shortcut` (was Super+C) and `show-history-window-shortcut` (was Super+Shift+H) now default to unset. Shortcuts you set yourself are kept; if you relied on the old defaults, set them again in Settings → Shortcuts
+- Extension description now declares clipboard access: it reads and stores clipboard text locally and sends nothing anywhere
 
 ### Docs
 
-- Social preview refreshed for v1.5.5 (GNOME Shell 45–51)
+- Social preview refreshed for GNOME Shell 45–51
+- README shortcuts table lists suggested combinations instead of defaults
 
 ## 1.5.5 — 2026-10-18
 

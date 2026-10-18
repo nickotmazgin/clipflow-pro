@@ -1,6 +1,6 @@
 {
   "name": "ClipFlow Pro",
-  "description": "GNOME Shell 45–51 clipboard manager. X11/Xorg validated on maintainer setup; Wayland supported. History window, panel menu, search, pin/star, and privacy controls.",
+  "description": "Clipboard history manager for GNOME Shell 45–51.\n\nThis extension reads and stores your clipboard (copied text) locally to build a searchable history. Nothing is sent anywhere; history stays on your computer and can be paused, excluded per app or cleared.\n\n* History window and panel menu with search\n* Pin and star entries\n* Paste or insert past entries\n* Privacy controls: ignore passwords, pause on lock, clear on logout\n\nNo keyboard shortcuts are set by default; you can add them in Settings → Shortcuts.",
   "uuid": "clipflow-pro@nickotmazgin.github.io",
   "shell-version": [
     "45",
@@ -11,8 +11,8 @@
     "50",
     "51"
   ],
-  "version": 51,
-  "version-name": "1.5.5 45.51",
+  "version": 52,
+  "version-name": "1.5.6 45.51",
   "url": "https://github.com/nickotmazgin/clipflow-pro",
   "settings-schema": "org.gnome.shell.extensions.clipflow-pro",
   "gettext-domain": "clipflow-pro",

@@ -17,7 +17,7 @@
 
 **ClipFlow Pro** is a clipboard history manager for **GNOME Shell 45–51** on **Wayland and X11/Xorg** sessions (UUID `clipflow-pro@nickotmazgin.github.io`).
 
-> **Latest: v1.5.5** — GNOME Shell 51 support (GNOME 45–51). **Previous releases are kept for history**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
+> **Latest: v1.5.6** — extensions.gnome.org review compliance: no default clipboard shortcuts, clearer clipboard notice. **Previous releases are kept for history**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
 
 > **GNOME Shell 43–44 is no longer supported.** ClipFlow Pro now targets **GNOME 45–51 only**. Upgrade your desktop environment to GNOME **45** or newer.
 
@@ -63,7 +63,12 @@ Full combined image (download): [collage-v1.5.3.png](screenshots/collage-v1.5.3.
 
 ---
 
-## What's new in v1.5.5
+## What's new in v1.5.6
+
+- **No default shortcuts:** Super+C (enhanced copy) and Super+Shift+H (history window) are no longer set out of the box, as extensions.gnome.org requires for anything touching clipboard data. Left-click on the panel icon still opens the history window. If you used them, set them again in Settings → Shortcuts
+- **Clearer clipboard notice:** the extension description now says plainly that it reads and stores your clipboard locally and sends nothing anywhere
+
+### v1.5.5
 
 - **GNOME Shell 51 support:** ClipFlow Pro now installs and enables on GNOME 51 (the September 2026 release). The code was already free of the APIs GNOME 51 removed (`St` `vertical`, async `disable()`, `pointerWatcher`, `GLSLEffect`)
 - **Reset to Defaults checked:** Settings → About → Maintenance → *Reset to Defaults* restores all 50 settings; your clipboard history is kept
@@ -87,6 +92,7 @@ Recent tagged releases on [GitHub](https://github.com/nickotmazgin/clipflow-pro/
 
 | Version | Highlights |
 |---------|------------|
+| **1.5.6** | extensions.gnome.org compliance: no default clipboard shortcuts |
 | **1.5.5** | GNOME Shell 51 support |
 | **1.5.4** | Panel popup menu fix on GNOME 45–47, new gallery and demo video |
 | **1.5.3** | Privacy hardening (stdin IPC, 0600 files), safer import, dead-code cleanup |
@@ -120,12 +126,12 @@ Highlights from earlier milestones:
 
 | Session | Status | Notes |
 |---------|--------|-------|
-| **X11 / Xorg** | **Supported · validated** | **v1.5.5** runtime-tested on Zorin OS 18.1 / GNOME Shell 46 / X11; native `St.Clipboard` first; `Alt+F2` → `r` after install |
-| **Wayland** | **Supported** | Code paths + install docs; not maintainer runtime-tested on v1.5.5 — reports welcome |
+| **X11 / Xorg** | **Supported · validated** | **v1.5.6** runtime-tested on Zorin OS 18.1 / GNOME Shell 46 / X11; native `St.Clipboard` first; `Alt+F2` → `r` after install |
+| **Wayland** | **Supported** | Code paths + install docs; not maintainer runtime-tested on v1.5.6 — reports welcome |
 
 **Minimum requirement:** GNOME Shell **45** or newer on a **Wayland or X11/Xorg** session.
 
-> **Validation scope (v1.5.5):** maintainer confidence is highest on **X11/Xorg** (local Zorin setup). **Wayland** is supported by design and community use; older release notes were not retroactively re-labeled.
+> **Validation scope (v1.5.6):** maintainer confidence is highest on **X11/Xorg** (local Zorin setup). **Wayland** is supported by design and community use; older release notes were not retroactively re-labeled.
 
 - Panel icon position: **left / center / right** on the GNOME **top bar** (not bottom/side docks)
 - Distribution: **GitHub Releases only** (no extensions.gnome.org)
@@ -140,7 +146,7 @@ Highlights from earlier milestones:
 2. Install:
 
 ```bash
-gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.5.5-gs45-51.zip
+gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.5.6-gs45-51.zip
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 # Wayland: log out/in · X11 only: Alt+F2 → r → Enter
 ```
@@ -170,17 +176,17 @@ gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 
 ### Keyboard shortcuts
 
-Set or change any of these in **Settings → Shortcuts** (click the button, press your keys).
+No shortcuts are set out of the box (extensions.gnome.org rules don't allow default shortcuts that touch clipboard data). Add the ones you want in **Settings → Shortcuts**: click the button and press your keys. The left column suggests a combination for each.
 
-| Action | Default |
+| Action | Suggested shortcut |
 |---|---|
 | Open the history window | <kbd>Super</kbd>+<kbd>Shift</kbd>+<kbd>H</kbd> |
-| Enhanced copy (add the selection or clipboard to history) | <kbd>Super</kbd>+<kbd>C</kbd> |
-| Open the recent clips menu | not set |
-| Paste latest entry into the focused app | not set |
-| Paste the entry before it | not set |
-| Enhanced paste (clean the text, then paste) | not set |
-| Classic menu: filter all / pinned / starred, toggle pin / star on the top entry | not set |
+| Open the recent clips menu | <kbd>Super</kbd>+<kbd>Shift</kbd>+<kbd>R</kbd> |
+| Paste latest entry into the focused app | <kbd>Super</kbd>+<kbd>Shift</kbd>+<kbd>Insert</kbd> |
+| Paste the entry before it | <kbd>Super</kbd>+<kbd>Shift</kbd>+<kbd>V</kbd> |
+| Enhanced copy (add the selection or clipboard to history) | <kbd>Super</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd> |
+| Enhanced paste (clean the text, then paste) | your choice |
+| Classic menu: filter all / pinned / starred, toggle pin / star on the top entry | your choice |
 
 In the history window: **double-click** an entry to insert it, **right-click** for copy, insert, pin, star and delete, and type in the search box to filter. In the panel menu, **Enter** or **Space** copies the highlighted clip.
 

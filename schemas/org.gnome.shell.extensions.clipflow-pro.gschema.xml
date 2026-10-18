@@ -26,7 +26,7 @@
 
     <!-- Keyboard Shortcuts -->
     <key name="enhanced-copy-shortcut" type="as">
-      <default>['&lt;Super&gt;c']</default>
+      <default>[]</default>
       <summary>Enhanced copy shortcut</summary>
       <description>Keyboard shortcut for enhanced copying</description>
     </key>
@@ -38,7 +38,7 @@
     </key>
     
     <key name="show-history-window-shortcut" type="as">
-      <default>['&lt;Super&gt;&lt;Shift&gt;h']</default>
+      <default>[]</default>
       <summary>Open history window shortcut</summary>
       <description>Keyboard shortcut to open the full ClipFlow history window (CopyQ-style browser)</description>
     </key>

@@ -65,7 +65,7 @@ Full combined image (download): [collage-v1.5.3.png](screenshots/collage-v1.5.3.
 
 ## What's new in v1.5.7
 
-- **Respects password managers:** when KeePassXC or another password manager marks a copied password as secret, ClipFlow Pro doesn't save it (Settings → *Ignore Password-like Content*, on by default). This also covers the copy GNOME keeps after the password manager closes. The keyword and API-token check still runs as before
+- **Respects password managers:** when KeePassXC or another password manager marks a copied password as secret, ClipFlow Pro doesn't save it (Settings → *Ignore Password-like Content*, on by default). This also covers the copy GNOME keeps after the password manager closes. Tested with KeePassXC 2.7.6. The keyword and API-token check still runs as before
 - Older release notes: see the table below and [CHANGELOG.md](CHANGELOG.md)
 
 ## Recent releases
@@ -109,7 +109,7 @@ Highlights from earlier milestones:
 
 | Session | Status | Notes |
 |---------|--------|-------|
-| **X11 / Xorg** | **Supported · validated** | **v1.5.7** runtime-tested on Zorin OS 18.1 / GNOME Shell 46 / X11; native `St.Clipboard` first; `Alt+F2` → `r` after install |
+| **X11 / Xorg** | **Supported · validated** | **v1.5.7** runtime-tested on Zorin OS 18.1 / GNOME Shell 46 / X11, including KeePassXC 2.7.6; native `St.Clipboard` first; `Alt+F2` → `r` after install |
 | **Wayland** | **Supported** | Code paths + install docs; not maintainer runtime-tested on v1.5.7 — reports welcome |
 
 **Minimum requirement:** GNOME Shell **45** or newer on a **Wayland or X11/Xorg** session.

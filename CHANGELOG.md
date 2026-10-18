@@ -8,6 +8,10 @@
 - When the password manager closes, GNOME re-offers the same text without the marker. ClipFlow Pro keeps a SHA-256 hash (never the text) of up to 32 recent marked clips in memory, so that copy is skipped too. An unreadable marker counts as secret
 - The keyword and API-token check is unchanged
 
+### Verified
+
+- With **KeePassXC 2.7.6** on Zorin OS 18.1 / GNOME Shell 46 / X11: a random password copied with Ctrl+C carried the `secret` marker and was not saved; a normal clip copied right after was saved; quitting KeePassXC left nothing in history
+
 ### Docs
 
 - README links the demo video and the DEV article; older "what's new" sections trimmed (they remain in this changelog)

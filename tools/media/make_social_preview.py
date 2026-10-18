@@ -41,7 +41,7 @@ def main():
 
     d = ImageDraw.Draw(canvas)
     d.text((56, 160), 'ClipFlow Pro', font=font(58), fill=(255, 255, 255))
-    lines = ['Clipboard history', 'for GNOME Shell 45–50']
+    lines = ['Clipboard history', 'for GNOME Shell 45–51']
     for i, line in enumerate(lines):
         d.text((58, 240 + i * 42), line, font=font(32), fill=(220, 226, 240))
     points = ['Search in any language', 'Pin · Star · Insert', 'Private, local-only']

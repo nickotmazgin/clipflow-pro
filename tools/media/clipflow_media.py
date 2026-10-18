@@ -797,7 +797,7 @@ def make_video(session, out_mp4, voice=None):
     rec.voice = voice
     rec.start()
     try:
-        rec.caption(f'ClipFlow Pro {version()} — clipboard history for GNOME Shell 45–50', 4, 'title')
+        rec.caption(f'ClipFlow Pro {version()} — clipboard history for GNOME Shell 45–51', 4, 'title')
         time.sleep(4)
 
         interval = 2200

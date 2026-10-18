@@ -1,6 +1,6 @@
 {
   "name": "ClipFlow Pro",
-  "description": "GNOME Shell 45–50 clipboard manager. X11/Xorg validated on maintainer setup; Wayland supported. History window, panel menu, search, pin/star, and privacy controls.",
+  "description": "GNOME Shell 45–51 clipboard manager. X11/Xorg validated on maintainer setup; Wayland supported. History window, panel menu, search, pin/star, and privacy controls.",
   "uuid": "clipflow-pro@nickotmazgin.github.io",
   "shell-version": [
     "45",
@@ -8,10 +8,11 @@
     "47",
     "48",
     "49",
-    "50"
+    "50",
+    "51"
   ],
-  "version": 50,
-  "version-name": "1.5.4 45.50",
+  "version": 51,
+  "version-name": "1.5.5 45.51",
   "url": "https://github.com/nickotmazgin/clipflow-pro",
   "settings-schema": "org.gnome.shell.extensions.clipflow-pro",
   "gettext-domain": "clipflow-pro",

@@ -4,7 +4,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/nickotmazgin/clipflow-pro/release-validate.yml?branch=main&label=CI)](https://github.com/nickotmazgin/clipflow-pro/actions)
 [![Downloads](https://img.shields.io/github/downloads/nickotmazgin/clipflow-pro/total?label=downloads&color=success)](https://github.com/nickotmazgin/clipflow-pro/releases)
 [![License: GPL-3.0](https://img.shields.io/badge/License-GPL--3.0-blue)](LICENSE)
-[![GNOME 45–50](https://img.shields.io/badge/GNOME-45%E2%80%9350-4A86CF?logo=gnome&logoColor=white)](#compatibility)
+[![GNOME 45–51](https://img.shields.io/badge/GNOME-45%E2%80%9351-4A86CF?logo=gnome&logoColor=white)](#compatibility)
 [![Wayland](https://img.shields.io/badge/Wayland-supported-0078D4)](#compatibility)
 [![X11 / Xorg](https://img.shields.io/badge/X11%20%2F%20Xorg-validated-555555)](#compatibility)
 [![ESM](https://img.shields.io/badge/ESM-GJS%20modules-orange)](#compatibility)
@@ -15,11 +15,11 @@
 
 > If ClipFlow Pro saves you time, a ⭐ on GitHub helps other GNOME users find it.
 
-**ClipFlow Pro** is a clipboard history manager for **GNOME Shell 45–50** on **Wayland and X11/Xorg** sessions (UUID `clipflow-pro@nickotmazgin.github.io`).
+**ClipFlow Pro** is a clipboard history manager for **GNOME Shell 45–51** on **Wayland and X11/Xorg** sessions (UUID `clipflow-pro@nickotmazgin.github.io`).
 
-> **Latest: v1.5.4** — Panel popup menu fix for GNOME 45–47, plus a refreshed gallery and demo video. **Previous releases are kept for history**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
+> **Latest: v1.5.5** — GNOME Shell 51 support (GNOME 45–51). **Previous releases are kept for history**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
 
-> **GNOME Shell 43–44 is no longer supported.** ClipFlow Pro now targets **GNOME 45–50 only**. Upgrade your desktop environment to GNOME **45** or newer.
+> **GNOME Shell 43–44 is no longer supported.** ClipFlow Pro now targets **GNOME 45–51 only**. Upgrade your desktop environment to GNOME **45** or newer.
 
 > **Keywords:** GNOME clipboard manager · Linux clipboard history · Wayland · X11 · Xorg · history window · copy paste · productivity · privacy · open source
 
@@ -63,7 +63,12 @@ Full combined image (download): [collage-v1.5.3.png](screenshots/collage-v1.5.3.
 
 ---
 
-## What's new in v1.5.4
+## What's new in v1.5.5
+
+- **GNOME Shell 51 support:** ClipFlow Pro now installs and enables on GNOME 51 (the September 2026 release). The code was already free of the APIs GNOME 51 removed (`St` `vertical`, async `disable()`, `pointerWatcher`, `GLSLEffect`)
+- **Reset to Defaults checked:** Settings → About → Maintenance → *Reset to Defaults* restores all 50 settings; your clipboard history is kept
+
+### v1.5.4
 
 - **Panel popup menu works on GNOME 45–47:** with *Panel Icon Left-Click* set to the quick panel menu, left-click now opens it (it failed with `No property orientation on StBoxLayout`)
 - **New gallery and demo video** covering the history window, every panel menu and every settings tab
@@ -78,10 +83,11 @@ Full combined image (download): [collage-v1.5.3.png](screenshots/collage-v1.5.3.
 
 ## Recent releases
 
-Eight tagged releases on [GitHub](https://github.com/nickotmazgin/clipflow-pro/releases) (GNOME 45–50):
+Recent tagged releases on [GitHub](https://github.com/nickotmazgin/clipflow-pro/releases) (GNOME 45+):
 
 | Version | Highlights |
 |---------|------------|
+| **1.5.5** | GNOME Shell 51 support |
 | **1.5.4** | Panel popup menu fix on GNOME 45–47, new gallery and demo video |
 | **1.5.3** | Privacy hardening (stdin IPC, 0600 files), safer import, dead-code cleanup |
 | **1.5.2** | Lifecycle cleanup, private insert payloads, documentation & privacy hardening |
@@ -109,17 +115,17 @@ Highlights from earlier milestones:
 
 | GNOME | Status | Notes |
 |-------|--------|-------|
-| **45–50** | **Supported** | History Window, ESM, enhanced panel menu — use `*-gs45-50.zip` |
+| **45–51** | **Supported** | History Window, ESM, enhanced panel menu — use `*-gs45-51.zip`. GNOME 51 is checked against the official porting guide; reports welcome |
 | **43–44** | **Discontinued** | No longer built, distributed, or maintained |
 
 | Session | Status | Notes |
 |---------|--------|-------|
-| **X11 / Xorg** | **Supported · validated** | **v1.5.4** runtime-tested on Zorin OS 18.1 / GNOME Shell 46 / X11; native `St.Clipboard` first; `Alt+F2` → `r` after install |
-| **Wayland** | **Supported** | Code paths + install docs; not maintainer runtime-tested on v1.5.4 — reports welcome |
+| **X11 / Xorg** | **Supported · validated** | **v1.5.5** runtime-tested on Zorin OS 18.1 / GNOME Shell 46 / X11; native `St.Clipboard` first; `Alt+F2` → `r` after install |
+| **Wayland** | **Supported** | Code paths + install docs; not maintainer runtime-tested on v1.5.5 — reports welcome |
 
 **Minimum requirement:** GNOME Shell **45** or newer on a **Wayland or X11/Xorg** session.
 
-> **Validation scope (v1.5.4):** maintainer confidence is highest on **X11/Xorg** (local Zorin setup). **Wayland** is supported by design and community use; older release notes were not retroactively re-labeled.
+> **Validation scope (v1.5.5):** maintainer confidence is highest on **X11/Xorg** (local Zorin setup). **Wayland** is supported by design and community use; older release notes were not retroactively re-labeled.
 
 - Panel icon position: **left / center / right** on the GNOME **top bar** (not bottom/side docks)
 - Distribution: **GitHub Releases only** (no extensions.gnome.org)
@@ -130,11 +136,11 @@ Highlights from earlier milestones:
 
 ### From GitHub (recommended)
 
-1. Download **`clipflow-pro@nickotmazgin.github.io-*-gs45-50.zip`** from **[Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest)** (GNOME 45–50 only).
+1. Download **`clipflow-pro@nickotmazgin.github.io-*-gs45-51.zip`** from **[Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest)** (GNOME 45–51 only).
 2. Install:
 
 ```bash
-gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.5.4-gs45-50.zip
+gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.5.5-gs45-51.zip
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 # Wayland: log out/in · X11 only: Alt+F2 → r → Enter
 ```

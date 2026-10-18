@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # ClipFlow Pro - Package script
-# Produces the GNOME 45-50 release zip without bumping version.
+# Produces the GNOME 45-51 release zip without bumping version.
 
 set -euo pipefail
 
@@ -44,10 +44,10 @@ print((vn.split()[0] if vn else '1.3.4'))
 PY
 )
 
-ZIP_4550="${DIST_DIR}/${UUID}-${BASE_VER}-gs45-50.zip"
+ZIP_4551="${DIST_DIR}/${UUID}-${BASE_VER}-gs45-51.zip"
 
-echo "[2/2] Creating GNOME 45-50 zip: ${ZIP_4550}"
-"${PYTHON}" "${ROOT_DIR}/tools/zip_dir.py" "${BUILD_DIR}" "${ZIP_4550}" . --exclude "schemas/gschemas.compiled"
+echo "[2/2] Creating GNOME 45-51 zip: ${ZIP_4551}"
+"${PYTHON}" "${ROOT_DIR}/tools/zip_dir.py" "${BUILD_DIR}" "${ZIP_4551}" . --exclude "schemas/gschemas.compiled"
 
 echo "Done. Artifact:"
-echo "  - ${ZIP_4550}"
+echo "  - ${ZIP_4551}"

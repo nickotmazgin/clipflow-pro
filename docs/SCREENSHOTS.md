@@ -2,22 +2,15 @@
 
 | Path | Use |
 |------|-----|
-| `screenshots/collage-v1.4.2-2026.jpg` | Main README collage (HD JPEG, 8-tile grid; About Maintenance last) |
-| `screenshots/v1.4.2/1c.jpg` | History window — multi-select, context menu |
-| `screenshots/v1.4.2/2c.jpg` | Panel recent clips / shortcuts |
-| `screenshots/v1.4.2/3.jpg` | Settings → Behavior (unchanged from v1.4.1) |
-| `screenshots/v1.4.2/3c.jpg` | Settings → Shortcuts |
-| `screenshots/v1.4.2/4c.jpg` | About → Maintenance reset |
+| `screenshots/collage-v1.5.3.png` | Main README collage (history window, panel menus, settings) |
+| `screenshots/v1.5.3/01..12-*.png` | README gallery: history window, panel menus, every settings tab |
+| `screenshots/social-preview-v1.5.5.png` | GitHub social preview (1280×640) |
 
-Source PNGs and JPEG exports live in `~/Pictures/Screenshots/clipflow pro 2026/` (grid inputs under `collage-grid/`).
-
-Rebuild collage:
+Screenshots, the collage, the social preview and the demo video are all made with
+[`tools/media`](../tools/media/README.md):
 
 ```bash
-python3 tools/make_collage_2026.py clipflow \
-  "$HOME/Pictures/Screenshots/clipflow pro 2026/collage-grid" \
-  /tmp/clipflow-collage.png
-# then export JPEG with quality 93 (see tools/rebuild_all_collages.sh)
+python3 tools/media/clipflow_media.py screenshots   # screenshots/v<version>/ + collage
 ```
 
-The README shows the collage plus five highlight JPGs in a table.
+Older screenshot sets (v1.4.x) were removed from the tree; they remain in git history.

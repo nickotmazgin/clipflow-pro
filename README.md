@@ -17,7 +17,7 @@
 
 **ClipFlow Pro** is a clipboard history manager for **GNOME Shell 45–51** on **Wayland and X11/Xorg** sessions (UUID `clipflow-pro@nickotmazgin.github.io`).
 
-> **Latest: v1.5.6** — extensions.gnome.org review compliance: no default clipboard shortcuts, clearer clipboard notice. **Previous releases are kept for history**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
+> **Latest: v1.5.7** — respects password managers: text that KeePassXC and others mark as secret is not saved. **Previous releases are kept for history**; download only from [Releases](https://github.com/nickotmazgin/clipflow-pro/releases/latest).
 
 > **GNOME Shell 43–44 is no longer supported.** ClipFlow Pro now targets **GNOME 45–51 only**. Upgrade your desktop environment to GNOME **45** or newer.
 
@@ -63,28 +63,10 @@ Full combined image (download): [collage-v1.5.3.png](screenshots/collage-v1.5.3.
 
 ---
 
-## What's new in v1.5.6
+## What's new in v1.5.7
 
-- **No default shortcuts:** Super+C (enhanced copy) and Super+Shift+H (history window) are no longer set out of the box, as extensions.gnome.org requires for anything touching clipboard data. Left-click on the panel icon still opens the history window. If you used them, set them again in Settings → Shortcuts
-- **Clearer clipboard notice:** the extension description now says plainly that it reads and stores your clipboard locally and sends nothing anywhere
-
-### v1.5.5
-
-- **GNOME Shell 51 support:** ClipFlow Pro now installs and enables on GNOME 51 (the September 2026 release). The code was already free of the APIs GNOME 51 removed (`St` `vertical`, async `disable()`, `pointerWatcher`, `GLSLEffect`)
-- **Reset to Defaults checked:** Settings → About → Maintenance → *Reset to Defaults* restores all 50 settings; your clipboard history is kept
-
-### v1.5.4
-
-- **Panel popup menu works on GNOME 45–47:** with *Panel Icon Left-Click* set to the quick panel menu, left-click now opens it (it failed with `No property orientation on StBoxLayout`)
-- **New gallery and demo video** covering the history window, every panel menu and every settings tab
-
-### v1.5.3
-
-- **Clipboard text stays private:** the history window passes text to `wl-copy` / `xclip` / `wtype` / `xdotool` on stdin, never via `/tmp` files or process arguments
-- **Owner-only files from creation:** history, history-window saves, and exports are written `0600` atomically; insert payloads live in `$XDG_RUNTIME_DIR`
-- **Safer import:** importing history merges by timestamp and no longer pushes out your newest entries
-- **Clean disable:** clipboard read timeouts are removed when the extension is turned off
-- **Housekeeping:** dead code removed, stricter linting in CI, full GPL-3.0 license text restored
+- **Respects password managers:** when KeePassXC or another password manager marks a copied password as secret, ClipFlow Pro doesn't save it (Settings → *Ignore Password-like Content*, on by default). This also covers the copy GNOME keeps after the password manager closes. The keyword and API-token check still runs as before
+- Older release notes: see the table below and [CHANGELOG.md](CHANGELOG.md)
 
 ## Recent releases
 
@@ -92,7 +74,8 @@ Recent tagged releases on [GitHub](https://github.com/nickotmazgin/clipflow-pro/
 
 | Version | Highlights |
 |---------|------------|
-| **1.5.6** | extensions.gnome.org compliance: no default clipboard shortcuts |
+| **1.5.7** | Respects the password-manager "secret" clipboard hint |
+| **1.5.6** | No default clipboard shortcuts, clearer clipboard notice |
 | **1.5.5** | GNOME Shell 51 support |
 | **1.5.4** | Panel popup menu fix on GNOME 45–47, new gallery and demo video |
 | **1.5.3** | Privacy hardening (stdin IPC, 0600 files), safer import, dead-code cleanup |
@@ -126,12 +109,12 @@ Highlights from earlier milestones:
 
 | Session | Status | Notes |
 |---------|--------|-------|
-| **X11 / Xorg** | **Supported · validated** | **v1.5.6** runtime-tested on Zorin OS 18.1 / GNOME Shell 46 / X11; native `St.Clipboard` first; `Alt+F2` → `r` after install |
-| **Wayland** | **Supported** | Code paths + install docs; not maintainer runtime-tested on v1.5.6 — reports welcome |
+| **X11 / Xorg** | **Supported · validated** | **v1.5.7** runtime-tested on Zorin OS 18.1 / GNOME Shell 46 / X11; native `St.Clipboard` first; `Alt+F2` → `r` after install |
+| **Wayland** | **Supported** | Code paths + install docs; not maintainer runtime-tested on v1.5.7 — reports welcome |
 
 **Minimum requirement:** GNOME Shell **45** or newer on a **Wayland or X11/Xorg** session.
 
-> **Validation scope (v1.5.6):** maintainer confidence is highest on **X11/Xorg** (local Zorin setup). **Wayland** is supported by design and community use; older release notes were not retroactively re-labeled.
+> **Validation scope (v1.5.7):** maintainer confidence is highest on **X11/Xorg** (local Zorin setup). **Wayland** is supported by design and community use; older release notes were not retroactively re-labeled.
 
 - Panel icon position: **left / center / right** on the GNOME **top bar** (not bottom/side docks)
 - Distribution: **GitHub Releases only** (no extensions.gnome.org)
@@ -146,7 +129,7 @@ Highlights from earlier milestones:
 2. Install:
 
 ```bash
-gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.5.6-gs45-51.zip
+gnome-extensions install --force clipflow-pro@nickotmazgin.github.io-1.5.7-gs45-51.zip
 gnome-extensions enable clipflow-pro@nickotmazgin.github.io
 # Wayland: log out/in · X11 only: Alt+F2 → r → Enter
 ```
@@ -197,6 +180,8 @@ In the history window: **double-click** an entry to insert it, **right-click** f
 - **Releases:** https://github.com/nickotmazgin/clipflow-pro/releases
 - **Issues:** https://github.com/nickotmazgin/clipflow-pro/issues
 - **Changelog:** [CHANGELOG.md](CHANGELOG.md)
+- **Demo video:** https://youtu.be/Cao9ljjI5JI
+- **Article on DEV:** [ClipFlow Pro 1.5.6: a free, open-source clipboard history manager for GNOME](https://dev.to/nickotmazgin/clipflow-pro-156-a-free-open-source-clipboard-history-manager-for-gnome-45-51-wayland-x11-2o0l)
 
 ## More GNOME extensions by Nick Otmazgin
 

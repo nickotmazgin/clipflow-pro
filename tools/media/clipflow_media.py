@@ -243,6 +243,24 @@ def save_window(wid, path):
     log(f'saved {path.relative_to(REPO) if path.is_relative_to(REPO) else path}')
 
 
+def grab_settled(timeout=3.0):
+    """Grab once the work area stops changing (a closing menu can still be fading out).
+
+    The panel is left out of the comparison: a clock with seconds never settles.
+    """
+    ax, ay, aw, ah = work_area()
+    box = (ax, ay, ax + aw, ay + ah)
+    prev = grab()
+    end = time.time() + timeout
+    while time.time() < end:
+        time.sleep(0.25)
+        cur = grab()
+        if ImageChops.difference(prev.crop(box), cur.crop(box)).getbbox() is None:
+            return cur
+        prev = cur
+    return prev
+
+
 def diff_regions(before, after, panel_band):
     """Return (menu_bbox, icon_x_range) from two full-screen shots."""
     diff = ImageChops.difference(before, after).convert('L').point(lambda v: 255 if v > 24 else 0)
@@ -503,11 +521,11 @@ class Capturer:
             time.sleep(1.0 + attempt)
             run('xdotool', 'mousemove', str(cx), str(cy), check=False)
             time.sleep(0.6)
-            before = grab()
+            before = grab_settled()
             self.desktop = before
             run('xdotool', 'click', '1', check=False)
             time.sleep(1.2)
-            menu, _ = diff_regions(before, grab(), self.panel_band)
+            menu, _ = diff_regions(before, grab_settled(), self.panel_band)
             if menu:
                 break
             log(f'panel menu did not open (attempt {attempt + 1}); retrying')

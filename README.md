@@ -188,7 +188,7 @@ In the history window: **double-click** an entry to insert it, **right-click** f
 - **Changelog:** [CHANGELOG.md](CHANGELOG.md)
 - **Demo video:** https://youtu.be/Cao9ljjI5JI
 - **AlternativeTo:** https://alternativeto.net/software/clipflow-pro/about/
-- **Article on DEV:** [ClipFlow Pro 1.5.6: a free, open-source clipboard history manager for GNOME](https://dev.to/nickotmazgin/clipflow-pro-156-a-free-open-source-clipboard-history-manager-for-gnome-45-51-wayland-x11-2o0l)
+- **Articles on DEV:** [ClipFlow Pro 1.5.8: respects password managers and works with light GNOME themes](https://dev.to/nickotmazgin/clipflow-pro-158-respects-password-managers-and-works-with-light-gnome-themes-1a7d) · [ClipFlow Pro 1.5.6: a free, open-source clipboard history manager for GNOME](https://dev.to/nickotmazgin/clipflow-pro-156-a-free-open-source-clipboard-history-manager-for-gnome-45-51-wayland-x11-2o0l)
 
 ## More GNOME extensions by Nick Otmazgin
 

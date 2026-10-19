@@ -37,29 +37,29 @@ https://github.com/user-attachments/assets/7620ff29-6f1b-4ad2-a2e1-fe57f8f2e120
 
 ### Main collage
 
-![ClipFlow Pro v1.5.3 — history window, panel menus and settings](screenshots/collage-v1.5.3.png)
+![ClipFlow Pro v1.5.8 — history window, panel menus and settings](screenshots/collage-v1.5.8.png)
 
-### v1.5.3 gallery
+### v1.5.8 gallery
 
 **History window**
 
 | History window | Search | Row actions (right-click) |
 |:---:|:---:|:---:|
-| ![History window](screenshots/v1.5.3/01-history-window.png) | ![Search](screenshots/v1.5.3/02-history-search.png) | ![Row actions (right-click)](screenshots/v1.5.3/03-history-row-actions.png) |
+| ![History window](screenshots/v1.5.8/01-history-window.png) | ![Search](screenshots/v1.5.8/02-history-search.png) | ![Row actions (right-click)](screenshots/v1.5.8/03-history-row-actions.png) |
 
 **Panel icon menus**
 
 | Recent clips (right-click) | Panel menu | ⋮ clip menu | Actions |
 |:---:|:---:|:---:|:---:|
-| ![Recent clips (right-click)](screenshots/v1.5.3/04-panel-recent-menu.png) | ![Panel menu](screenshots/v1.5.3/05-panel-menu.png) | ![⋮ clip menu](screenshots/v1.5.3/06-panel-row-menu.png) | ![Actions](screenshots/v1.5.3/07-panel-actions.png) |
+| ![Recent clips (right-click)](screenshots/v1.5.8/04-panel-recent-menu.png) | ![Panel menu](screenshots/v1.5.8/05-panel-menu.png) | ![⋮ clip menu](screenshots/v1.5.8/06-panel-row-menu.png) | ![Actions](screenshots/v1.5.8/07-panel-actions.png) |
 
 **Settings**
 
 | General | Behavior | Appearance | Shortcuts | About |
 |:---:|:---:|:---:|:---:|:---:|
-| ![General](screenshots/v1.5.3/08-settings-general.png) | ![Behavior](screenshots/v1.5.3/09-settings-behavior.png) | ![Appearance](screenshots/v1.5.3/10-settings-appearance.png) | ![Shortcuts](screenshots/v1.5.3/11-settings-shortcuts.png) | ![About](screenshots/v1.5.3/12-settings-about.png) |
+| ![General](screenshots/v1.5.8/08-settings-general.png) | ![Behavior](screenshots/v1.5.8/09-settings-behavior.png) | ![Appearance](screenshots/v1.5.8/10-settings-appearance.png) | ![Shortcuts](screenshots/v1.5.8/11-settings-shortcuts.png) | ![About](screenshots/v1.5.8/12-settings-about.png) |
 
-Full combined image (download): [collage-v1.5.3.png](screenshots/collage-v1.5.3.png) · Screenshots and the demo video are made with [`tools/media`](tools/media/README.md).
+Full combined image (download): [collage-v1.5.8.png](screenshots/collage-v1.5.8.png) · Screenshots and the demo video are made with [`tools/media`](tools/media/README.md).
 
 ---
 

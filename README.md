@@ -202,7 +202,6 @@ In the history window: **double-click** an entry to insert it, **right-click** f
 ClipFlow Pro is created, maintained, signed, and released by **[Nick Otmazgin](https://github.com/nickotmazgin)** — the project's sole administrator and solo developer, who authors and reviews all code that ships.
 
 [![AI assisted — OpenAI Codex](https://img.shields.io/badge/AI%20assisted-OpenAI%20Codex-10A37F)](https://openai.com/codex/)
-[![AI assisted — Cursor Agent](https://img.shields.io/badge/AI%20assisted-Cursor%20Agent-1A1A1A)](https://cursor.com)
 [![AI assisted — Claude Code](https://img.shields.io/badge/AI%20assisted-Claude%20Code-D97757)](https://claude.com/claude-code)
 
 <table>
@@ -218,17 +217,6 @@ ClipFlow Pro is created, maintained, signed, and released by **[Nick Otmazgin](h
         <sub>Creator &amp; Solo Maintainer</sub>
         <br />
         <sub>💻 🎨 📦 🚀 📖</sub>
-      </td>
-      <td align="center" valign="top" width="25%">
-        <a href="https://github.com/cursoragent">
-          <img src="https://avatars.githubusercontent.com/u/199161495?v=4" width="80px" height="80px" style="border-radius: 50%;" alt="Cursor Agent"/>
-          <br />
-          <sub><b>Cursor Agent</b></sub>
-        </a>
-        <br />
-        <sub>AI Pair-Programming Co-Pilot</sub>
-        <br />
-        <sub>💻 🐛 🧪 📖</sub>
       </td>
       <td align="center" valign="top" width="25%">
         <a href="https://github.com/claude">
@@ -260,7 +248,7 @@ ClipFlow Pro is created, maintained, signed, and released by **[Nick Otmazgin](h
 Recent releases were built with help from AI pair-programming agents, operated under the maintainer's direction and review:
 
 - **OpenAI Codex** — clipboard capture/persistence performance work, terminal paste reliability, release engineering, signing, and validation
-- **Cursor Agent** ([@cursoragent](https://github.com/cursoragent)) — code review, debugging, automated testing workflows, and documentation
+- **Cursor Agent** — code review, debugging, automated testing workflows, and documentation
 - **Claude** by Anthropic ([@claude](https://github.com/claude), via [Claude Code](https://claude.com/claude-code)) — v1.5.3 audit, privacy hardening, history-import fix, cleanup, and release preparation
 
 Every AI-assisted change is human-reviewed, tested on real GNOME sessions, and approved by the maintainer before release. See [CONTRIBUTORS.md](CONTRIBUTORS.md) for the full credits.

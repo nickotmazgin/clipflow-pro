@@ -41,7 +41,6 @@ yarn-error.log*
 
 # AI/Cursor specific
 .aider*
-.cursor/
 
 # Development temp files
 *.cache

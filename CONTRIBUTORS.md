@@ -19,17 +19,6 @@ Thank you to everyone who has helped make ClipFlow Pro better.
         <sub>💻 🎨 📦 🚀 📖</sub>
       </td>
       <td align="center" valign="top" width="25%">
-        <a href="https://github.com/cursoragent">
-          <img src="https://avatars.githubusercontent.com/u/199161495?v=4" width="80px" height="80px" style="border-radius: 50%;" alt="Cursor Agent"/>
-          <br />
-          <sub><b>Cursor Agent</b></sub>
-        </a>
-        <br />
-        <sub>AI Pair-Programming Co-Pilot</sub>
-        <br />
-        <sub>💻 🐛 🧪 📖</sub>
-      </td>
-      <td align="center" valign="top" width="25%">
         <a href="https://github.com/claude">
           <img src="https://avatars.githubusercontent.com/u/81847?v=4" width="80px" height="80px" style="border-radius: 50%;" alt="Claude"/>
           <br />
@@ -66,7 +55,7 @@ ClipFlow Pro's recent releases were developed with help from AI pair-programming
 | Assistant | Role |
 |-----------|------|
 | **[OpenAI Codex](https://openai.com/codex/)** | Clipboard capture and persistence performance (v1.4.7), terminal paste reliability (v1.4.3–v1.4.6), release engineering, signed-tag workflows, release validation |
-| **[Cursor Agent](https://github.com/cursoragent)** ([Anysphere](https://cursor.com)) | Code review, debugging, X11/Wayland test automation, CI workflow hardening, documentation |
+| **Cursor Agent** (Anysphere) | Code review, debugging, X11/Wayland test automation, CI workflow hardening, documentation |
 | **[Claude](https://github.com/claude)** ([Anthropic](https://www.anthropic.com), via [Claude Code](https://claude.com/claude-code)) | v1.5.3 repository audit, privacy hardening (stdin IPC, owner-only files), history-import fix, dead-code removal, lint/CI tightening, license restoration, release preparation |
 
 ## Community

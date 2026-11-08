@@ -21,6 +21,8 @@
 
 > **GNOME Shell 43–44 is no longer supported.** ClipFlow Pro now targets **GNOME 45–51 only**. Upgrade your desktop environment to GNOME **45** or newer.
 
+> **Not on extensions.gnome.org.** The listings there are old, unmaintained builds that I no longer control, so please don't install them. GitHub is the only current source.
+
 > **Keywords:** GNOME clipboard manager · Linux clipboard history · Wayland · X11 · Xorg · history window · copy paste · productivity · privacy · open source
 
 ---
